@@ -1,0 +1,169 @@
+[
+    {
+        "label": "unittest",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "unittest",
+        "description": "unittest",
+        "detail": "unittest",
+        "documentation": {}
+    },
+    {
+        "label": "captured_io",
+        "importPath": "test_base",
+        "description": "test_base",
+        "isExtraImport": true,
+        "detail": "test_base",
+        "documentation": {}
+    },
+    {
+        "label": "StringIO",
+        "importPath": "io",
+        "description": "io",
+        "isExtraImport": true,
+        "detail": "io",
+        "documentation": {}
+    },
+    {
+        "label": "StringIO",
+        "importPath": "io",
+        "description": "io",
+        "isExtraImport": true,
+        "detail": "io",
+        "documentation": {}
+    },
+    {
+        "label": "hangman",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "hangman",
+        "description": "hangman",
+        "detail": "hangman",
+        "documentation": {}
+    },
+    {
+        "label": "random",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "random",
+        "description": "random",
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "contextmanager",
+        "importPath": "contextlib",
+        "description": "contextlib",
+        "isExtraImport": true,
+        "detail": "contextlib",
+        "documentation": {}
+    },
+    {
+        "label": "MyTestCase",
+        "kind": 6,
+        "importPath": "tests.test_main",
+        "description": "tests.test_main",
+        "peekOfCode": "class MyTestCase(unittest.TestCase):\n    def test_previous(self):\n        words = hangman.read_file('tests/test_list.txt')\n        self.assertEqual(1, len(words))\n        self.assertEqual('abc', words[0])\n        hangman.random.randint = lambda a,b: 0\n        with captured_io(StringIO('a\\n')) as (out, err):\n            hangman.select_random_word(['abc'])\n            hangman.select_random_letter_from('abc')\n        output = out.getvalue().strip()",
+        "detail": "tests.test_main",
+        "documentation": {}
+    },
+    {
+        "label": "read_file",
+        "kind": 2,
+        "importPath": "hangman",
+        "description": "hangman",
+        "peekOfCode": "def read_file(file_name):\n    file = open(file_name,'r')\n    return file.readlines()\ndef select_random_word(words):\n    random_index = random.randint(0, len(words)-1)\n    word = words[random_index]\n    return word\ndef select_random_letter_from(word):\n    random_index = random.randint(0, len(word) - 1)\n    letter = word[random_index]",
+        "detail": "hangman",
+        "documentation": {}
+    },
+    {
+        "label": "select_random_word",
+        "kind": 2,
+        "importPath": "hangman",
+        "description": "hangman",
+        "peekOfCode": "def select_random_word(words):\n    random_index = random.randint(0, len(words)-1)\n    word = words[random_index]\n    return word\ndef select_random_letter_from(word):\n    random_index = random.randint(0, len(word) - 1)\n    letter = word[random_index]\n    print('Guess the word: ' + word[:random_index] + \"_\" + word[random_index+1:])\n    return letter, random_index\ndef get_user_input():",
+        "detail": "hangman",
+        "documentation": {}
+    },
+    {
+        "label": "select_random_letter_from",
+        "kind": 2,
+        "importPath": "hangman",
+        "description": "hangman",
+        "peekOfCode": "def select_random_letter_from(word):\n    random_index = random.randint(0, len(word) - 1)\n    letter = word[random_index]\n    print('Guess the word: ' + word[:random_index] + \"_\" + word[random_index+1:])\n    return letter, random_index\ndef get_user_input():\n    return input('Guess the missing letter: ')\ndef show_answer(answer, selected_word, missing_letter_index):\n    \"\"\"\n    TODO Step 1 - Show better results messages",
+        "detail": "hangman",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_input",
+        "kind": 2,
+        "importPath": "hangman",
+        "description": "hangman",
+        "peekOfCode": "def get_user_input():\n    return input('Guess the missing letter: ')\ndef show_answer(answer, selected_word, missing_letter_index):\n    \"\"\"\n    TODO Step 1 - Show better results messages\n    \"\"\"\n    print (\"The word was: \" + selected_word)\n    if (answer == selected_word[missing_letter_index]):\n        print (\"Well done! You are awesome!\")\n    else:",
+        "detail": "hangman",
+        "documentation": {}
+    },
+    {
+        "label": "show_answer",
+        "kind": 2,
+        "importPath": "hangman",
+        "description": "hangman",
+        "peekOfCode": "def show_answer(answer, selected_word, missing_letter_index):\n    \"\"\"\n    TODO Step 1 - Show better results messages\n    \"\"\"\n    print (\"The word was: \" + selected_word)\n    if (answer == selected_word[missing_letter_index]):\n        print (\"Well done! You are awesome!\")\n    else:\n        print(\"Wrong! Do better next time.\")\n    pass",
+        "detail": "hangman",
+        "documentation": {}
+    },
+    {
+        "label": "ask_file_name",
+        "kind": 2,
+        "importPath": "hangman",
+        "description": "hangman",
+        "peekOfCode": "def ask_file_name():\n    \"\"\"\n    TODO Step 2 - Update to prompt user for filename to use for words\n    \"\"\"\n    words_file = input(\"Words file? [leave empty to use short_words.txt] :\")\n    if (words_file==\"\"):\n        words_file = \"short_words.txt\"\n    elif (words_file == \"words.txt\"):\n        words_file = \"words.txt\"\n    return words_file",
+        "detail": "hangman",
+        "documentation": {}
+    },
+    {
+        "label": "run_game",
+        "kind": 2,
+        "importPath": "hangman",
+        "description": "hangman",
+        "peekOfCode": "def run_game(file_name):\n    \"\"\"\n    You can leave this code as is, and only implemented above where the code comments prompt you.\n    \"\"\"\n    words = read_file(file_name)\n    word = select_random_word(words)\n    missing_letter, letter_index = select_random_letter_from(word)\n    answer = get_user_input()\n    show_answer(answer, word, letter_index)\nif __name__ == \"__main__\":",
+        "detail": "hangman",
+        "documentation": {}
+    },
+    {
+        "label": "captured_io",
+        "kind": 2,
+        "importPath": "test_base",
+        "description": "test_base",
+        "peekOfCode": "def captured_io(stdin):\n    \"\"\"Capture standard input and output, as well as standard error, and make that available for testing\"\"\"\n    new_out, new_err, new_input = StringIO(), StringIO(), stdin\n    old_out, old_err, old_input = sys.stdout, sys.stderr, sys.stdin\n    try:\n        sys.stdout, sys.stderr, sys.stdin = new_out, new_err, new_input\n        yield sys.stdout, sys.stderr\n    finally:\n        sys.stdout, sys.stderr, sys.stdin = old_out, old_err, old_input\n@contextmanager",
+        "detail": "test_base",
+        "documentation": {}
+    },
+    {
+        "label": "captured_output",
+        "kind": 2,
+        "importPath": "test_base",
+        "description": "test_base",
+        "peekOfCode": "def captured_output():\n    \"\"\"Capture standard error and output and make that available for testing\"\"\"\n    new_out, new_err = StringIO(), StringIO()\n    old_out, old_err = sys.stdout, sys.stderr\n    try:\n        sys.stdout, sys.stderr = new_out, new_err\n        yield sys.stdout, sys.stderr\n    finally:\n        sys.stdout, sys.stderr = old_out, old_err\ndef run_unittests(test_filename):",
+        "detail": "test_base",
+        "documentation": {}
+    },
+    {
+        "label": "run_unittests",
+        "kind": 2,
+        "importPath": "test_base",
+        "description": "test_base",
+        "peekOfCode": "def run_unittests(test_filename):\n    \"\"\"\n    Use this method to discover unittests at specified path, and run them\n    :param path:\n    :return: TestResult\n    \"\"\"\n    import unittest\n    loader = unittest.TestLoader()\n    suite = loader.loadTestsFromName(test_filename)\n    runner = unittest.TextTestRunner()",
+        "detail": "test_base",
+        "documentation": {}
+    }
+]
