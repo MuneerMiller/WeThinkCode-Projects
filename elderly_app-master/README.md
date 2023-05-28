@@ -7,14 +7,11 @@
 Easiest way to manage your health, medicines, emergencies all in one place.
 
 ## Download the App
-[<img src="https://image.flaticon.com/icons/svg/443/443049.svg" align="center"
-width="60" hspace="10" vspace="10">](http://www.mediafire.com/file/7tztn4uv8wt355s/Elderly_Care.apk/file)
-<br>
 The app is heavy as it is the profile apk due to some issue with the release build.
 
 ## About
 
-The app provides a reminder for the elderly for their daily medications, shows nearby hospitals,  an option to alert emergency contacts, sos button for fetching the number of nearby hospital in case of emergency, option to add important notes based on their priority, option to add doctor appointment reminder and alert emergency contacts regarding the same, helps in tracking the person's important health vitals, to organise documents in one place.There is a companion app for Caretakers to monitor the data from health trackers,to view documents,emergency video call and more. Find the companion app here : [Elderly Companion](https://github.com/adarshbalu/elderly_companion) app.
+The app provides a reminder for the elderly for their daily medications, shows nearby hospitals,  an option to alert emergency contacts, sos button for fetching the number of nearby hospital in case of emergency, option to add important notes based on their priority, option to add doctor appointment reminder and alert emergency contacts regarding the same, helps in tracking the person's important health vitals, to organise documents in one place.There is a companion app for Caretakers to monitor the data from health trackers,to view documents,emergency video call and more.
 
 ## Features
 
@@ -121,18 +118,3 @@ On Android versions prior to Android 6.0, Elderly Care requires the following pe
 - Message and Call: Permission required for alerting relatives and to contact hospitals.
 
 - Access Current Location: Current location access required for informing the point of contact.
-
-## Contributing
-
-Elderly Care app is a free and open source project. Any contributions are welcome. Here are a few ways you can help:
- * [Report bugs and make suggestions.](https://github.com/adarshbalu/elderly_app/issues)
- 
-
-## Credits  
-
-<!--Thanks to  Wanicon (https://flaticon.com/authors/wanicon) for the app icon.-->
-
-## License
-
-This application is released under GNU GPLv3 (see [LICENSE](LICENSE)).
-Some of the used libraries are released under different licenses.
