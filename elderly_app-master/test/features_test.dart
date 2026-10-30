@@ -1,0 +1,475 @@
+import 'package:elderly_app/data/models.dart';
+import 'package:elderly_app/services/location_service.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'helpers.dart';
+
+void main() {
+  testWidgets('first run: intro, setup, then home', (tester) async {
+    final app = await pumpApp(tester);
+
+    expect(find.text('Never miss a medicine'), findsOneWidget);
+    for (var i = 0; i < 4; i++) {
+      await tester.tapText('Next');
+    }
+    expect(find.text('Family is one tap away'), findsOneWidget);
+    await tester.tapText('Get started');
+
+    expect(find.text('Welcome to Elderly Care'), findsOneWidget);
+    await tester.tapText('Continue');
+    expect(find.text('Please enter your name'), findsOneWidget);
+
+    await tester.enter('Your name', 'Margaret Smith');
+    await tester.enter('Their name', 'Anna');
+    await tester.tapText('Continue');
+    expect(find.text('Please enter their phone number'), findsOneWidget);
+    await tester.enter('Their phone number', '082 555 0101');
+    await tester.tapText('Continue');
+
+    expect(find.textContaining(', Margaret'), findsOneWidget);
+    expect(find.text('I need help'), findsOneWidget);
+    expect(app.store.relatives.single.name, 'Anna');
+    for (final label in [
+      'Medicines',
+      'Appointments',
+      'Health tracker',
+      'My family',
+      'Hospitals nearby',
+      'Video call',
+      'Documents',
+      'Notes',
+    ]) {
+      expect(find.text(label), findsOneWidget, reason: label);
+    }
+  });
+
+  testWidgets('medicines: add, see on schedule, confirm a dose, edit, delete', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await tester.tapText('Medicines');
+    expect(find.text('No medicines yet'), findsOneWidget);
+
+    await tester.tapText('Add medicine');
+    await tester.enter('Medicine name', 'Metformin');
+    await tester.enter('How much (optional)', '500 mg');
+    await tester.tapText('Capsule');
+    await tester.tapText('3 times');
+    expect(find.text('Dose 3'), findsOneWidget);
+    await tester.tapText('Twice');
+    expect(find.text('Dose 3'), findsNothing);
+    await tester.tapText('Save reminder');
+
+    final m = app.store.medicines.single;
+    expect(m.name, 'Metformin');
+    expect(m.type, MedicineType.capsule);
+    expect(m.times, const [ClockTime(8, 0), ClockTime(14, 0)]);
+    expect(find.text("Today's schedule"), findsOneWidget);
+    expect(find.textContaining('500 mg · 2× a day'), findsOneWidget);
+
+    // Open the 08:00 dose and say it was taken.
+    await tester.tap(find.text('Metformin').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Did you take your Metformin?'), findsOneWidget);
+    await tester.tapText('Yes, I took it');
+    expect(m.recordFor(DateTime.now(), const ClockTime(8, 0))?.taken, isTrue);
+    expect(find.textContaining('Taken'), findsWidgets);
+
+    // Edit then delete.
+    await tester.tap(find.byIcon(Icons.edit_rounded));
+    await tester.pumpAndSettle();
+    await tester.enter('Medicine name', 'Metformin XR');
+    await tester.tapText('Save changes');
+    expect(app.store.medicines.single.name, 'Metformin XR');
+
+    await tester.tap(find.byIcon(Icons.edit_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Delete medicine'));
+    await tester.pumpAndSettle();
+    await tester.tapText('Delete');
+    expect(app.store.medicines, isEmpty);
+    expect(find.text('No medicines yet'), findsOneWidget);
+  });
+
+  testWidgets('missed dose offers to text the family', (tester) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    // A dose that is due right now.
+    final now = DateTime.now();
+    await app.store.saveMedicine(
+      Medicine(
+        id: 50,
+        name: 'Aspirin',
+        type: MedicineType.tablet,
+        times: [ClockTime(now.hour, now.minute)],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Time for Aspirin'), findsOneWidget);
+    await tester.tapText('Check');
+    await tester.tapText('No, not yet');
+    expect(find.text('Let your family know?'), findsOneWidget);
+    await tester.tapText('Send text');
+
+    final text = app.contacts.texts.single;
+    expect(text.to, ['082 555 0101', '083 555 0202']);
+    expect(text.body, contains('Margaret did not take Aspirin'));
+    expect(
+      app.store.medicines.single.dosesOn(now).single.status,
+      DoseStatus.skipped,
+    );
+  });
+
+  testWidgets('appointments: add, mark attended, delete', (tester) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await tester.tapText('Appointments');
+    expect(find.text('No upcoming appointments'), findsOneWidget);
+
+    await tester.tapText('Add appointment');
+    await tester.tapText('Save appointment');
+    expect(find.text("Please enter the doctor's name"), findsOneWidget);
+    await tester.enter("Doctor's name", 'Dr. Naidoo');
+    await tester.enter('Type of doctor (optional)', 'Cardiologist');
+    await tester.enter('Where (optional)', 'Groote Schuur');
+    await tester.tapText('Save appointment');
+
+    expect(find.text('Dr. Naidoo'), findsOneWidget);
+    expect(find.text('Upcoming (1)'), findsOneWidget);
+    final a = app.store.appointments.single;
+    expect(a.dateTime.isAfter(DateTime.now()), isTrue);
+
+    // Shows on the home screen too.
+    await tester.back();
+    expect(find.text('Dr. Naidoo'), findsOneWidget);
+    await tester.tapText('Appointments');
+
+    await tester.tapText('Dr. Naidoo');
+    await tester.tapText('I went to this appointment');
+    await tester.tapText('Save changes');
+    expect(find.text('Past (1)'), findsOneWidget);
+    await tester.tapText('Past (1)');
+    expect(find.text('Attended'), findsOneWidget);
+
+    await tester.tapText('Dr. Naidoo');
+    await tester.tap(find.byTooltip('Delete appointment'));
+    await tester.pumpAndSettle();
+    await tester.tapText('Delete');
+    expect(app.store.appointments, isEmpty);
+  });
+
+  testWidgets('health tracker: validate, record readings, chart, delete', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await tester.tapText('Health tracker');
+    expect(find.text('No readings yet'), findsNWidgets(4));
+
+    await tester.tapText('Blood pressure');
+    expect(
+      find.text('Add your first reading to start tracking.'),
+      findsOneWidget,
+    );
+
+    await tester.tapText('Add reading');
+    await tester.enter('Systolic (top number)', '400');
+    await tester.tapText('Save reading');
+    expect(find.text('Should be between 60 and 250'), findsOneWidget);
+    expect(find.text('Please enter diastolic (bottom number)'), findsOneWidget);
+
+    await tester.enter('Systolic (top number)', '128');
+    await tester.enter('Diastolic (bottom number)', '82');
+    await tester.enter('Pulse', '71');
+    await tester.tapText('Save reading');
+    expect(find.text('128/82 mmHg · 71 bpm'), findsOneWidget);
+    expect(find.text('Add one more reading to see a chart.'), findsOneWidget);
+
+    await tester.tapText('Add reading');
+    await tester.enter('Systolic (top number)', '121');
+    await tester.enter('Diastolic (bottom number)', '79');
+    await tester.enter('Pulse', '68');
+    await tester.tapText('Save reading');
+    expect(
+      find.bySemanticsLabel(
+        RegExp('Blood pressure chart of the last 2 readings'),
+      ),
+      findsOneWidget,
+    );
+    expect(app.store.entriesFor(TrackerType.bloodPressure), hasLength(2));
+
+    await tester.tap(find.byTooltip('Delete reading').first);
+    await tester.pumpAndSettle();
+    await tester.tapText('Delete');
+    expect(app.store.entriesFor(TrackerType.bloodPressure), hasLength(1));
+
+    // Each tracker type has its own form.
+    await tester.back();
+    expect(find.textContaining('128/82 mmHg · 71 bpm'), findsOneWidget);
+    await tester.tapText('Sleep');
+    await tester.tapText('Add reading');
+    await tester.enter('Hours slept', '7');
+    await tester.tapText('Save reading');
+    expect(find.text('7 h 0 min'), findsOneWidget);
+  });
+
+  testWidgets('family: add, call, text, edit, remove', (tester) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await tester.tapText('My family');
+    expect(find.text('Anna'), findsOneWidget);
+
+    await tester.tapText('Add person');
+    await tester.enter('Name', 'Carol');
+    await tester.enter('Phone number', '12');
+    await tester.tapText('Save');
+    expect(find.text('That number looks too short'), findsOneWidget);
+    await tester.enter('Phone number', '084 555 0303');
+    await tester.enter('Relationship (optional)', 'Neighbour');
+    await tester.tapText('Save');
+    expect(find.text('Neighbour · 084 555 0303'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Call').at(2));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Text').first);
+    await tester.pumpAndSettle();
+    expect(app.contacts.calls, ['084 555 0303']);
+    expect(app.contacts.texts.single.to, ['082 555 0101']);
+
+    await tester.tap(find.byTooltip('Edit Carol'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Remove family member'));
+    await tester.pumpAndSettle();
+    await tester.tapText('Remove');
+    expect(app.store.relatives.map((r) => r.name), ['Anna', 'Ben']);
+  });
+
+  testWidgets('SOS: call emergency services or alert family with location', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+
+    await tester.tapText('I need help');
+    expect(find.text('How can we help?'), findsOneWidget);
+    expect(find.text('Call Anna'), findsOneWidget);
+    await tester.tapText('Call emergency services');
+    expect(app.contacts.calls, ['112']);
+
+    await tester.tapText('I need help');
+    await tester.tapText('Alert my family');
+    final text = app.contacts.texts.single;
+    expect(text.to, ['082 555 0101', '083 555 0202']);
+    expect(text.body, contains('Margaret needs help'));
+    expect(
+      text.body,
+      contains(
+        'https://www.google.com/maps/search/?api=1&query=-33.924900,18.424100',
+      ),
+    );
+  });
+
+  testWidgets('SOS still alerts family when location is unavailable', (
+    tester,
+  ) async {
+    final app = await pumpApp(
+      tester,
+      prefs: signedUp,
+      location: FakeLocation(
+        error: const LocationException('Location is switched off.'),
+      ),
+    );
+    await tester.tapText('I need help');
+    await tester.tapText('Alert my family');
+    expect(app.contacts.texts.single.body, isNot(contains('maps')));
+    expect(find.textContaining('Sending without location'), findsOneWidget);
+  });
+
+  testWidgets('hospitals: lists nearby places with directions and call', (
+    tester,
+  ) async {
+    final app = await pumpApp(
+      tester,
+      prefs: signedUp,
+      hospitals: const [
+        Hospital(
+          name: 'Groote Schuur Hospital',
+          location: GeoPoint(-33.9411, 18.4654),
+          distanceKm: 4.2,
+          phone: '021 404 9111',
+          address: 'Main Road, Observatory',
+        ),
+        Hospital(
+          name: 'City Clinic',
+          location: GeoPoint(-33.92, 18.42),
+          distanceKm: 0.35,
+        ),
+      ],
+    );
+    await tester.tapText('Hospitals nearby');
+
+    expect(app.hospitals.askedAbout?.lat, -33.9249);
+    expect(find.text('2 places within 10 km'), findsOneWidget);
+    expect(find.text('4.2 km away'), findsOneWidget);
+    expect(find.text('350 m away'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Directions').first);
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Call').first);
+    await tester.tapText('Emergency? Call 112');
+    expect(
+      app.contacts.urls.single,
+      'https://www.google.com/maps/dir/?api=1&destination=-33.941100,18.465400',
+    );
+    expect(app.contacts.calls, ['021 404 9111', '112']);
+  });
+
+  testWidgets('hospitals: explains location problems and can retry', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      prefs: signedUp,
+      location: FakeLocation(
+        error: const LocationException(
+          'Elderly Care needs permission to see your location.',
+        ),
+      ),
+    );
+    await tester.tapText('Hospitals nearby');
+    expect(find.text('Could not search'), findsOneWidget);
+    expect(
+      find.text('Elderly Care needs permission to see your location.'),
+      findsOneWidget,
+    );
+    await tester.tapText('Try again');
+    expect(find.text('Could not search'), findsOneWidget);
+  });
+
+  testWidgets('video call: texts the family the link and opens the call', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await tester.tapText('Video call');
+    await tester.tapText('Voice only (no camera)');
+    await tester.tapText('Start video call');
+
+    final url = app.contacts.urls.single;
+    expect(url, startsWith('https://meet.jit.si/ElderlyCare-margaretsmith-'));
+    expect(url, contains('config.startAudioOnly=true'));
+    final room = url.split('#').first;
+    expect(app.contacts.texts.single.body, contains(room));
+
+    // The same room is used next time so family can bookmark it.
+    await tester.tapText('Start video call');
+    expect(app.contacts.urls.last.split('#').first, room);
+  });
+
+  testWidgets('notes: add with priority, sorted, edit, delete', (tester) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await tester.tapText('Notes');
+    expect(find.text('No notes yet'), findsOneWidget);
+
+    await tester.tapText('New note');
+    await tester.enter('Title', 'Buy milk');
+    await tester.tapText('Save note');
+    await tester.tapText('New note');
+    await tester.enter('Title', 'Ask doctor about knee');
+    await tester.enter('Note', 'Pain when climbing stairs');
+    await tester.tapText('Important');
+    await tester.tapText('Save note');
+
+    expect(app.store.sortedNotes.map((n) => n.title), [
+      'Ask doctor about knee',
+      'Buy milk',
+    ]);
+    final firstY = tester.getTopLeft(find.text('Ask doctor about knee')).dy;
+    expect(firstY, lessThan(tester.getTopLeft(find.text('Buy milk')).dy));
+
+    await tester.tapText('Buy milk');
+    await tester.enter('Title', 'Buy milk and bread');
+    await tester.tapText('Save note');
+    expect(find.text('Buy milk and bread'), findsOneWidget);
+
+    await tester.tapText('Buy milk and bread');
+    await tester.tap(find.byTooltip('Delete note'));
+    await tester.pumpAndSettle();
+    await tester.tapText('Delete');
+    expect(app.store.notes.single.title, 'Ask doctor about knee');
+  });
+
+  testWidgets('documents: saved photos can be searched, viewed and deleted', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    // A 1×1 PNG, as the image picker would return.
+    const png =
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+    for (final (id, name) in [
+      (10, 'Blood test March'),
+      (11, 'Medical aid card'),
+    ]) {
+      await app.store.saveDocument(
+        HealthDocument(
+          id: id,
+          name: name,
+          imageBase64: png,
+          addedAt: DateTime.now(),
+        ),
+      );
+    }
+    await tester.tapText('Documents');
+    expect(find.text('Blood test March'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'aid');
+    await tester.pumpAndSettle();
+    expect(find.text('Blood test March'), findsNothing);
+    expect(find.text('Medical aid card'), findsOneWidget);
+
+    await tester.tapText('Medical aid card');
+    expect(find.byType(InteractiveViewer), findsOneWidget);
+    await tester.tap(find.byTooltip('Delete document'));
+    await tester.pumpAndSettle();
+    await tester.tapText('Delete');
+    expect(app.store.documents.map((d) => d.name), ['Blood test March']);
+  });
+
+  testWidgets('documents: naming screen requires a name', (tester) async {
+    await pumpApp(tester, prefs: signedUp);
+    await tester.tapText('Documents');
+    await tester.tapText('Add document');
+    expect(find.text('Take a photo'), findsOneWidget);
+    expect(find.text('Choose from gallery'), findsOneWidget);
+  });
+
+  testWidgets('profile: edit details, change emergency number, erase data', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await tester.tap(find.byTooltip('My profile'));
+    await tester.pumpAndSettle();
+    expect(find.text('Margaret Smith'), findsOneWidget);
+
+    await tester.tapText('Edit');
+    await tester.enter('Blood group', 'O+');
+    await tester.enter('Allergies', 'Penicillin');
+    await tester.enter('Emergency number', '10177');
+    await tester.tapText('Save profile');
+    expect(find.text('O+'), findsOneWidget);
+    expect(find.text('Penicillin'), findsOneWidget);
+    expect(app.store.profile!.emergencyNumber, '10177');
+
+    await tester.tapText('Erase all my data');
+    await tester.tapText('Erase');
+    expect(app.store.profile, isNull);
+    expect(find.text('Never miss a medicine'), findsOneWidget);
+  });
+
+  testWidgets('home adapts to large system text without overflowing', (
+    tester,
+  ) async {
+    await pumpApp(tester, prefs: signedUp);
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView).first, const Offset(0, -1500));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+}

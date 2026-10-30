@@ -1,120 +1,115 @@
-# Elderly Care<!-- [![Build Status](https://travis-ci.org/wallabag/android-app.svg?branch=master)](https://travis-ci.org/wallabag/android-app)-->
-<!--
-<img src="microorganism.png" align="left"
-     width="200" hspace="10" vspace="10">
--->
+# Elderly Care
 
-Easiest way to manage your health, medicines, emergencies all in one place.
+The easiest way for an older person to manage medicines, doctor visits, health readings and emergencies, all in one place.
 
-## Download the App
-The app is heavy as it is the profile apk due to some issue with the release build.
+Built with Flutter 3 for **Android, iOS and the web**. Everything is stored on the device. Calls, texts, maps and video calls are handed to the phone's own apps, so no account or server is needed.
 
-## About
-
-The app provides a reminder for the elderly for their daily medications, shows nearby hospitals,  an option to alert emergency contacts, sos button for fetching the number of nearby hospital in case of emergency, option to add important notes based on their priority, option to add doctor appointment reminder and alert emergency contacts regarding the same, helps in tracking the person's important health vitals, to organise documents in one place.There is a companion app for Caretakers to monitor the data from health trackers,to view documents,emergency video call and more.
+<p>
+<img src="screens/home.png" width="200" alt="Home screen">
+<img src="screens/medicines.png" width="200" alt="Today's medicine schedule">
+<img src="screens/sos.png" width="200" alt="Emergency options">
+<img src="screens/blood-pressure.png" width="200" alt="Blood pressure chart">
+</p>
 
 ## Features
 
-- Medicine Reminder
-  - Reminder for the elderly to stay on schedule for their daily medicines.
-  - The reminder hits an alarm and requests for confirmation if the person hastaken the specific medicine at the times prescribed. 
-  - If not responded to,or responded negatively,the app sends a notification to the point of contact.
+| | |
+|---|---|
+| **Medicine reminders** | Add a medicine, its dose and up to three times a day. A notification comes when it's due, and the app asks *"Did you take it?"*. If the answer is no, it offers to text the family. |
+| **Appointments** | Upcoming and past doctor visits, with a reminder an hour before. |
+| **Health tracker** | Blood pressure, blood sugar, weight and sleep, with a chart of recent readings and healthy-range tips. |
+| **I need help (SOS)** | One big red button: call emergency services (112 by default, changeable), text every family member your current location, or call a relative directly. |
+| **My family** | Family and carers with one-tap Call and Text buttons. |
+| **Hospitals nearby** | Hospitals and clinics within 10 km from OpenStreetMap (no API key), nearest first, with directions and phone numbers. |
+| **Video call** | Opens a free [Jitsi Meet](https://meet.jit.si) call in the user's own private room and texts the family the link. |
+| **Documents** | Photos of prescriptions, test results and medical aid cards, searchable by name. |
+| **Notes** | Things to remember. Important notes stay at the top. |
+| **Profile** | Medical details (blood group, allergies, usual BP…) and the emergency number. |
 
-- Alert Emergency contacts with location
-  - Feature that shares your current location to all emergency contacts in case you want them to reach you as soon as possible. Helps accessing you in emergency, or to coordinate care.
+### Designed for older users
+- Large type in [Lexend](https://www.lexend.com/), a font designed for readability. The layout grows with the phone's text-size setting.
+- Large touch targets. Every form's main button stays pinned to the bottom of the screen.
+- One colour per area of the app, plain-language labels, and a confirmation before anything is deleted.
+- Works with screen readers, in dark mode, and on tablets and desktop browsers.
 
-- Locate nearby Hospitals
-  - This feature help in locating all your nearby hospitals in your current location providing information on the distances and      directions for you.
+<p>
+<img src="screens/dose-check.png" width="180" alt="Medicine check">
+<img src="screens/hospitals.png" width="180" alt="Nearby hospitals">
+<img src="screens/family.png" width="180" alt="Family">
+<img src="screens/documents.png" width="180" alt="Documents">
+<img src="screens/home-dark.png" width="180" alt="Dark mode">
+</p>
 
-- Emergency Video Call
-  - Helps you to connect with loved ones on emergency needs.
+## Running it
 
-- Doctor Appointments
-  - Helps in keeping track of doctor appointments through reminders.
-  - It will also inform the point of contact giving the details of the appointment.
+Requires Flutter 3.35 or newer (Dart 3.9+).
 
-- Notes
-  - Person can enter all important notes and to record observations in the app itself. 
-  - Notes will be arranged in the priority specified.
+```bash
+flutter pub get
+```
 
-- Track
-  - This feature helps the person to track progress his important health vitals such as sleep, weight, blood pressure, sugar level etc.   - A graphical representation of each would be provided based on the regular data.
+On a phone or emulator:
 
-- Document Storage
-  - Helps in organising all personal documents you are challenged manage - from all personal IDs and journals to medical contacts and    insurance informations. Secure upload and storage.
-  
-## Technologies Used
-- Firebase - Authentication,Firestore,Storage
-- SqfLite Database - Offline Storage
-- Shared Preferences
-- Jisti Meet - Video call
-- TomTom API - Routing and Navigation
-- OpenCage API - Location information
+```bash
+flutter run
+```
 
+In Chrome:
 
+```bash
+flutter run -d chrome
+```
 
-## Screenshots
+To build:
 
-### Home Screen
+```bash
+flutter build apk --release
+```
 
-<img src="screens/home_screen(1).png" align="center"
-width="200" hspace="10" vspace="10">
+```bash
+flutter build web --release --no-web-resources-cdn
+```
 
-<img src="screens/home_screen(2).png" align="center"
-width="200" hspace="10" vspace="10">
+On the web, reminders appear inside the app rather than as phone notifications, and calls and texts open the computer's default handler.
 
-###  Documents
+## Tests
 
-<img src="screens/documents.png" align="center"
-width="200" hspace="10" vspace="10">
+```bash
+flutter analyze
+```
 
-<img src="screens/view_documents.png" align="center"
-width="200" hspace="10" vspace="10">
+```bash
+flutter test
+```
 
-### Medicine Reminder
+`flutter test` runs unit tests for the scheduling, storage and hospital-search logic, plus widget tests that walk through every feature with fake phone services.
 
-<img src="screens/medicine_reminder.png" align="center"
-width="200" hspace="10" vspace="10">
+`test_e2e/browser_test.js` drives the release **web build** in headless Chromium (Playwright). It goes from onboarding through every feature, reloads the page to check the data persisted, and saves a screenshot of each step to `test_e2e/output/`. Location is faked and the hospital API is answered from a fixture.
 
-<img src="medicine_intake_confirmation.png" align="center"
-width="200" hspace="10" vspace="10">
+```bash
+flutter build web --release --no-web-resources-cdn
+```
 
-### Tracker
+```bash
+node test_e2e/browser_test.js
+```
 
-<img src="screens/add_tracking_data.png" align="center"
-width="200" hspace="10" vspace="10">
+## Project layout
 
-<img src="screens/tracking_screen.png" align="center"
-width="200" hspace="10" vspace="10">
-
-
-### Video call
-
-<img src="screens/video_call_confirmation.png" align="center"
-width="200" hspace="10" vspace="10">
-
-
-### Profile
-
-<img src="screens/profile.png" align="center"
-width="200" hspace="10" vspace="10">
-
-
-### Notes
-
-<img src="screens/notes.png" align="center"
-width="200" hspace="10" vspace="10">
-
-
+```
+lib/
+  main.dart                 app start, theme, first-run gate
+  app_scope.dart            gives screens the data store and services
+  theme.dart                colours, type scale, per-feature accents
+  data/                     models + on-device store (shared_preferences)
+  services/                 calls/SMS/links, location + hospital search, notifications
+  screens/<feature>/        one folder per feature
+  widgets/common.dart       shared building blocks
+```
 
 ## Permissions
 
-On Android versions prior to Android 6.0, Elderly Care requires the following permissions:
-
-- Full Network Access: It uses the network data for the firebase.
-
-- Storage space:For storing all the datas such as documents, notes and reminders.
-  
-- Message and Call: Permission required for alerting relatives and to contact hospitals.
-
-- Access Current Location: Current location access required for informing the point of contact.
+- **Location**: to find nearby hospitals and, only when you ask, to send your location to your family.
+- **Notifications**: for medicine and appointment reminders, which are rescheduled after a reboot.
+- **Camera / photos**: to save photos of documents.
+- **Internet**: for the hospital search.

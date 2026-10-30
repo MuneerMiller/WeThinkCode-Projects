@@ -1,0 +1,148 @@
+import 'package:elderly_app/app_scope.dart';
+import 'package:elderly_app/data/app_store.dart';
+import 'package:elderly_app/main.dart';
+import 'package:elderly_app/services/contact_service.dart';
+import 'package:elderly_app/services/location_service.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// Records what the app asked the phone to do instead of doing it.
+class FakeContacts extends ContactService {
+  final calls = <String>[];
+  final texts = <({List<String> to, String body})>[];
+  final urls = <String>[];
+
+  @override
+  Future<bool> call(String number) async {
+    calls.add(number);
+    return true;
+  }
+
+  @override
+  Future<bool> sms(List<String> numbers, String body) async {
+    texts.add((to: numbers, body: body));
+    return true;
+  }
+
+  @override
+  Future<bool> openUrl(String url) async {
+    urls.add(url);
+    return true;
+  }
+}
+
+class FakeLocation extends LocationService {
+  FakeLocation({this.point = const GeoPoint(-33.9249, 18.4241), this.error});
+  final GeoPoint point;
+  final LocationException? error;
+
+  @override
+  Future<GeoPoint> current() async {
+    if (error != null) throw error!;
+    return point;
+  }
+}
+
+class FakeHospitals extends HospitalService {
+  FakeHospitals(this.result);
+  final List<Hospital> result;
+  GeoPoint? askedAbout;
+
+  @override
+  Future<List<Hospital>> near(GeoPoint here, {int radiusMeters = 10000}) async {
+    askedAbout = here;
+    return result;
+  }
+}
+
+class TestApp {
+  TestApp(this.store, this.contacts, this.location, this.hospitals);
+  final AppStore store;
+  final FakeContacts contacts;
+  final FakeLocation location;
+  final FakeHospitals hospitals;
+}
+
+/// Starts the real app with fake phone services and in-memory storage.
+Future<TestApp> pumpApp(
+  WidgetTester tester, {
+  Map<String, Object> prefs = const {},
+  FakeLocation? location,
+  List<Hospital> hospitals = const [],
+}) async {
+  // A phone-sized portrait screen.
+  tester.view.physicalSize = const Size(1080, 2340);
+  tester.view.devicePixelRatio = 2.75;
+  addTearDown(tester.view.reset);
+
+  SharedPreferences.setMockInitialValues(prefs);
+  final store = await AppStore.load();
+  final app = TestApp(
+    store,
+    FakeContacts(),
+    location ?? FakeLocation(),
+    FakeHospitals(hospitals),
+  );
+  await tester.pumpWidget(
+    ElderlyApp(
+      store: store,
+      services: AppServices(
+        contacts: app.contacts,
+        location: app.location,
+        hospitals: app.hospitals,
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return app;
+}
+
+/// Prefs for a user who has already finished setup.
+const signedUp = <String, Object>{
+  'onboardingSeen': true,
+  'profile':
+      '{"name":"Margaret Smith","phone":"0821234567","emergencyNumber":"112"}',
+  'relatives':
+      '[{"id":1,"name":"Anna","phone":"082 555 0101","relationship":"Daughter"},'
+      '{"id":2,"name":"Ben","phone":"083 555 0202","relationship":"Son"}]',
+  'nextId': 3,
+};
+
+extension Driver on WidgetTester {
+  Future<void> tapText(String text) async {
+    // Prefer an on-screen match (e.g. a dialog button over the page behind it),
+    // otherwise scroll the first match into view.
+    var finder = find.text(text).hitTestable();
+    if (finder.evaluate().isEmpty) {
+      finder = find.text(text);
+      await centre(finder.first);
+      if (finder.hitTestable().evaluate().isEmpty) {
+        // Covered by a message: wait for it to go, as a person would.
+        await pump(const Duration(seconds: 5));
+        await pumpAndSettle();
+      }
+    }
+    await tap(finder.first);
+    await pumpAndSettle();
+  }
+
+  /// Scrolls [finder] to the middle of the screen, clear of snack bars and
+  /// floating buttons.
+  Future<void> centre(Finder finder) async {
+    await Scrollable.ensureVisible(element(finder), alignment: 0.5);
+    await pumpAndSettle();
+  }
+
+  Future<void> enter(String label, String value) async {
+    final field = find.widgetWithText(TextFormField, label);
+    await centre(field.first);
+    await enterText(field.first, value);
+    await pump();
+  }
+
+  Future<void> back() async {
+    await pageBack();
+    await pumpAndSettle();
+  }
+}

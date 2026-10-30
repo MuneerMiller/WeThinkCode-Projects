@@ -1,510 +1,369 @@
-import 'package:elderly_app/others/notification_service.dart';
-import 'package:elderly_app/screens/appoinment_reminder/appoinment_reminder_screen.dart';
-import 'package:elderly_app/screens/document/view_documents_screen.dart';
-import 'package:elderly_app/screens/hospital/nearby_hospital_screen.dart';
-import 'package:elderly_app/screens/login/initial_setup_screen.dart';
-import 'package:elderly_app/screens/medicine_reminder/medicine_reminder.dart';
-import 'package:elderly_app/screens/notes/note_home_screen.dart';
-import 'package:elderly_app/screens/relatives/contact_relatives_screen.dart';
-import 'package:elderly_app/screens/trackers/tracker_home.dart';
-import 'package:elderly_app/screens/video_call/video_call.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:elderly_app/widgets/home_screen_widgets.dart';
-import 'package:elderly_app/widgets/app_default.dart';
-import 'package:elderly_app/others/functions.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:sweet_alert_dialogs/sweet_alert_dialogs.dart';
-import 'package:permission_handler/permission_handler.dart'
-    as PermissionManager;
-import 'package:flutter_android/android_hardware.dart'
-    show Sensor, SensorEvent, SensorManager;
+import 'package:intl/intl.dart';
 
-class HomeScreen extends StatefulWidget {
-  static const String id = 'Home_Screen';
+import '../../app_scope.dart';
+import '../../data/models.dart';
+import '../../theme.dart';
+import '../../widgets/common.dart';
+import '../appointments/appointments_screen.dart';
+import '../documents/documents_screen.dart';
+import '../family/family_screen.dart';
+import '../family/sos.dart';
+import '../health/health_screen.dart';
+import '../hospitals/hospitals_screen.dart';
+import '../medicines/dose_check_screen.dart';
+import '../medicines/medicines_screen.dart';
+import '../notes/notes_screen.dart';
+import '../profile/profile_screen.dart';
+import '../video_call/video_call_screen.dart';
 
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
+Widget screenFor(Feature f) => switch (f) {
+  Feature.medicines => const MedicinesScreen(),
+  Feature.appointments => const AppointmentsScreen(),
+  Feature.health => const HealthScreen(),
+  Feature.family => const FamilyScreen(),
+  Feature.hospitals => const HospitalsScreen(),
+  Feature.videoCall => const VideoCallScreen(),
+  Feature.documents => const DocumentsScreen(),
+  Feature.notes => const NotesScreen(),
+};
+
+void openFeature(BuildContext context, Feature f) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => FeatureTheme(feature: f, child: screenFor(f)),
+    ),
+  );
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  NotificationService notificationService;
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
-  var sensor;
-  bool initialSetupComplete = true;
-  bool heartRateSensor = false;
-  checkSensor() async {
-    try {
-      sensor = await SensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
-      var events = await sensor.subscribe();
-      events.listen((SensorEvent event) {
-        print(event.values[0]);
-        if (mounted)
-          setState(() {
-            heartRateSensor = true;
-          });
-      });
-    } catch (e) {
-      if (e == NoSuchMethodError) {
-        if (mounted)
-          setState(() {
-            heartRateSensor = false;
-          });
-      }
-    }
-  }
-
-  final _auth = FirebaseAuth.instance;
-  FirebaseUser loggedInUser;
-
-  checkRequiredPermission() async {
-    bool permissionEnabled, serviceEnabled;
-    permissionEnabled = false;
-    serviceEnabled = false;
-    PermissionManager.PermissionStatus cameraPermission, microPhonePermission;
-
-    if (!(permissionEnabled && serviceEnabled)) {
-      cameraPermission = await PermissionManager.PermissionHandler()
-          .checkPermissionStatus(PermissionManager.PermissionGroup.camera);
-      cameraPermission = await PermissionManager.PermissionHandler()
-          .checkPermissionStatus(PermissionManager.PermissionGroup.microphone);
-      if (cameraPermission == PermissionManager.PermissionStatus.granted &&
-          microPhonePermission == PermissionManager.PermissionStatus.granted) {
-        setState(() {
-          permissionEnabled = true;
-        });
-
-        PermissionManager.ServiceStatus cameraServiceStatus =
-            await PermissionManager.PermissionHandler()
-                .checkServiceStatus(PermissionManager.PermissionGroup.camera);
-
-        PermissionManager.ServiceStatus microPhoneServiceStatus =
-            await PermissionManager.PermissionHandler().checkServiceStatus(
-                PermissionManager.PermissionGroup.microphone);
-        if (cameraServiceStatus == PermissionManager.ServiceStatus.enabled &&
-            microPhoneServiceStatus ==
-                PermissionManager.ServiceStatus.enabled) {
-          setState(() {
-            serviceEnabled = true;
-          });
-        }
-      } else {
-        await PermissionManager.PermissionHandler().requestPermissions([
-          PermissionManager.PermissionGroup.camera,
-          PermissionManager.PermissionGroup.microphone
-        ]);
-        setState(() {
-          serviceEnabled = true;
-          permissionEnabled = true;
-        });
-      }
-    }
-    return serviceEnabled && permissionEnabled;
-  }
-
-  Future checkLocationPermission() async {
-    permission = await PermissionManager.PermissionHandler()
-        .checkPermissionStatus(PermissionManager.PermissionGroup.location);
-    PermissionManager.ServiceStatus serviceStatus =
-        await PermissionManager.PermissionHandler()
-            .checkServiceStatus(PermissionManager.PermissionGroup.location);
-
-    if (permission == PermissionManager.PermissionStatus.granted) {
-      setState(() {
-        permissionGranted = true;
-      });
-
-      if (serviceStatus == PermissionManager.ServiceStatus.enabled) {
-        setState(() {
-          serviceEnabled = true;
-        });
-      } else {
-        await location.requestService();
-      }
-    } else if (permission == PermissionManager.PermissionStatus.denied) {
-      await location.requestPermission();
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    getCurrentUser();
-    notificationService = NotificationService();
-    notificationService.initialize();
-  }
-
-  bool permissionGranted = false;
-  bool serviceEnabled = false;
-  PermissionManager.PermissionStatus permission;
   @override
   Widget build(BuildContext context) {
-    double screenWidth = getDeviceWidth(context);
-    double screenHeight = getDeviceHeight(context);
+    final store = context.store;
+    final theme = Theme.of(context);
+    final now = DateTime.now();
+    final profile = store.profile!;
 
     return Scaffold(
-      drawer: AppDrawer(),
-      appBar: ElderlyAppBar(),
-      body: WillPopScope(
-          onWillPop: () async {
-            return showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return RichAlertDialog(
-                    alertTitle: richTitle("Exit the App"),
-                    alertSubtitle: richSubtitle('Are you Sure '),
-                    alertType: RichAlertType.WARNING,
-                    actions: <Widget>[
-                      FlatButton(
-                        child: Text("Yes"),
-                        onPressed: () {
-                          SystemNavigator.pop();
-                        },
-                      ),
-                      FlatButton(
-                        child: Text("No"),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  );
-                });
-          },
-          child: NotificationListener<OverscrollIndicatorNotification>(
-            onNotification: (OverscrollIndicatorNotification overScroll) {
-              overScroll.disallowGlow();
-              return true;
-            },
-            child: ListView(
-              children: <Widget>[
-                SizedBox(
-                  height: screenHeight * 0.1,
+      appBar: AppBar(
+        titleSpacing: 20,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/logo.png',
+              height: 34,
+              excludeFromSemantics: true,
+            ),
+            const SizedBox(width: 12),
+            const Flexible(
+              child: Text('Elderly Care', overflow: TextOverflow.ellipsis),
+            ),
+          ],
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: IconButton(
+              tooltip: 'My profile',
+              onPressed: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
+              icon: CircleAvatar(
+                radius: 20,
+                backgroundColor: theme.colorScheme.primaryContainer,
+                child: Text(
+                  profile.name.isEmpty ? '?' : profile.name[0].toUpperCase(),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
                 ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          InkWell(
-                            splashColor: Colors.purple,
-                            child: CardButton(
-                              height: screenHeight * 0.2,
-                              width: screenWidth * (35 / 100),
-                              icon: FontAwesomeIcons.userMd,
-                              size: screenWidth * (25 / 100),
-                              color: Color(0xff7b1fa2),
-                              borderColor: Color(0xff7b1fa2).withOpacity(0.75),
-                            ),
-                            onTap: () {
-                              Navigator.pushNamed(
-                                  context, AppoinmentReminder.id);
-                            },
-                          ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        children: [
+          ContentWidth(
+            maxWidth: 900,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  '${greeting(now)}, ${profile.firstName}',
+                  style: theme.textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  DateFormat('EEEE d MMMM').format(now),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const _SosButton(),
+                const SizedBox(height: 16),
+                _TodayCard(now: now),
+                const SectionHeader('What would you like to do?'),
+                LayoutBuilder(
+                  builder: (context, c) {
+                    final columns = c.maxWidth > 720
+                        ? 4
+                        : (c.maxWidth > 480 ? 3 : 2);
+                    const features = Feature.values;
+                    // Rows size to their tallest tile, so large system text
+                    // makes tiles taller instead of overflowing.
+                    return Column(
+                      children: [
+                        for (var i = 0; i < features.length; i += columns)
                           Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text('Appoinment Reminder'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          InkWell(
-                            splashColor: Colors.yellowAccent,
-                            child: CardButton(
-                              height: screenHeight * (20 / 100),
-                              width: screenWidth * (35 / 100),
-                              icon: FontAwesomeIcons.capsules,
-                              size: screenWidth * 0.2,
-                              color: Color(0xffE3952D),
-                              borderColor: Color(0xffE3952D).withOpacity(0.75),
-                            ),
-                            onTap: () {
-                              Navigator.pushNamed(context, MedicineReminder.id);
-                            },
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text('Add Medicine Reminder'),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: screenHeight * 0.06,
-                ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          InkWell(
-                            splashColor: Colors.green,
-                            child: CardButton(
-                              height: screenHeight * (20 / 100),
-                              width: screenWidth * (35 / 100),
-                              icon: FontAwesomeIcons.hospital,
-                              size: screenWidth * (25 / 100),
-                              color: Color(0xff3c513d),
-                              borderColor: Color(0xff3c513d).withOpacity(0.75),
-                            ),
-                            onTap: () async {
-                              await checkLocationPermission();
-                              if (serviceEnabled && permissionGranted) {
-                                Navigator.pushNamed(
-                                    context, NearbyHospitalScreen.id);
-                              }
-                            },
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              'Locate Nearby Hospital',
+                            padding: const EdgeInsets.only(bottom: 14),
+                            child: IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  for (var j = i; j < i + columns; j++) ...[
+                                    if (j > i) const SizedBox(width: 14),
+                                    Expanded(
+                                      child: j < features.length
+                                          ? _FeatureTile(features[j])
+                                          : const SizedBox(),
+                                    ),
+                                  ],
+                                ],
+                              ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          InkWell(
-                            splashColor: Colors.indigo[300],
-                            child: CardButton(
-                              height: screenHeight * (20 / 100),
-                              width: screenWidth * (35 / 100),
-                              icon: FontAwesomeIcons.child,
-                              size: screenWidth * (25 / 100),
-                              color: Color(0xffaf5676),
-                              borderColor: Color(0xffaf5676).withOpacity(0.75),
-                            ),
-                            onTap: () async {
-                              if (initialSetupComplete) {
-                                await checkLocationPermission();
-                                if (serviceEnabled && permissionGranted) {
-                                  Navigator.pushNamed(
-                                      context, ContactScreen.id);
-                                }
-                              } else {
-                                showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return RichAlertDialog(
-                                        alertTitle: richTitle("Setup Error"),
-                                        alertSubtitle: richSubtitle(
-                                            'Initial setup not complete '),
-                                        alertType: RichAlertType.ERROR,
-                                        actions: <Widget>[
-                                          FlatButton(
-                                            child: Text("Do it now"),
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                              Navigator.pushNamed(context,
-                                                  InitialSetupScreen.id);
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    });
-                              }
-                            },
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text('Contact Relatives'),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
+                      ],
+                    );
+                  },
                 ),
-                SizedBox(
-                  height: screenHeight * 0.06,
-                ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-//                          InkWell(
-//                            splashColor: Colors.redAccent,
-//                            child: CardButton(
-//                              height: screenHeight * 0.2,
-//                              width: screenWidth * (35 / 100),
-//                              icon: FontAwesomeIcons.heartbeat,
-//                              size: screenWidth * (25 / 100),
-//                              color: Color(0xffD83B36),
-//                              borderColor: Color(0xffD83B36).withOpacity(0.75),
-//                            ),
-//                            onTap: () {
-//                              if (heartRateSensor) {
-//                                Navigator.pushNamed(
-//                                    context, HeartRateScreen.id);
-//                              } else {
-//                                print('Heart Rate Sensor not available');
-//                                showDialog(
-//                                    context: context,
-//                                    builder: (BuildContext context) {
-//                                      return RichAlertDialog(
-//                                        alertTitle:
-//                                            richTitle("Function not available"),
-//                                        alertSubtitle: richSubtitle(
-//                                            'Sensor not available in device '),
-//                                        alertType: RichAlertType.WARNING,
-//                                        actions: <Widget>[
-//                                          FlatButton(
-//                                              child: Text("Ok"),
-//                                              onPressed: () {
-//                                                Navigator.pop(context);
-//                                              }),
-//                                        ],
-//                                      );
-//                                    });
-//                              }
-//                            },
-//                          ),
-//                          Padding(
-//                            padding: EdgeInsets.only(top: 8.0),
-//                            child: Text('Check your Heart rate'),
-//                          ),
-                          InkWell(
-                            splashColor: Colors.redAccent,
-                            child: CardButton(
-                              height: screenHeight * 0.2,
-                              width: screenWidth * (35 / 100),
-                              icon: FontAwesomeIcons.userInjured,
-                              size: screenWidth * (25 / 100),
-                              color: Color(0xffD83B36),
-                              borderColor: Color(0xffD83B36).withOpacity(0.75),
-                            ),
-                            onTap: () async {
-                              bool granted = await checkRequiredPermission();
-                              if (granted) {
-                                Navigator.push(context,
-                                    MaterialPageRoute(builder: (context) {
-                                  return VideoCall(
-                                    userID: loggedInUser.uid,
-                                  );
-                                }));
-                              }
-                            },
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text('Urgent Video Call'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          InkWell(
-                            splashColor: Colors.brown,
-                            child: CardButton(
-                              height: screenHeight * (20 / 100),
-                              width: screenWidth * (35 / 100),
-                              icon: FontAwesomeIcons.fileAlt,
-                              size: screenWidth * 0.2,
-                              color: Color(0xff5d4037),
-                              borderColor: Color(0xff5d4037).withOpacity(0.75),
-                            ),
-                            onTap: () {
-                              Navigator.pushNamed(context, ViewDocuments.id);
-                            },
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text('Save Documents'),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: screenHeight * 0.06,
-                ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          InkWell(
-                            splashColor: Colors.teal,
-                            child: CardButton(
-                              height: screenHeight * 0.2,
-                              width: screenWidth * (35 / 100),
-                              icon: FontAwesomeIcons.stickyNote,
-                              size: screenWidth * (25 / 100),
-                              color: Color(0xff00796b),
-                              borderColor: Color(0xff00796b).withOpacity(0.75),
-                            ),
-                            onTap: () {
-                              Navigator.pushNamed(context, NoteList.id);
-                            },
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text('Take a Note'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          InkWell(
-                            splashColor: Colors.blue,
-                            child: CardButton(
-                              height: screenHeight * (20 / 100),
-                              width: screenWidth * (35 / 100),
-                              icon: FontAwesomeIcons.notesMedical,
-                              size: screenWidth * 0.2,
-                              color: Color(0xff3d5afe),
-                              borderColor: Color(0xff3d5afe).withOpacity(0.75),
-                            ),
-                            onTap: () {
-                              Navigator.push(context,
-                                  MaterialPageRoute(builder: (_) {
-                                return TrackerHome();
-                              }));
-                            },
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(top: 8.0),
-                            child: Text('Health Tracker'),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: screenHeight * (5 / 100),
-                ),
-                SizedBox(
-                  height: 30,
-                )
               ],
             ),
-          )),
+          ),
+        ],
+      ),
     );
   }
+}
 
-  void getCurrentUser() async {
-    try {
-      final user = await _auth.currentUser();
-      if (user != null) {
-        loggedInUser = user;
-      }
-    } catch (e) {
-      print(e);
+class _SosButton extends StatelessWidget {
+  const _SosButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: AppTheme.sos,
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () => showSosSheet(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          child: Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.sos_rounded,
+                  color: Colors.white,
+                  size: 36,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'I need help',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      'Call for help or alert your family',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Colors.white,
+                size: 32,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Next medicine dose and next appointment at a glance.
+class _TodayCard extends StatelessWidget {
+  const _TodayCard({required this.now});
+  final DateTime now;
+
+  @override
+  Widget build(BuildContext context) {
+    final store = context.store;
+    final theme = Theme.of(context);
+    final doses = store.dosesToday(now);
+    final pending = doses
+        .where(
+          (d) => d.status == DoseStatus.due || d.status == DoseStatus.upcoming,
+        )
+        .toList();
+    final taken = doses.where((d) => d.status == DoseStatus.taken).length;
+    final nextAppt = store.upcomingAppointments(now).firstOrNull;
+
+    final Widget medicineRow;
+    if (doses.isEmpty) {
+      medicineRow = ListTile(
+        leading: IconBadge(
+          Feature.medicines.icon,
+          color: Feature.medicines.color,
+        ),
+        title: const Text('No medicines yet'),
+        subtitle: const Text('Add one to get reminders'),
+        trailing: const Icon(Icons.chevron_right_rounded),
+        onTap: () => openFeature(context, Feature.medicines),
+      );
+    } else if (pending.isEmpty) {
+      medicineRow = ListTile(
+        leading: IconBadge(
+          Icons.check_circle_rounded,
+          color: Feature.notes.color,
+        ),
+        title: const Text('All medicines done for today'),
+        subtitle: Text('$taken of ${doses.length} taken'),
+        trailing: const Icon(Icons.chevron_right_rounded),
+        onTap: () => openFeature(context, Feature.medicines),
+      );
+    } else {
+      final next = pending.first;
+      final isDue = next.status == DoseStatus.due;
+      medicineRow = ListTile(
+        leading: IconBadge(
+          next.medicine.type.icon,
+          color: Feature.medicines.color,
+        ),
+        title: Text(
+          isDue
+              ? 'Time for ${next.medicine.name}'
+              : 'Next: ${next.medicine.name}',
+        ),
+        subtitle: Text(
+          '${formatTime(context, next.time)}'
+          '${next.medicine.dosage.isEmpty ? '' : ' · ${next.medicine.dosage}'}',
+        ),
+        trailing: isDue
+            ? FilledButton.tonal(
+                onPressed: () => openDoseCheck(context, next),
+                child: const Text('Check'),
+              )
+            : const Icon(Icons.chevron_right_rounded),
+        onTap: () => isDue
+            ? openDoseCheck(context, next)
+            : openFeature(context, Feature.medicines),
+      );
     }
+
+    return Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: Text('Today', style: theme.textTheme.titleMedium),
+          ),
+          medicineRow,
+          if (nextAppt != null) ...[
+            const Divider(indent: 20, endIndent: 20),
+            ListTile(
+              leading: IconBadge(
+                Feature.appointments.icon,
+                color: Feature.appointments.color,
+              ),
+              title: Text(nextAppt.doctor),
+              subtitle: Text(
+                '${formatDay(nextAppt.dateTime, now: now)} at ${formatTime(context, nextAppt.dateTime)}',
+              ),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => openFeature(context, Feature.appointments),
+            ),
+          ],
+          const SizedBox(height: 6),
+        ],
+      ),
+    );
+  }
+}
+
+class _FeatureTile extends StatelessWidget {
+  const _FeatureTile(this.feature);
+  final Feature feature;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final s = feature.scheme(theme.brightness);
+    return Material(
+      color: s.primaryContainer.withValues(
+        alpha: theme.brightness == Brightness.light ? 0.55 : 0.35,
+      ),
+      borderRadius: BorderRadius.circular(24),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(24),
+        onTap: () => openFeature(context, feature),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: s.primary,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Icon(feature.icon, color: s.onPrimary, size: 34),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                feature.label,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: s.onPrimaryContainer,
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                feature.subtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: s.onSurfaceVariant,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
