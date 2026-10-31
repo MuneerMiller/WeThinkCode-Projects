@@ -110,9 +110,12 @@ class HomeScreen extends StatelessWidget {
                 const SectionHeader('What would you like to do?'),
                 LayoutBuilder(
                   builder: (context, c) {
-                    final columns = c.maxWidth > 720
-                        ? 4
-                        : (c.maxWidth > 480 ? 3 : 2);
+                    // Each tile needs about 170px at normal text size; with
+                    // larger text use fewer, wider tiles so words don't break.
+                    final textScale = MediaQuery.textScalerOf(context).scale(1);
+                    final columns = (c.maxWidth / (170 * textScale))
+                        .floor()
+                        .clamp(1, 4);
                     const features = Feature.values;
                     // Rows size to their tallest tile, so large system text
                     // makes tiles taller instead of overflowing.
@@ -229,6 +232,7 @@ class _TodayCard extends StatelessWidget {
         .toList();
     final taken = doses.where((d) => d.status == DoseStatus.taken).length;
     final nextAppt = store.upcomingAppointments(now).firstOrNull;
+    final runningLow = store.medicines.where((m) => m.isLow).toList();
 
     final Widget medicineRow;
     if (doses.isEmpty) {
@@ -291,6 +295,19 @@ class _TodayCard extends StatelessWidget {
             child: Text('Today', style: theme.textTheme.titleMedium),
           ),
           medicineRow,
+          for (final m in runningLow) ...[
+            const Divider(indent: 20, endIndent: 20),
+            ListTile(
+              leading: IconBadge(
+                Icons.warning_amber_rounded,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              title: Text('Refill ${m.name} soon'),
+              subtitle: Text('Only ${m.supply} doses left'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => openFeature(context, Feature.medicines),
+            ),
+          ],
           if (nextAppt != null) ...[
             const Divider(indent: 20, endIndent: 20),
             ListTile(

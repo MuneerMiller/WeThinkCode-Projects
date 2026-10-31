@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../data/models.dart';
+import '../../data/summary.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import 'tracker_screen.dart';
@@ -14,7 +15,22 @@ class HealthScreen extends StatelessWidget {
     final store = context.store;
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Health tracker')),
+      appBar: AppBar(
+        title: const Text('Health tracker'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: TextButton.icon(
+              onPressed: () => context.services.sharing.shareText(
+                healthSummary(store, DateTime.now()),
+                subject: 'Health summary for ${store.profile?.name ?? 'me'}',
+              ),
+              icon: const Icon(Icons.ios_share_rounded),
+              label: const Text('Share'),
+            ),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
@@ -23,7 +39,7 @@ class HealthScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Keep a record of your readings so you and your doctor can see how you are doing.',
+                  'Keep a record of your readings, then tap Share to send your doctor a summary.',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

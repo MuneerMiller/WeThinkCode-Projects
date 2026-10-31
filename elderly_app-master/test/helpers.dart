@@ -3,6 +3,7 @@ import 'package:elderly_app/data/app_store.dart';
 import 'package:elderly_app/main.dart';
 import 'package:elderly_app/services/contact_service.dart';
 import 'package:elderly_app/services/location_service.dart';
+import 'package:elderly_app/services/share_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +33,33 @@ class FakeContacts extends ContactService {
   }
 }
 
+class FakeShare extends ShareService {
+  final sharedTexts = <String>[];
+  final files = <({String name, String contents})>[];
+
+  /// What [pickBackupFile] returns, as if the user chose that file.
+  String? fileToPick;
+
+  @override
+  Future<bool> shareText(String text, {String? subject}) async {
+    sharedTexts.add(text);
+    return true;
+  }
+
+  @override
+  Future<bool> shareFile(
+    String name,
+    String contents, {
+    String? subject,
+  }) async {
+    files.add((name: name, contents: contents));
+    return true;
+  }
+
+  @override
+  Future<String?> pickBackupFile() async => fileToPick;
+}
+
 class FakeLocation extends LocationService {
   FakeLocation({this.point = const GeoPoint(-33.9249, 18.4241), this.error});
   final GeoPoint point;
@@ -57,8 +85,9 @@ class FakeHospitals extends HospitalService {
 }
 
 class TestApp {
-  TestApp(this.store, this.contacts, this.location, this.hospitals);
+  TestApp(this.store, this.contacts, this.location, this.hospitals, this.share);
   final AppStore store;
+  final FakeShare share;
   final FakeContacts contacts;
   final FakeLocation location;
   final FakeHospitals hospitals;
@@ -83,6 +112,7 @@ Future<TestApp> pumpApp(
     FakeContacts(),
     location ?? FakeLocation(),
     FakeHospitals(hospitals),
+    FakeShare(),
   );
   await tester.pumpWidget(
     ElderlyApp(
@@ -91,6 +121,7 @@ Future<TestApp> pumpApp(
         contacts: app.contacts,
         location: app.location,
         hospitals: app.hospitals,
+        sharing: app.share,
       ),
     ),
   );

@@ -472,4 +472,145 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('medical ID: reachable from SOS, shows key facts, calls family', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await app.store.saveProfile(
+      app.store.profile!
+        ..bloodGroup = 'O+'
+        ..allergies = 'Penicillin'
+        ..conditions = 'Type 2 diabetes',
+    );
+    await app.store.saveMedicine(
+      Medicine(
+        id: 60,
+        name: 'Metformin',
+        dosage: '500 mg',
+        type: MedicineType.tablet,
+        times: const [ClockTime(8, 0)],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tapText('I need help');
+    await tester.tapText('Show my medical ID');
+    expect(find.text('Medical ID'), findsOneWidget);
+    for (final t in [
+      'O+',
+      'Penicillin',
+      'Type 2 diabetes',
+      'Metformin 500 mg',
+      'Anna',
+    ]) {
+      expect(find.text(t), findsOneWidget, reason: t);
+    }
+    await tester.tap(find.byTooltip('Call Anna'));
+    expect(app.contacts.calls, ['082 555 0101']);
+  });
+
+  testWidgets('text size setting enlarges the whole app and is remembered', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    double greetingSize() =>
+        tester.getSize(find.textContaining('Margaret').first).height;
+    final before = greetingSize();
+
+    await tester.tap(find.byTooltip('My profile'));
+    await tester.pumpAndSettle();
+    await tester.tapText('Extra large');
+    expect(app.store.textScale, 1.3);
+    await tester.back();
+    expect(greetingSize(), greaterThan(before * 1.2));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('backup: export to a file, then restore it on a fresh install', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await tester.tap(find.byTooltip('My profile'));
+    await tester.pumpAndSettle();
+    await tester.tapText('Back up my data');
+    final file = app.share.files.single;
+    expect(
+      file.name,
+      matches(RegExp(r'^elderly-care-backup-\d{4}-\d\d-\d\d\.json$')),
+    );
+    expect(file.contents, contains('Margaret Smith'));
+
+    // Start over, then restore.
+    await tester.tapText('Erase all my data');
+    await tester.tapText('Erase');
+    expect(app.store.profile, isNull);
+    await app.store.markOnboardingSeen();
+    await app.store.saveProfile(UserProfile(name: 'Temporary'));
+    await tester.pumpAndSettle();
+
+    app.share.fileToPick = 'this is not a backup';
+    await tester.tap(find.byTooltip('My profile'));
+    await tester.pumpAndSettle();
+    await tester.tapText('Restore from a backup');
+    await tester.tapText('Choose file');
+    expect(
+      find.text('This file is not an Elderly Care backup.'),
+      findsOneWidget,
+    );
+    expect(app.store.profile!.name, 'Temporary');
+
+    app.share.fileToPick = file.contents;
+    await tester.tapText('Restore from a backup');
+    await tester.tapText('Choose file');
+    expect(app.store.profile!.name, 'Margaret Smith');
+    expect(app.store.relatives, hasLength(2));
+    expect(find.textContaining(', Margaret'), findsOneWidget); // back on home
+  });
+
+  testWidgets('medicine supply: counts down when taken and warns on home', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await tester.tapText('Medicines');
+    await tester.tapText('Add medicine');
+    await tester.enter('Medicine name', 'Amlodipine');
+    await tester.enter('Doses left in the pack (optional)', 'lots');
+    await tester.tapText('Save reminder');
+    expect(find.text('Please enter a whole number'), findsOneWidget);
+    await tester.enter('Doses left in the pack (optional)', '4');
+    await tester.tapText('Save reminder');
+    expect(find.text('4 doses left (about 4 days)'), findsOneWidget);
+
+    // Take today's 8:00 dose.
+    await tester.tap(find.text('Amlodipine').first);
+    await tester.pumpAndSettle();
+    await tester.tapText('Yes, I took it');
+    final m = app.store.medicines.single;
+    expect(m.supply, 3);
+    expect(find.text('Only 3 doses left – time to refill'), findsOneWidget);
+    expect(find.text('Last 7 days: 1 of 1 doses taken'), findsOneWidget);
+
+    await tester.back();
+    expect(find.text('Refill Amlodipine soon'), findsOneWidget);
+  });
+
+  testWidgets('health tracker: share a summary with the doctor', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await app.store.saveTrackerEntry(
+      TrackerEntry(
+        id: 70,
+        type: TrackerType.bloodSugar,
+        at: DateTime.now().subtract(const Duration(days: 1)),
+        values: {'glucose': 105},
+      ),
+    );
+    await tester.tapText('Health tracker');
+    await tester.tapText('Share');
+    final text = app.share.sharedTexts.single;
+    expect(text, contains('Health summary for Margaret Smith'));
+    expect(text, contains('105 mg/dL'));
+  });
 }

@@ -4,6 +4,7 @@ import 'data/app_store.dart';
 import 'services/contact_service.dart';
 import 'services/location_service.dart';
 import 'services/notification_service.dart';
+import 'services/share_service.dart';
 
 class AppServices {
   AppServices({
@@ -11,16 +12,19 @@ class AppServices {
     LocationService? location,
     HospitalService? hospitals,
     NotificationService? notifications,
+    ShareService? sharing,
     this.jitsiServer = 'https://meet.jit.si',
   }) : contacts = contacts ?? const ContactService(),
        location = location ?? const LocationService(),
        hospitals = hospitals ?? HospitalService(),
-       notifications = notifications ?? NotificationService();
+       notifications = notifications ?? NotificationService(),
+       sharing = sharing ?? const ShareService();
 
   final ContactService contacts;
   final LocationService location;
   final HospitalService hospitals;
   final NotificationService notifications;
+  final ShareService sharing;
   final String jitsiServer;
 }
 

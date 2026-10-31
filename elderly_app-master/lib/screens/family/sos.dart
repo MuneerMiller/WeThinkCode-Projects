@@ -5,6 +5,7 @@ import '../../services/contact_service.dart';
 import '../../services/location_service.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
+import '../profile/medical_id_screen.dart';
 import 'family_screen.dart';
 
 /// Emergency options: call emergency services, alert family, or call one
@@ -46,6 +47,16 @@ Future<void> showSosSheet(BuildContext context) {
                   onTap: () {
                     Navigator.pop(sheetContext);
                     alertFamily(context);
+                  },
+                ),
+                _SosAction(
+                  icon: Icons.medical_information_rounded,
+                  color: Feature.health.color,
+                  title: 'Show my medical ID',
+                  subtitle: 'Allergies, medicines and contacts for helpers',
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    openMedicalId(context);
                   },
                 ),
                 for (final r in store.relatives.take(3))

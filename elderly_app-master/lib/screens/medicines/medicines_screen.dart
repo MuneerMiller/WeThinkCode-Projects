@@ -76,14 +76,22 @@ class MedicinesScreen extends StatelessWidget {
                             child: ListTile(
                               leading: IconBadge(m.type.icon),
                               title: Text(m.name),
-                              subtitle: Text(
-                                [
-                                  if (m.dosage.isNotEmpty) m.dosage,
-                                  '${m.times.length}× a day',
-                                  ([...m.times]..sort())
-                                      .map((t) => t.timeOfDay.format(context))
-                                      .join(', '),
-                                ].join(' · '),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    [
+                                      if (m.dosage.isNotEmpty) m.dosage,
+                                      '${m.times.length}× a day',
+                                      ([...m.times]..sort())
+                                          .map(
+                                            (t) => t.timeOfDay.format(context),
+                                          )
+                                          .join(', '),
+                                    ].join(' · '),
+                                  ),
+                                  _MedicineFacts(m, now: now),
+                                ],
                               ),
                               trailing: const Icon(Icons.edit_rounded),
                               onTap: () => Navigator.of(context).push(
@@ -145,6 +153,56 @@ class _DoseRow extends StatelessWidget {
             )
           : null,
       onTap: () => openDoseCheck(context, dose),
+    );
+  }
+}
+
+/// Supply left and the last week's record for one medicine.
+class _MedicineFacts extends StatelessWidget {
+  const _MedicineFacts(this.m, {required this.now});
+  final Medicine m;
+  final DateTime now;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final a = m.adherence(now);
+    final lines = <Widget>[
+      if (m.supply != null)
+        Row(
+          children: [
+            Icon(
+              m.isLow
+                  ? Icons.warning_amber_rounded
+                  : Icons.inventory_2_outlined,
+              size: 20,
+              color: m.isLow ? theme.colorScheme.error : null,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                m.isLow
+                    ? 'Only ${m.supply} doses left – time to refill'
+                    : '${m.supply} doses left (about ${m.daysLeft} days)',
+                style: m.isLow
+                    ? TextStyle(
+                        color: theme.colorScheme.error,
+                        fontWeight: FontWeight.w600,
+                      )
+                    : null,
+              ),
+            ),
+          ],
+        ),
+      if (a.due > 0) Text('Last 7 days: ${a.taken} of ${a.due} doses taken'),
+    ];
+    if (lines.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: lines,
+      ),
     );
   }
 }

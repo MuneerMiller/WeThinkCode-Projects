@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app_scope.dart';
 import '../../data/models.dart';
 import '../../widgets/common.dart';
+import 'medical_id_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -71,6 +72,12 @@ class ProfileScreen extends StatelessWidget {
                   style: theme.textTheme.headlineSmall,
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: () => openMedicalId(context),
+                  icon: const Icon(Icons.medical_information_rounded),
+                  label: const Text('Show my medical ID'),
+                ),
                 const SectionHeader('Contact'),
                 Card(
                   child: Column(
@@ -117,9 +124,18 @@ class ProfileScreen extends StatelessWidget {
                         'Allergies',
                         p.allergies,
                       ),
+                      row(
+                        Icons.healing_rounded,
+                        'Medical conditions',
+                        p.conditions,
+                      ),
                     ],
                   ),
                 ),
+                const SectionHeader('Text size'),
+                const _TextSizePicker(),
+                const SectionHeader('Backup'),
+                const _BackupCard(),
                 const SectionHeader('This app'),
                 Card(
                   child: Column(
@@ -289,11 +305,127 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     hint: 'e.g. Normal',
                   ),
                   _field('allergies', 'Allergies', hint: 'e.g. Penicillin'),
+                  _field(
+                    'conditions',
+                    'Medical conditions',
+                    hint: 'e.g. Type 2 diabetes, high blood pressure',
+                  ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _TextSizePicker extends StatelessWidget {
+  const _TextSizePicker();
+
+  static final sizes = {1.0: 'Normal', 1.15: 'Large', 1.3: 'Extra large'};
+
+  @override
+  Widget build(BuildContext context) {
+    final store = context.store;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SegmentedButton<double>(
+          showSelectedIcon: false,
+          segments: [
+            for (final MapEntry(:key, :value) in sizes.entries)
+              ButtonSegment(value: key, label: Text(value)),
+          ],
+          selected: {
+            sizes.containsKey(store.textScale) ? store.textScale : 1.0,
+          },
+          onSelectionChanged: (s) => store.setTextScale(s.first),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Makes all writing in the app bigger. It adds to your phone\'s own text size.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BackupCard extends StatelessWidget {
+  const _BackupCard();
+
+  Future<void> _backUp(BuildContext context) async {
+    final store = context.store;
+    final sharing = context.services.sharing;
+    final stamp = DateTime.now().toIso8601String().substring(0, 10);
+    final ok = await sharing.shareFile(
+      'elderly-care-backup-$stamp.json',
+      store.exportBackup(),
+      subject: 'Elderly Care backup',
+    );
+    if (context.mounted) {
+      showMessage(
+        context,
+        ok
+            ? 'Backup ready. Keep it somewhere safe, like your email or cloud storage.'
+            : 'Could not create the backup.',
+      );
+    }
+  }
+
+  Future<void> _restore(BuildContext context) async {
+    final store = context.store;
+    final sharing = context.services.sharing;
+    final ok = await confirm(
+      context,
+      title: 'Restore from a backup?',
+      message:
+          'Everything currently in the app will be replaced by what is '
+          'in the backup file.',
+      confirmLabel: 'Choose file',
+    );
+    if (!ok || !context.mounted) return;
+    try {
+      final json = await sharing.pickBackupFile();
+      if (json == null) return;
+      await store.importBackup(json);
+      if (context.mounted) {
+        showMessage(context, 'Backup restored');
+        Navigator.of(context).popUntil((r) => r.isFirst);
+      }
+    } on FormatException catch (e) {
+      if (context.mounted) showMessage(context, e.message);
+    } catch (_) {
+      if (context.mounted) showMessage(context, 'Could not read that file.');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.cloud_upload_rounded),
+            title: const Text('Back up my data'),
+            subtitle: const Text(
+              'Save everything to a file you can email to yourself or keep in the cloud.',
+            ),
+            onTap: () => _backUp(context),
+          ),
+          const Divider(indent: 20, endIndent: 20),
+          ListTile(
+            leading: const Icon(Icons.settings_backup_restore_rounded),
+            title: const Text('Restore from a backup'),
+            subtitle: const Text(
+              'Use this on a new phone to get your data back.',
+            ),
+            onTap: () => _restore(context),
+          ),
+        ],
       ),
     );
   }

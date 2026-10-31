@@ -355,9 +355,52 @@ async function opened() { return page.evaluate(() => window.__opened); }
     await tap('Edit');
     await fill('Blood group', 'O+');
     await fill('Allergies', 'Penicillin');
+    await fill('Medical conditions', 'Type 2 diabetes');
     await tap('Save profile');
     await see('Penicillin');
     await shot('profile');
+  });
+
+  await check('backup: downloads a backup file of all data', async () => {
+    const download = page.waitForEvent('download', { timeout: 15000 });
+    await tap('Back up my data');
+    const file = await download;
+    assert(/^elderly-care-backup-\d{4}-\d\d-\d\d\.json$/.test(file.suggestedFilename()), file.suggestedFilename());
+    const backup = JSON.parse(fs.readFileSync(await file.path(), 'utf8'));
+    assert.strictEqual(backup.format, 'elderly-care-backup');
+    assert(JSON.stringify(backup.data).includes('Metformin'), 'contains medicines');
+    fs.copyFileSync(await file.path(), path.join(out, 'backup.json'));
+    await see('Backup ready');
+  });
+
+  await check('text size: Extra large enlarges the app', async () => {
+    await tap('Extra large');
+    await back();
+    await settle(600);
+    await shot('home-extra-large-text');
+    await tapLocator(page.getByRole('button', { name: 'My profile' }));
+    await tap('Normal');
+    await back();
+  });
+
+  await check('medical ID: opens from SOS with key facts', async () => {
+    await tap('I need help');
+    await tap('Show my medical ID');
+    for (const t of ['Medical ID', 'O+', 'Penicillin', 'Type 2 diabetes', 'Metformin 500 mg']) await see(t);
+    await shot('medical-id');
+    await back();
+  });
+
+  await check('health tracker: share opens a summary for the doctor', async () => {
+    await tap('Health tracker');
+    await tap('Share');
+    await settle(800);
+    const o = await opened();
+    const mail = o.find((u) => u.startsWith('mailto:'));
+    assert(mail, `expected a share fallback, got ${o.slice(-2)}`);
+    const body = decodeURIComponent(mail);
+    assert(body.includes('Health summary for Margaret Smith'), body.slice(0, 200));
+    assert(body.includes('124/80 mmHg'), 'includes readings');
     await back();
   });
 

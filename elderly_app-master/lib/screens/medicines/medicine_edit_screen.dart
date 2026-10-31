@@ -18,6 +18,9 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
   final _form = GlobalKey<FormState>();
   late final _name = TextEditingController(text: widget.medicine?.name);
   late final _dosage = TextEditingController(text: widget.medicine?.dosage);
+  late final _supply = TextEditingController(
+    text: widget.medicine?.supply?.toString(),
+  );
   late MedicineType _type = widget.medicine?.type ?? MedicineType.tablet;
   late final List<ClockTime> _times = [...?widget.medicine?.times]..sort();
 
@@ -31,6 +34,7 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
   void dispose() {
     _name.dispose();
     _dosage.dispose();
+    _supply.dispose();
     super.dispose();
   }
 
@@ -73,6 +77,7 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
     m
       ..name = _name.text.trim()
       ..dosage = _dosage.text.trim()
+      ..supply = int.tryParse(_supply.text.trim())
       ..type = _type
       ..times = _times.toSet().toList();
     await store.saveMedicine(m);
@@ -154,6 +159,23 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
                       labelText: 'How much (optional)',
                       hintText: 'e.g. 1 tablet, 500 mg',
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _supply,
+                    decoration: const InputDecoration(
+                      labelText: 'Doses left in the pack (optional)',
+                      hintText: 'e.g. 30',
+                      helperText: 'We will warn you when it is time to refill.',
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return null;
+                      final n = int.tryParse(v.trim());
+                      return n == null || n < 0 || n > 10000
+                          ? 'Please enter a whole number'
+                          : null;
+                    },
                   ),
                   const SectionHeader('Type'),
                   Wrap(

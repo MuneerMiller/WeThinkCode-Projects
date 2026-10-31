@@ -1,5 +1,6 @@
 import 'package:elderly_app/data/app_store.dart';
 import 'package:elderly_app/data/models.dart';
+import 'package:elderly_app/data/summary.dart';
 import 'package:elderly_app/services/location_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -165,5 +166,161 @@ void main() {
       expect(store.profile, isNull);
       expect(store.relatives, isEmpty);
     });
+  });
+
+  group('Medicine supply and history', () {
+    test('taking a dose uses one from the pack, and undoing gives it back', () {
+      final m = Medicine(
+        id: 1,
+        name: 'Aspirin',
+        type: MedicineType.tablet,
+        times: const [ClockTime(8, 0), ClockTime(20, 0)],
+        supply: 7,
+      );
+      final day = DateTime(2026, 3, 10, 9);
+      m.record(day, const ClockTime(8, 0), true);
+      expect(m.supply, 6);
+      m.record(day, const ClockTime(8, 0), true); // same answer again
+      expect(m.supply, 6);
+      m.record(day, const ClockTime(8, 0), false); // changed their mind
+      expect(m.supply, 7);
+      expect(m.daysLeft, 3);
+      expect(m.isLow, isTrue);
+    });
+
+    test('untracked supply never warns', () {
+      final m = Medicine(
+        id: 1,
+        name: 'A',
+        type: MedicineType.tablet,
+        times: const [ClockTime(8, 0)],
+      );
+      m.record(DateTime(2026), const ClockTime(8, 0), true);
+      expect(m.supply, isNull);
+      expect(m.isLow, isFalse);
+    });
+
+    test('adherence counts only past doses since the medicine was added', () {
+      final m = Medicine(
+        id: 1,
+        name: 'A',
+        type: MedicineType.tablet,
+        times: const [ClockTime(8, 0), ClockTime(20, 0)],
+        addedOn: DateTime(2026, 3, 8, 7),
+      );
+      final now = DateTime(2026, 3, 10, 12);
+      m.record(DateTime(2026, 3, 8), const ClockTime(8, 0), true);
+      m.record(DateTime(2026, 3, 9), const ClockTime(20, 0), true);
+      m.record(DateTime(2026, 3, 10), const ClockTime(8, 0), false);
+      // 8th: 8:00 + 20:00, 9th: both, 10th: 8:00 only (20:00 hasn't come).
+      final a = m.adherence(now);
+      expect(a.due, 5);
+      expect(a.taken, 2);
+    });
+  });
+
+  group('Backup', () {
+    test('restores everything exactly', () async {
+      SharedPreferences.setMockInitialValues({});
+      final store = await AppStore.load();
+      await store.saveProfile(
+        UserProfile(name: 'Margaret Smith', allergies: 'Penicillin'),
+      );
+      await store.saveRelative(
+        Relative(id: store.newId(), name: 'Anna', phone: '082'),
+      );
+      await store.saveMedicine(
+        Medicine(
+          id: store.newId(),
+          name: 'Metformin',
+          type: MedicineType.tablet,
+          times: const [ClockTime(8, 0)],
+          supply: 20,
+        ),
+      );
+      await store.setTextScale(1.3);
+      final backup = store.exportBackup();
+
+      await store.resetEverything();
+      expect(store.profile, isNull);
+
+      await store.importBackup(backup);
+      expect(store.profile!.allergies, 'Penicillin');
+      expect(store.relatives.single.name, 'Anna');
+      expect(store.medicines.single.supply, 20);
+      expect(store.textScale, 1.3);
+      expect(store.newId(), 3);
+    });
+
+    test('rejects files that are not backups and keeps current data', () async {
+      SharedPreferences.setMockInitialValues({});
+      final store = await AppStore.load();
+      await store.saveProfile(UserProfile(name: 'Keep me'));
+      for (final bad in [
+        'not json',
+        '{"hello": 1}',
+        '{"format": "elderly-care-backup", "data": {}}',
+      ]) {
+        await expectLater(
+          store.importBackup(bad),
+          throwsFormatException,
+          reason: bad,
+        );
+      }
+      expect(store.profile!.name, 'Keep me');
+    });
+  });
+
+  test('health summary lists details, medicines and recent readings', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await AppStore.load();
+    final now = DateTime(2026, 3, 10, 12);
+    await store.saveProfile(
+      UserProfile(
+        name: 'Margaret Smith',
+        age: '78',
+        bloodGroup: 'O+',
+        conditions: 'Type 2 diabetes',
+        allergies: 'Penicillin',
+      ),
+    );
+    await store.saveMedicine(
+      Medicine(
+        id: 1,
+        name: 'Metformin',
+        dosage: '500 mg',
+        type: MedicineType.tablet,
+        times: const [ClockTime(20, 0), ClockTime(8, 0)],
+      ),
+    );
+    await store.saveTrackerEntry(
+      TrackerEntry(
+        id: 2,
+        type: TrackerType.bloodPressure,
+        at: DateTime(2026, 3, 9, 8, 30),
+        values: {'systolic': 128, 'diastolic': 82, 'pulse': 70},
+        notes: 'after breakfast',
+      ),
+    );
+    await store.saveTrackerEntry(
+      TrackerEntry(
+        id: 3,
+        type: TrackerType.weight,
+        at: DateTime(2025, 1, 1), // too old: left out
+        values: {'weight': 70},
+      ),
+    );
+    final text = healthSummary(store, now);
+    expect(text, contains('Health summary for Margaret Smith'));
+    expect(text, contains('Age 78 · Blood group O+'));
+    expect(text, contains('Conditions: Type 2 diabetes'));
+    expect(text, contains('Allergies: Penicillin'));
+    expect(text, contains('- Metformin 500 mg at 08:00, 20:00'));
+    expect(text, contains('BLOOD PRESSURE (1 readings)'));
+    expect(
+      text,
+      contains('9 Mar, 08:30: 128/82 mmHg · 70 bpm – after breakfast'),
+    );
+    expect(text, isNot(contains('WEIGHT')));
   });
 }

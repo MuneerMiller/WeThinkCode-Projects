@@ -31,6 +31,15 @@ class ElderlyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
+        // Apply the in-app text size on top of the phone's own setting.
+        builder: (context, child) {
+          final mq = MediaQuery.of(context);
+          final scale = mq.textScaler.scale(1) * context.store.textScale;
+          return MediaQuery(
+            data: mq.copyWith(textScaler: TextScaler.linear(scale)),
+            child: child!,
+          );
+        },
         home: const StartGate(),
       ),
     );

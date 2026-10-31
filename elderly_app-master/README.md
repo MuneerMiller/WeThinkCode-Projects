@@ -15,16 +15,18 @@ Built with Flutter 3 for **Android, iOS and the web**. Everything is stored on t
 
 | | |
 |---|---|
-| **Medicine reminders** | Add a medicine, its dose and up to three times a day. A notification comes when it's due, and the app asks *"Did you take it?"*. If the answer is no, it offers to text the family. |
+| **Medicine reminders** | Add a medicine, its dose and up to three times a day. A notification comes when it's due, and the app asks *"Did you take it?"*. If the answer is no, it offers to text the family. It can also count the doses left in the pack and warn when it's time to refill, and it shows how many doses were taken in the last 7 days. |
 | **Appointments** | Upcoming and past doctor visits, with a reminder an hour before. |
-| **Health tracker** | Blood pressure, blood sugar, weight and sleep, with a chart of recent readings and healthy-range tips. |
-| **I need help (SOS)** | One big red button: call emergency services (112 by default, changeable), text every family member your current location, or call a relative directly. |
+| **Health tracker** | Blood pressure, blood sugar, weight and sleep, with a chart of recent readings and healthy-range tips. **Share** sends a doctor a plain-text summary of recent readings, medicines and appointments. |
+| **I need help (SOS)** | One big red button: call emergency services (112 by default, changeable), text every family member your current location, show your medical ID, or call a relative directly. |
+| **Medical ID** | Allergies, conditions, blood group, medicines and emergency contacts in large type, for paramedics or a new doctor. |
 | **My family** | Family and carers with one-tap Call and Text buttons. |
 | **Hospitals nearby** | Hospitals and clinics within 10 km from OpenStreetMap (no API key), nearest first, with directions and phone numbers. |
 | **Video call** | Opens a free [Jitsi Meet](https://meet.jit.si) call in the user's own private room and texts the family the link. |
 | **Documents** | Photos of prescriptions, test results and medical aid cards, searchable by name. |
 | **Notes** | Things to remember. Important notes stay at the top. |
-| **Profile** | Medical details (blood group, allergies, usual BP…) and the emergency number. |
+| **Profile** | Medical details (blood group, allergies, conditions, usual BP…), the emergency number and an in-app text size setting (Normal / Large / Extra large). |
+| **Backup & restore** | Saves everything to one file you can email to yourself or keep in cloud storage, and restores it on a new phone. |
 
 ### Designed for older users
 - Large type in [Lexend](https://www.lexend.com/), a font designed for readability. The layout grows with the phone's text-size setting.
@@ -37,6 +39,7 @@ Built with Flutter 3 for **Android, iOS and the web**. Everything is stored on t
 <img src="screens/hospitals.png" width="180" alt="Nearby hospitals">
 <img src="screens/family.png" width="180" alt="Family">
 <img src="screens/documents.png" width="180" alt="Documents">
+<img src="screens/medical-id.png" width="180" alt="Medical ID">
 <img src="screens/home-dark.png" width="180" alt="Dark mode">
 </p>
 
@@ -90,6 +93,8 @@ flutter build web --release --no-web-resources-cdn
 On the web, reminders appear inside the app rather than as phone notifications, and calls and texts open the computer's default handler.
 
 ## Tests
+
+GitHub Actions (`.github/workflows/elderly-app.yml`) runs the formatting check, `flutter analyze`, the tests and a web build on every push and pull request that touches the app.
 
 ```bash
 flutter analyze

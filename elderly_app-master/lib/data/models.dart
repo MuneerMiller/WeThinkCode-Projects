@@ -56,6 +56,7 @@ class UserProfile {
     this.bloodPressure = '',
     this.bloodSugar = '',
     this.allergies = '',
+    this.conditions = '',
     this.emergencyNumber = '112',
   });
 
@@ -71,6 +72,7 @@ class UserProfile {
     bloodPressure: j['bloodPressure'] ?? '',
     bloodSugar: j['bloodSugar'] ?? '',
     allergies: j['allergies'] ?? '',
+    conditions: j['conditions'] ?? '',
     emergencyNumber: j['emergencyNumber'] ?? '112',
   );
 
@@ -85,6 +87,7 @@ class UserProfile {
   String bloodPressure;
   String bloodSugar;
   String allergies;
+  String conditions;
   String emergencyNumber;
 
   String get firstName => name.trim().split(RegExp(r'\s+')).first;
@@ -101,6 +104,7 @@ class UserProfile {
     'bloodPressure': bloodPressure,
     'bloodSugar': bloodSugar,
     'allergies': allergies,
+    'conditions': conditions,
     'emergencyNumber': emergencyNumber,
   };
 }
@@ -188,14 +192,19 @@ class Medicine {
     required this.type,
     required this.times,
     this.dosage = '',
+    this.supply,
+    DateTime? addedOn,
     List<IntakeRecord>? history,
-  }) : history = history ?? [];
+  }) : addedOn = addedOn ?? DateTime.now(),
+       history = history ?? [];
 
   factory Medicine.fromJson(Map<String, dynamic> j) => Medicine(
     id: j['id'],
     name: j['name'],
     type: MedicineType.values.byName(j['type'] ?? 'other'),
     dosage: j['dosage'] ?? '',
+    supply: j['supply'],
+    addedOn: j['addedOn'] == null ? null : DateTime.parse(j['addedOn']),
     times: [for (final t in j['times']) ClockTime.parse(t)],
     history: [
       for (final h in (j['history'] ?? const [])) IntakeRecord.fromJson(h),
@@ -209,6 +218,18 @@ class Medicine {
   List<ClockTime> times;
   List<IntakeRecord> history;
 
+  /// When the reminder was created; earlier doses don't count as missed.
+  final DateTime addedOn;
+
+  /// Doses left in the pack, if the user tracks it.
+  int? supply;
+
+  /// Days of medicine left at the current schedule.
+  int? get daysLeft => supply == null ? null : supply! ~/ times.length;
+
+  /// Running low: three days or less left.
+  bool get isLow => daysLeft != null && daysLeft! <= 3;
+
   IntakeRecord? recordFor(DateTime day, ClockTime slot) {
     final key = _dateKey(day);
     for (final r in history.reversed) {
@@ -218,9 +239,33 @@ class Medicine {
   }
 
   void record(DateTime day, ClockTime slot, bool taken) {
+    final wasTaken = recordFor(day, slot)?.taken ?? false;
     final key = _dateKey(day);
     history.removeWhere((r) => r.date == key && r.slot == slot);
     history.add(IntakeRecord(date: key, slot: slot, taken: taken));
+    // Keep the pack count in step, including when an answer is changed.
+    if (supply != null && taken != wasTaken) {
+      supply = (supply! + (taken ? -1 : 1)).clamp(0, 1 << 30);
+    }
+  }
+
+  /// Doses taken vs. doses that were due over the last [days] days,
+  /// counting answered doses and unanswered ones whose time has passed.
+  ({int taken, int due}) adherence(DateTime now, {int days = 7}) {
+    var taken = 0, due = 0;
+    for (var d = 0; d < days; d++) {
+      final day = DateTime(now.year, now.month, now.day - d);
+      for (final slot in times) {
+        final rec = recordFor(day, slot);
+        final at = slot.on(day);
+        // An answered dose always counts; an unanswered one only if its time
+        // has passed since the medicine was added.
+        if (rec == null && (at.isAfter(now) || at.isBefore(addedOn))) continue;
+        due++;
+        if (rec?.taken ?? false) taken++;
+      }
+    }
+    return (taken: taken, due: due);
   }
 
   /// Today's doses. A dose becomes "due" 30 minutes before its time and stays
@@ -244,6 +289,8 @@ class Medicine {
     'name': name,
     'type': type.name,
     'dosage': dosage,
+    'supply': supply,
+    'addedOn': addedOn.toIso8601String(),
     'times': [for (final t in times) t.key],
     'history': [for (final h in history) h.toJson()],
   };

@@ -23,6 +23,9 @@ class AppStore extends ChangeNotifier {
 
   UserProfile? profile;
   bool onboardingSeen = false;
+
+  /// Extra text enlargement on top of the phone's own setting.
+  double textScale = 1.0;
   final List<Relative> relatives = [];
   final List<Medicine> medicines = [];
   final List<Appointment> appointments = [];
@@ -51,6 +54,7 @@ class AppStore extends ChangeNotifier {
 
   void _read() {
     onboardingSeen = _prefs.getBool('onboardingSeen') ?? false;
+    textScale = _prefs.getDouble('textScale') ?? 1.0;
     _nextId = _prefs.getInt('nextId') ?? 1;
     final p = _prefs.getString('profile');
     profile = p == null ? null : UserProfile.fromJson(jsonDecode(p));
@@ -99,6 +103,68 @@ class AppStore extends ChangeNotifier {
     profile = value;
     notifyListeners();
     await _prefs.setString('profile', jsonEncode(value.toJson()));
+  }
+
+  Future<void> setTextScale(double value) async {
+    textScale = value;
+    notifyListeners();
+    await _prefs.setDouble('textScale', value);
+  }
+
+  // Backup & restore
+
+  static const _backupFormat = 'elderly-care-backup';
+
+  /// Everything the app has stored, as one JSON document.
+  String exportBackup() {
+    final data = <String, Object?>{
+      for (final key in _prefs.getKeys()) key: _prefs.get(key),
+    };
+    return const JsonEncoder.withIndent(' ').convert({
+      'format': _backupFormat,
+      'version': 1,
+      'exportedAt': DateTime.now().toIso8601String(),
+      'data': data,
+    });
+  }
+
+  /// Replaces all data with a backup made by [exportBackup].
+  ///
+  /// Throws a [FormatException] if [json] isn't such a backup; existing data
+  /// is left untouched in that case.
+  Future<void> importBackup(String json) async {
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(json);
+    } on FormatException {
+      throw const FormatException('This file is not an Elderly Care backup.');
+    }
+    if (decoded is! Map ||
+        decoded['format'] != _backupFormat ||
+        decoded['data'] is! Map) {
+      throw const FormatException('This file is not an Elderly Care backup.');
+    }
+    final data = (decoded['data'] as Map).cast<String, Object?>();
+    if (data['profile'] is! String) {
+      throw const FormatException('This backup has no profile in it.');
+    }
+    await _prefs.clear();
+    for (final MapEntry(:key, :value) in data.entries) {
+      switch (value) {
+        case final bool v:
+          await _prefs.setBool(key, v);
+        case final int v:
+          await _prefs.setInt(key, v);
+        case final double v:
+          await _prefs.setDouble(key, v);
+        case final String v:
+          await _prefs.setString(key, v);
+        case final List v:
+          await _prefs.setStringList(key, v.cast<String>());
+      }
+    }
+    _read();
+    notifyListeners();
   }
 
   Future<void> resetEverything() async {
