@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../app_scope.dart';
 import '../../data/models.dart';
 import '../../data/summary.dart';
+import '../../data/summary_pdf.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import 'tracker_screen.dart';
@@ -21,10 +23,7 @@ class HealthScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
-              onPressed: () => context.services.sharing.shareText(
-                healthSummary(store, DateTime.now()),
-                subject: 'Health summary for ${store.profile?.name ?? 'me'}',
-              ),
+              onPressed: () => shareHealthSummary(context),
               icon: const Icon(Icons.ios_share_rounded),
               label: const Text('Share'),
             ),
@@ -109,4 +108,64 @@ class _TrackerCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Lets the user send their doctor a summary, as a PDF or as a message.
+Future<void> shareHealthSummary(BuildContext context) async {
+  final store = context.store;
+  final sharing = context.services.sharing;
+  final subject = 'Health summary for ${store.profile?.name ?? 'me'}';
+  final choice = await showModalBottomSheet<String>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheet) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+              child: Text(
+                'Send your doctor a summary of the last 30 days',
+                style: Theme.of(sheet).textTheme.titleMedium,
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf_rounded, size: 30),
+              title: const Text('As a PDF document'),
+              subtitle: const Text('Neat tables, easy to print'),
+              onTap: () => Navigator.pop(sheet, 'pdf'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.sms_rounded, size: 30),
+              title: const Text('As a message'),
+              subtitle: const Text('Plain text for email or WhatsApp'),
+              onTap: () => Navigator.pop(sheet, 'text'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+  if (choice == null || !context.mounted) return;
+  final now = DateTime.now();
+  if (choice == 'text') {
+    await sharing.shareText(healthSummary(store, now), subject: subject);
+    return;
+  }
+  final bytes = await healthSummaryPdf(
+    store,
+    now,
+    regular: await rootBundle.load('assets/fonts/Lexend-400.ttf'),
+    bold: await rootBundle.load('assets/fonts/Lexend-700.ttf'),
+  );
+  final stamp = now.toIso8601String().substring(0, 10);
+  await sharing.shareBytes(
+    'health-summary-$stamp.pdf',
+    bytes,
+    mimeType: 'application/pdf',
+    subject: subject,
+  );
 }

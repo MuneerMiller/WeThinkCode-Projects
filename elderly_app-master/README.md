@@ -15,9 +15,9 @@ Built with Flutter 3 for **Android, iOS and the web**. Everything is stored on t
 
 | | |
 |---|---|
-| **Medicine reminders** | Add a medicine, its dose and up to three times a day. A notification comes when it's due, and the app asks *"Did you take it?"*. If the answer is no, it offers to text the family. It can also count the doses left in the pack and warn when it's time to refill, and it shows how many doses were taken in the last 7 days. |
+| **Medicine reminders** | Add a medicine, its dose and up to three times a day. The reminder has **Taken**, **In 10 min** and **Not yet** buttons, and a dose left unanswered gets a follow-up an hour later. On Android you can allow exact timing so battery saving doesn't delay reminders. A notification comes when it's due, and the app asks *"Did you take it?"*. If the answer is no, it offers to text the family. It can also count the doses left in the pack and warn when it's time to refill, and it shows how many doses were taken in the last 7 days. |
 | **Appointments** | Upcoming and past doctor visits, with a reminder an hour before. |
-| **Health tracker** | Blood pressure, blood sugar, weight and sleep, with a chart of recent readings and healthy-range tips. **Share** sends a doctor a plain-text summary of recent readings, medicines and appointments. |
+| **Health tracker** | Blood pressure, blood sugar, weight and sleep, with a chart of recent readings and healthy-range tips. **Share** sends a doctor a 30-day summary as a printable **PDF** or as a plain-text message. |
 | **I need help (SOS)** | One big red button: call emergency services (112 by default, changeable), text every family member your current location, show your medical ID, or call a relative directly. |
 | **Medical ID** | Allergies, conditions, blood group, medicines and emergency contacts in large type, for paramedics or a new doctor. |
 | **My family** | Family and carers with one-tap Call and Text buttons. |
@@ -26,6 +26,7 @@ Built with Flutter 3 for **Android, iOS and the web**. Everything is stored on t
 | **Documents** | Photos of prescriptions, test results and medical aid cards, searchable by name. |
 | **Notes** | Things to remember. Important notes stay at the top. |
 | **Profile** | Medical details (blood group, allergies, conditions, usual BP…), the emergency number and an in-app text size setting (Normal / Large / Extra large). |
+| **Read aloud** | A speaker button reads out today's summary, the medicine check and the Medical ID. |
 | **Backup & restore** | Saves everything to one file you can email to yourself or keep in cloud storage, and restores it on a new phone. |
 
 ### Designed for older users
@@ -96,7 +97,7 @@ On the web, reminders appear inside the app rather than as phone notifications, 
 
 ## Tests
 
-GitHub Actions (`.github/workflows/elderly-app.yml`) runs the formatting check, `flutter analyze`, the tests and a web build on every push and pull request that touches the app.
+GitHub Actions (`.github/workflows/elderly-app.yml`) runs the formatting check, `flutter analyze` and the tests, then builds the website, the **Android APK** and an unsigned **iOS** app, on every push and pull request that touches the app. Each run's APK can be downloaded from its Artifacts section to install on a phone for testing.
 
 ```bash
 flutter analyze
@@ -127,6 +128,7 @@ node test_e2e/browser_test.js
 - **What leaves the device.** The hospital search sends the current location to OpenStreetMap's Overpass API. Video calls use meet.jit.si, in a room named by 16 random characters with no personal details. Calls, texts and shares go through the phone's own apps, and only when the user taps. There are no accounts, servers, analytics or ads, and no secrets or API keys in the app.
 - **Web.** The release build has a Content-Security-Policy that only allows the app's own code and the hospital-search API.
 - **Logs** never include phone numbers, messages or health data.
+- **Privacy policy:** shown in the app (from setup and from Privacy & security), and kept in [`assets/privacy_policy.md`](assets/privacy_policy.md). Before publishing, add a contact email for privacy questions; the app stores require one.
 - **Dependencies** are kept current by Dependabot (`.github/dependabot.yml`), and every change is checked by CI.
 
 ### Signing the Android app for release

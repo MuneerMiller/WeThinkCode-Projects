@@ -24,21 +24,25 @@ class ShareService {
   }
 
   /// Shares a text file; in a browser without sharing it is downloaded.
-  Future<bool> shareFile(
+  Future<bool> shareFile(String name, String contents, {String? subject}) =>
+      shareBytes(
+        name,
+        utf8.encode(contents),
+        mimeType: 'application/json',
+        subject: subject,
+      );
+
+  /// Shares any file; in a browser without sharing it is downloaded.
+  Future<bool> shareBytes(
     String name,
-    String contents, {
+    Uint8List bytes, {
+    required String mimeType,
     String? subject,
   }) async {
     try {
       final r = await SharePlus.instance.share(
         ShareParams(
-          files: [
-            XFile.fromData(
-              utf8.encode(contents),
-              name: name,
-              mimeType: 'application/json',
-            ),
-          ],
+          files: [XFile.fromData(bytes, name: name, mimeType: mimeType)],
           fileNameOverrides: [name],
           subject: subject,
           title: subject,

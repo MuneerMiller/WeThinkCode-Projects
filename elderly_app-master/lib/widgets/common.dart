@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../app_scope.dart';
 
 /// Keeps content readable on tablets and in desktop browsers.
 class ContentWidth extends StatelessWidget {
@@ -226,6 +227,31 @@ class BottomAction extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Reads [text] aloud; tap again to stop. Works without a Navigator, so it
+/// can also be used on the lock screen.
+class ReadAloudButton extends StatelessWidget {
+  const ReadAloudButton({super.key, required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final speech = context.services.speech;
+    return ValueListenableBuilder<String?>(
+      valueListenable: speech.speaking,
+      builder: (context, speaking, _) {
+        final active = speaking == text;
+        return OutlinedButton.icon(
+          onPressed: () => active ? speech.stop() : speech.speak(text),
+          icon: Icon(
+            active ? Icons.stop_circle_outlined : Icons.volume_up_rounded,
+          ),
+          label: Text(active ? 'Stop reading' : 'Read aloud'),
+        );
+      },
     );
   }
 }

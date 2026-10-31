@@ -105,6 +105,13 @@ class DoseCheckScreen extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: 16),
+                ReadAloudButton(
+                  text:
+                      'Did you take your ${m.name}? '
+                      '${m.dosage.isEmpty ? '' : '${m.dosage}. '}'
+                      '${formatDay(dose.time)} at ${formatTime(context, dose.time)}.',
+                ),
                 const Spacer(),
                 SizedBox(
                   width: double.infinity,

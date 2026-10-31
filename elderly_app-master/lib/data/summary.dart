@@ -47,7 +47,9 @@ String healthSummary(AppStore store, DateTime now, {int days = 30}) {
     if (entries.isEmpty) continue;
     out
       ..writeln()
-      ..writeln('${type.label.toUpperCase()} (${entries.length} readings)');
+      ..writeln(
+        '${type.label.toUpperCase()} (${entries.length} ${entries.length == 1 ? 'reading' : 'readings'})',
+      );
     for (final e in entries.reversed.take(10)) {
       out.writeln(
         '- ${when.format(e.at)}: ${e.display}'

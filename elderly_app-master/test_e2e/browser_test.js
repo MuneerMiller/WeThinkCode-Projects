@@ -157,6 +157,14 @@ async function opened() { return page.evaluate(() => window.__opened); }
   await context.addInitScript(() => {
     window.__opened = [];
     window.open = (u) => { window.__opened.push(String(u)); return null; };
+    // Capture "Read aloud" instead of playing sound.
+    window.__spoken = [];
+    if (window.speechSynthesis) {
+      window.speechSynthesis.speak = (u) => {
+        window.__spoken.push(u.text);
+        setTimeout(() => u.onend && u.onend(new Event('end')), 50);
+      };
+    }
   });
   await context.route('https://overpass-api.de/**', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(hospitalsFixture) }));
@@ -397,6 +405,7 @@ async function opened() { return page.evaluate(() => window.__opened); }
   await check('health tracker: share opens a summary for the doctor', async () => {
     await tap('Health tracker');
     await tap('Share');
+    await tap('As a message');
     await settle(800);
     const o = await opened();
     const mail = o.find((u) => u.startsWith('mailto:'));
@@ -404,6 +413,35 @@ async function opened() { return page.evaluate(() => window.__opened); }
     const body = decodeURIComponent(mail);
     assert(body.includes('Health summary for Margaret Smith'), body.slice(0, 200));
     assert(body.includes('124/80 mmHg'), 'includes readings');
+  });
+
+  await check('health tracker: PDF summary downloads with the right contents', async () => {
+    const download = page.waitForEvent('download', { timeout: 20000 });
+    await tap('Share');
+    await tap('As a PDF document');
+    const file = await download;
+    assert(/^health-summary-\d{4}-\d\d-\d\d\.pdf$/.test(file.suggestedFilename()), file.suggestedFilename());
+    const pdfPath = path.join(out, 'health-summary.pdf');
+    fs.copyFileSync(await file.path(), pdfPath);
+    const text = require('child_process').execFileSync('pdftotext', ['-layout', pdfPath, '-']).toString();
+    for (const t of ['Health summary', 'Margaret Smith', 'Penicillin', 'Metformin', '124/80 mmHg', 'Dr. Naidoo']) {
+      assert(text.includes(t), `PDF is missing "${t}"`);
+    }
+    await back();
+  });
+
+  await check('read aloud: today summary and Medical ID are spoken', async () => {
+    await tap('Read aloud');
+    await page.waitForFunction(() => window.__spoken.length > 0, null, { timeout: 5000 });
+    const today = await page.evaluate(() => window.__spoken.at(-1));
+    assert(today.includes('Margaret'), today);
+    assert(today.includes('Dr. Naidoo'), today);
+    await tap('I need help');
+    await tap('Show my medical ID');
+    await tap('Read aloud');
+    await page.waitForFunction(() => window.__spoken.length > 1, null, { timeout: 5000 });
+    const id = await page.evaluate(() => window.__spoken.at(-1));
+    assert(id.includes('Allergies: Penicillin.'), id);
     await back();
   });
 
@@ -436,6 +474,10 @@ async function opened() { return page.evaluate(() => window.__opened); }
     await see('Encrypted on this device');
     await see('App lock is off');
     await shot('privacy-security');
+    await tap('Read the full privacy policy');
+    await see('The short version');
+    await shot('privacy-policy');
+    await back();
   });
 
   await check('security: app lock with a PIN, also after reloading', async () => {

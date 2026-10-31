@@ -233,6 +233,26 @@ class _TodayCard extends StatelessWidget {
     final taken = doses.where((d) => d.status == DoseStatus.taken).length;
     final nextAppt = store.upcomingAppointments(now).firstOrNull;
     final runningLow = store.medicines.where((m) => m.isLow).toList();
+    final profile = store.profile;
+    final nextDose = pending.firstOrNull;
+    final spoken = [
+      if (profile != null) '${greeting(now)}, ${profile.firstName}.',
+      'Today is ${DateFormat('EEEE d MMMM').format(now)}.',
+      if (doses.isEmpty)
+        'You have no medicines set up.'
+      else if (nextDose == null)
+        'You have taken all your medicines for today.'
+      else
+        '${nextDose.status == DoseStatus.due ? 'It is time for' : 'Your next medicine is'} '
+            '${nextDose.medicine.name}'
+            '${nextDose.medicine.dosage.isEmpty ? '' : ', ${nextDose.medicine.dosage},'} '
+            'at ${formatTime(context, nextDose.time)}.',
+      for (final m in runningLow) 'Remember to refill ${m.name} soon.',
+      if (nextAppt != null)
+        'Your next appointment is with ${nextAppt.doctor}, '
+            '${formatDay(nextAppt.dateTime, now: now).toLowerCase()} at '
+            '${formatTime(context, nextAppt.dateTime)}.',
+    ].join(' ');
 
     final Widget medicineRow;
     if (doses.isEmpty) {
@@ -291,8 +311,15 @@ class _TodayCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: Text('Today', style: theme.textTheme.titleMedium),
+            padding: const EdgeInsets.fromLTRB(20, 12, 12, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text('Today', style: theme.textTheme.titleMedium),
+                ),
+                ReadAloudButton(text: spoken),
+              ],
+            ),
           ),
           medicineRow,
           for (final m in runningLow) ...[

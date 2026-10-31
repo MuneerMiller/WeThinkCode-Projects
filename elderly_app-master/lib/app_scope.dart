@@ -5,6 +5,7 @@ import 'services/contact_service.dart';
 import 'services/location_service.dart';
 import 'services/notification_service.dart';
 import 'services/share_service.dart';
+import 'services/speech_service.dart';
 
 class AppServices {
   AppServices({
@@ -13,18 +14,21 @@ class AppServices {
     HospitalService? hospitals,
     NotificationService? notifications,
     ShareService? sharing,
+    SpeechService? speech,
     this.jitsiServer = 'https://meet.jit.si',
   }) : contacts = contacts ?? const ContactService(),
        location = location ?? const LocationService(),
        hospitals = hospitals ?? HospitalService(),
        notifications = notifications ?? NotificationService(),
-       sharing = sharing ?? const ShareService();
+       sharing = sharing ?? const ShareService(),
+       speech = speech ?? SpeechService();
 
   final ContactService contacts;
   final LocationService location;
   final HospitalService hospitals;
   final NotificationService notifications;
   final ShareService sharing;
+  final SpeechService speech;
   final String jitsiServer;
 }
 

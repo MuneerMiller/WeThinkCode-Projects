@@ -1,6 +1,7 @@
 import 'package:elderly_app/app_scope.dart';
 import 'package:elderly_app/data/app_store.dart';
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:elderly_app/data/models.dart';
 import 'package:elderly_app/main.dart';
@@ -11,6 +12,7 @@ import 'package:elderly_app/services/location_service.dart';
 import 'package:elderly_app/services/notification_service.dart';
 import 'package:elderly_app/services/reminder_plan.dart';
 import 'package:elderly_app/services/share_service.dart';
+import 'package:elderly_app/services/speech_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -78,6 +80,19 @@ class FakeNotifications extends NotificationService {
   }) async => snoozed.add('${m.name} $dose');
 }
 
+class FakeSpeech extends SpeechService {
+  final spoken = <String>[];
+
+  @override
+  Future<void> speak(String text) async {
+    spoken.add(text);
+    speaking.value = text;
+  }
+
+  @override
+  Future<void> stop() async => speaking.value = null;
+}
+
 class FakeBiometrics extends Biometrics {
   FakeBiometrics({this.isAvailable = true, this.succeeds = true});
   bool isAvailable;
@@ -97,6 +112,7 @@ class FakeBiometrics extends Biometrics {
 class FakeShare extends ShareService {
   final sharedTexts = <String>[];
   final files = <({String name, String contents})>[];
+  final binaries = <({String name, List<int> bytes, String mimeType})>[];
 
   /// What [pickBackupFile] returns, as if the user chose that file.
   String? fileToPick;
@@ -114,6 +130,17 @@ class FakeShare extends ShareService {
     String? subject,
   }) async {
     files.add((name: name, contents: contents));
+    return true;
+  }
+
+  @override
+  Future<bool> shareBytes(
+    String name,
+    Uint8List bytes, {
+    required String mimeType,
+    String? subject,
+  }) async {
+    binaries.add((name: name, bytes: bytes, mimeType: mimeType));
     return true;
   }
 
@@ -154,7 +181,9 @@ class TestApp {
     this.share,
     this.keys,
     this.biometrics,
+    this.speech,
   );
+  final FakeSpeech speech;
   final AppStore store;
   final MemoryKeyStore keys;
   final FakeBiometrics biometrics;
@@ -195,6 +224,7 @@ Future<TestApp> pumpApp(
     FakeShare(),
     keys,
     biometrics,
+    FakeSpeech(),
   );
   await tester.pumpWidget(
     ElderlyApp(
@@ -205,6 +235,7 @@ Future<TestApp> pumpApp(
         hospitals: app.hospitals,
         sharing: app.share,
         notifications: notifications ?? FakeNotifications(),
+        speech: app.speech,
       ),
     ),
   );

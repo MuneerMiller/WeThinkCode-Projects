@@ -73,6 +73,25 @@ class MedicalIdView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              ReadAloudButton(
+                text: [
+                  'Medical ID for ${p.name}.',
+                  if (p.age.isNotEmpty) 'Age ${p.age}.',
+                  if (p.bloodGroup.isNotEmpty) 'Blood group ${p.bloodGroup}.',
+                  p.allergies.isEmpty
+                      ? 'No allergies recorded.'
+                      : 'Allergies: ${p.allergies}.',
+                  if (p.conditions.isNotEmpty)
+                    'Medical conditions: ${p.conditions}.',
+                  if (medicines.isNotEmpty)
+                    'Medicines: ${medicines.map((m) => m.dosage.isEmpty ? m.name : '${m.name} ${m.dosage}').join(', ')}.',
+                  for (final r in store.relatives)
+                    'Emergency contact: ${r.name}'
+                        '${r.relationship.isEmpty ? '' : ', ${r.relationship}'}, '
+                        '${r.phone.replaceAll(' ', '').split('').join(' ')}.',
+                ].join(' '),
+              ),
+              const SizedBox(height: 12),
               Card(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,

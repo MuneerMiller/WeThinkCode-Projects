@@ -1,6 +1,10 @@
 import 'package:elderly_app/data/app_store.dart';
 import 'package:elderly_app/data/models.dart';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:elderly_app/data/summary.dart';
+import 'package:elderly_app/data/summary_pdf.dart';
 import 'package:elderly_app/security/crypto.dart';
 import 'package:elderly_app/services/location_service.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -318,11 +322,77 @@ void main() {
     expect(text, contains('Conditions: Type 2 diabetes'));
     expect(text, contains('Allergies: Penicillin'));
     expect(text, contains('- Metformin 500 mg at 08:00, 20:00'));
-    expect(text, contains('BLOOD PRESSURE (1 readings)'));
+    expect(text, contains('BLOOD PRESSURE (1 reading)'));
     expect(
       text,
       contains('9 Mar, 08:30: 128/82 mmHg · 70 bpm – after breakfast'),
     );
     expect(text, isNot(contains('WEIGHT')));
+  });
+
+  test('PDF summary contains the details, medicines and readings', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = await AppStore.load(keys: MemoryKeyStore());
+    final now = DateTime(2026, 3, 10, 12);
+    await store.saveProfile(
+      UserProfile(
+        name: 'Margaret Smith',
+        bloodGroup: 'O+',
+        allergies: 'Penicillin',
+        conditions: 'Type 2 diabetes',
+      ),
+    );
+    await store.saveMedicine(
+      Medicine(
+        id: 1,
+        name: 'Metformin',
+        dosage: '500 mg',
+        type: MedicineType.tablet,
+        times: const [ClockTime(8, 0)],
+        addedOn: DateTime(2026, 3, 1),
+      )..record(DateTime(2026, 3, 9), const ClockTime(8, 0), true),
+    );
+    for (var i = 0; i < 40; i++) {
+      await store.saveTrackerEntry(
+        TrackerEntry(
+          id: 100 + i,
+          type: TrackerType.bloodSugar,
+          at: now.subtract(Duration(hours: 18 * i)),
+          values: {'glucose': 90 + i},
+        ),
+      );
+    }
+    ByteData font(int w) => ByteData.sublistView(
+      File('assets/fonts/Lexend-$w.ttf').readAsBytesSync(),
+    );
+    final bytes = await healthSummaryPdf(
+      store,
+      now,
+      regular: font(400),
+      bold: font(700),
+    );
+    final dir = await Directory.systemTemp.createTemp('pdf');
+    final file = File('${dir.path}/summary.pdf')..writeAsBytesSync(bytes);
+    final text = Process.runSync('pdftotext', ['-layout', file.path, '-']);
+    if (text.exitCode != 0) {
+      markTestSkipped('pdftotext is not installed');
+      return;
+    }
+    final out = text.stdout as String;
+    for (final expected in [
+      'Health summary',
+      'Margaret Smith',
+      'Penicillin',
+      'Type 2 diabetes',
+      'Metformin',
+      '500 mg',
+      '1 of 7', // taken 1 of the 7 doses due 4–10 March
+      'Blood sugar (40 readings)',
+      '129 mg/dL',
+      'Page 2 of 2',
+    ]) {
+      expect(out, contains(expected), reason: expected);
+    }
+    expect(out, isNot(contains('Blood pressure'))); // no readings: no section
   });
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app_scope.dart';
 import '../../data/models.dart';
 import '../../widgets/common.dart';
+import '../profile/privacy_policy_screen.dart';
 
 /// First-run form: who is using the app and who to contact in an emergency.
 class SetupScreen extends StatefulWidget {
@@ -145,6 +146,14 @@ class _SetupScreenState extends State<SetupScreen> {
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                       textAlign: TextAlign.center,
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const PrivacyPolicyScreen(),
+                        ),
+                      ),
+                      child: const Text('How we look after your information'),
                     ),
                   ],
                 ),

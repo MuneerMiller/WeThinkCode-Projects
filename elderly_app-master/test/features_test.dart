@@ -616,8 +616,106 @@ void main() {
     );
     await tester.tapText('Health tracker');
     await tester.tapText('Share');
+    await tester.tapText('As a message');
     final text = app.share.sharedTexts.single;
     expect(text, contains('Health summary for Margaret Smith'));
     expect(text, contains('105 mg/dL'));
+  });
+
+  testWidgets('read aloud: today, a dose check and the Medical ID', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    final now = DateTime.now();
+    await app.store.saveProfile(app.store.profile!..allergies = 'Penicillin');
+    await app.store.saveMedicine(
+      Medicine(
+        id: 80,
+        name: 'Aspirin',
+        dosage: '1 tablet',
+        type: MedicineType.tablet,
+        times: [ClockTime(now.hour, now.minute)],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tapText('Read aloud');
+    expect(app.speech.spoken.last, contains(', Margaret.'));
+    expect(
+      app.speech.spoken.last,
+      contains('It is time for Aspirin, 1 tablet,'),
+    );
+    expect(find.text('Stop reading'), findsOneWidget);
+    await tester.tapText('Stop reading');
+    expect(find.text('Stop reading'), findsNothing);
+
+    await tester.tapText('Check');
+    await tester.tapText('Read aloud');
+    expect(
+      app.speech.spoken.last,
+      startsWith('Did you take your Aspirin? 1 tablet. Today at'),
+    );
+    await tester.back();
+
+    await tester.tapText('I need help');
+    await tester.tapText('Show my medical ID');
+    await tester.tapText('Read aloud');
+    final id = app.speech.spoken.last;
+    expect(id, contains('Medical ID for Margaret Smith.'));
+    expect(id, contains('Allergies: Penicillin.'));
+    expect(id, contains('Medicines: Aspirin 1 tablet.'));
+    expect(
+      id,
+      contains('Emergency contact: Anna, Daughter, 0 8 2 5 5 5 0 1 0 1.'),
+    );
+  });
+
+  testWidgets('health tracker: share a PDF summary with the doctor', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await app.store.saveTrackerEntry(
+      TrackerEntry(
+        id: 71,
+        type: TrackerType.bloodPressure,
+        at: DateTime.now().subtract(const Duration(hours: 3)),
+        values: {'systolic': 131, 'diastolic': 84, 'pulse': 72},
+      ),
+    );
+    await tester.tapText('Health tracker');
+    await tester.tapText('Share');
+    await tester.tapText('As a PDF document');
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(seconds: 2)),
+    );
+    await tester.pumpAndSettle();
+    final pdf = app.share.binaries.single;
+    expect(pdf.mimeType, 'application/pdf');
+    expect(pdf.name, matches(RegExp(r'^health-summary-\d{4}-\d\d-\d\d\.pdf$')));
+    expect(String.fromCharCodes(pdf.bytes.take(5)), '%PDF-');
+  });
+
+  testWidgets('privacy policy opens from setup and from Privacy & security', (
+    tester,
+  ) async {
+    await pumpApp(tester, prefs: {'onboardingSeen': true});
+    await tester.tapText('How we look after your information');
+    expect(find.text('Privacy policy'), findsWidgets);
+    expect(find.text('The short version'), findsOneWidget);
+    expect(
+      find.textContaining('Your information stays on your phone.'),
+      findsOneWidget,
+    );
+    await tester.back();
+
+    await tester.enter('Your name', 'Margaret Smith');
+    await tester.tapText('Continue');
+    await tester.tap(find.byTooltip('My profile'));
+    await tester.pumpAndSettle();
+    await tester.tapText('Privacy & security');
+    await tester.tapText('Read the full privacy policy');
+    await tester.drag(find.byType(ListView).last, const Offset(0, -3000));
+    await tester.pumpAndSettle();
+    expect(find.text('Changes to this policy'), findsOneWidget);
   });
 }

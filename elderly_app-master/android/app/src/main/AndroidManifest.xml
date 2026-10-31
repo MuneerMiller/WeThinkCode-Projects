@@ -67,6 +67,10 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- flutter_tts: "Read aloud" uses the phone's text-to-speech -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
         <!-- url_launcher: phone calls, texts, maps and video calls -->
         <intent>
             <action android:name="android.intent.action.DIAL" />
