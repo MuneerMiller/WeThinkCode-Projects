@@ -42,6 +42,23 @@ Built with Flutter 3 for **Android, iOS and the web**. Everything is stored on t
 
 ## Running it
 
+### The easy way: one script
+
+`run.sh` (macOS/Linux) and `run.ps1` (Windows) do everything: download the project if needed, install Flutter to your home folder if you don't have it, fetch packages and start the app. The only thing you need beforehand is [git](https://git-scm.com) (plus Google Chrome for the default mode).
+
+| Command | What it does |
+|---|---|
+| `./run.sh` | Run the app in Chrome |
+| `./run.sh serve` | Run it as a website at http://localhost:8080, for any browser |
+| `./run.sh phone` | Run on a plugged-in phone or an emulator |
+| `./run.sh test` | Run the code checks and automated tests |
+
+On Windows use `.\run.ps1`, `.\run.ps1 serve` and so on in PowerShell. If Windows blocks the script, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once.
+
+You can also download just the script and run it in an empty folder. It clones the repo next to itself.
+
+### By hand
+
 Requires Flutter 3.35 or newer (Dart 3.9+).
 
 ```bash
