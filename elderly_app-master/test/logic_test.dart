@@ -373,11 +373,19 @@ void main() {
     );
     final dir = await Directory.systemTemp.createTemp('pdf');
     final file = File('${dir.path}/summary.pdf')..writeAsBytesSync(bytes);
-    final text = Process.runSync('pdftotext', ['-layout', file.path, '-']);
-    if (text.exitCode != 0) {
-      markTestSkipped('pdftotext is not installed');
+    // Reads the text back with poppler's pdftotext. CI installs it; locally
+    // the test is skipped if it is missing, but never silently on CI.
+    final ProcessResult text;
+    try {
+      text = Process.runSync('pdftotext', ['-layout', file.path, '-']);
+    } on ProcessException {
+      if (Platform.environment['CI'] == 'true') {
+        fail('pdftotext is required on CI (install poppler-utils)');
+      }
+      markTestSkipped('pdftotext is not installed (poppler-utils)');
       return;
     }
+    expect(text.exitCode, 0, reason: '${text.stderr}');
     final out = text.stdout as String;
     for (final expected in [
       'Health summary',
