@@ -45,7 +45,6 @@ class _AppointmentEditScreenState extends State<AppointmentEditScreen> {
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
     final store = context.store;
-    final notifications = context.services.notifications;
     final a =
         widget.appointment ??
         Appointment(id: store.newId(), doctor: '', dateTime: _when);
@@ -57,7 +56,6 @@ class _AppointmentEditScreenState extends State<AppointmentEditScreen> {
       ..dateTime = _when
       ..done = _done;
     await store.saveAppointment(a);
-    await notifications.scheduleAppointment(a);
     if (mounted) {
       showMessage(context, 'Appointment with ${a.doctor} saved');
       Navigator.pop(context);
@@ -75,7 +73,6 @@ class _AppointmentEditScreenState extends State<AppointmentEditScreen> {
     );
     if (!ok || !mounted) return;
     final store = context.store;
-    await context.services.notifications.cancelAppointment(a.id);
     await store.deleteAppointment(a.id);
     if (mounted) Navigator.pop(context);
   }

@@ -1,10 +1,15 @@
 import 'package:elderly_app/app_scope.dart';
 import 'package:elderly_app/data/app_store.dart';
+import 'dart:async';
+
+import 'package:elderly_app/data/models.dart';
 import 'package:elderly_app/main.dart';
 import 'package:elderly_app/security/app_lock.dart';
 import 'package:elderly_app/security/crypto.dart';
 import 'package:elderly_app/services/contact_service.dart';
 import 'package:elderly_app/services/location_service.dart';
+import 'package:elderly_app/services/notification_service.dart';
+import 'package:elderly_app/services/reminder_plan.dart';
 import 'package:elderly_app/services/share_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,6 +38,44 @@ class FakeContacts extends ContactService {
     urls.add(url);
     return true;
   }
+}
+
+/// Stands in for phone notifications: records what the app schedules and
+/// lets tests deliver notification taps.
+class FakeNotifications extends NotificationService {
+  final _taps = StreamController<DoseResponse>.broadcast();
+  final snoozed = <String>[];
+  DoseResponse? launch;
+  int syncs = 0;
+  List<Medicine> lastMedicines = const [];
+
+  void tap(DoseResponse r) => _taps.add(r);
+
+  @override
+  Stream<DoseResponse> get responses => _taps.stream;
+
+  @override
+  DoseResponse? takeLaunchResponse() {
+    final r = launch;
+    launch = null;
+    return r;
+  }
+
+  @override
+  Future<void> sync({
+    required List<Medicine> medicines,
+    required List<Appointment> appointments,
+  }) async {
+    syncs++;
+    lastMedicines = [...medicines];
+  }
+
+  @override
+  Future<void> snooze(
+    Medicine m,
+    DosePayload dose, {
+    Duration after = const Duration(minutes: 10),
+  }) async => snoozed.add('${m.name} $dose');
 }
 
 class FakeBiometrics extends Biometrics {
@@ -129,6 +172,8 @@ Future<TestApp> pumpApp(
   List<Hospital> hospitals = const [],
   MemoryKeyStore? keys,
   FakeBiometrics? biometrics,
+  FakeNotifications? notifications,
+  List<Medicine> medicines = const [],
 }) async {
   // A phone-sized portrait screen.
   tester.view.physicalSize = const Size(1080, 2340);
@@ -139,6 +184,9 @@ Future<TestApp> pumpApp(
   keys ??= MemoryKeyStore();
   biometrics ??= FakeBiometrics();
   final store = await AppStore.load(keys: keys, biometrics: biometrics);
+  for (final m in medicines) {
+    await store.saveMedicine(m);
+  }
   final app = TestApp(
     store,
     FakeContacts(),
@@ -156,6 +204,7 @@ Future<TestApp> pumpApp(
         location: app.location,
         hospitals: app.hospitals,
         sharing: app.share,
+        notifications: notifications ?? FakeNotifications(),
       ),
     ),
   );

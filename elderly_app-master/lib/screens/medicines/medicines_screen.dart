@@ -49,6 +49,7 @@ class MedicinesScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      const _OnTimeRemindersCard(),
                       SectionHeader(
                         "Today's schedule",
                         trailing: Text(
@@ -202,6 +203,94 @@ class _MedicineFacts extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: lines,
+      ),
+    );
+  }
+}
+
+/// Shown on Android when the phone may delay reminders, with a fix.
+class _OnTimeRemindersCard extends StatefulWidget {
+  const _OnTimeRemindersCard();
+
+  @override
+  State<_OnTimeRemindersCard> createState() => _OnTimeRemindersCardState();
+}
+
+class _OnTimeRemindersCardState extends State<_OnTimeRemindersCard>
+    with WidgetsBindingObserver {
+  bool? _allowed;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _check();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // Re-check when the user comes back from the settings page.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _check();
+  }
+
+  Future<void> _check() async {
+    final allowed = await context.services.notifications.exactTimingAllowed();
+    if (mounted) setState(() => _allowed = allowed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_allowed != false) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Card(
+        color: theme.colorScheme.tertiaryContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.alarm_off_rounded,
+                    color: theme.colorScheme.onTertiaryContainer,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Reminders may arrive late',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.onTertiaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Your phone is saving battery by delaying reminders. Allow '
+                'Elderly Care to remind you at the exact time.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onTertiaryContainer,
+                ),
+              ),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: () =>
+                    context.services.notifications.requestExactTiming(),
+                child: const Text('Allow on-time reminders'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

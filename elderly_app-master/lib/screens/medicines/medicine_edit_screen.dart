@@ -70,7 +70,6 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
     final store = context.store;
-    final notifications = context.services.notifications;
     final m =
         widget.medicine ??
         Medicine(id: store.newId(), name: '', type: _type, times: []);
@@ -81,7 +80,6 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
       ..type = _type
       ..times = _times.toSet().toList();
     await store.saveMedicine(m);
-    await notifications.scheduleMedicine(m);
     if (mounted) {
       showMessage(
         context,
@@ -104,7 +102,6 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
     );
     if (!ok || !mounted) return;
     final store = context.store;
-    await context.services.notifications.cancelMedicine(m.id);
     await store.deleteMedicine(m.id);
     if (mounted) Navigator.pop(context);
   }

@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'app_scope.dart';
 import 'data/app_store.dart';
 import 'screens/home/home_screen.dart';
+import 'screens/medicines/dose_actions.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/onboarding/setup_screen.dart';
 import 'security/lock_screen.dart';
+import 'services/notification_service.dart';
 import 'theme.dart';
 
 Future<void> main() async {
@@ -28,20 +32,58 @@ class ElderlyApp extends StatefulWidget {
 
 class _ElderlyAppState extends State<ElderlyApp> {
   late final AppLifecycleListener _lifecycle;
+  final _navigator = GlobalKey<NavigatorState>();
+  final _messenger = GlobalKey<ScaffoldMessengerState>();
+  StreamSubscription<DoseResponse>? _doseTaps;
+  Timer? _syncTimer;
 
   @override
   void initState() {
     super.initState();
-    // Lock again when the app comes back after a while in the background.
+    final store = widget.store;
+    final notifications = widget.services.notifications;
     _lifecycle = AppLifecycleListener(
-      onHide: widget.store.lock.appPaused,
-      onShow: widget.store.lock.appResumed,
+      // Lock again when the app comes back after a while in the background.
+      onHide: store.lock.appPaused,
+      onShow: () {
+        store.lock.appResumed();
+        _syncReminders();
+      },
     );
+    // Keep the phone's reminders in step with the data.
+    store.addListener(_scheduleSync);
+    _syncReminders();
+    _doseTaps = notifications.responses.listen(_onDoseTap);
+    final launch = notifications.takeLaunchResponse();
+    if (launch != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _onDoseTap(launch));
+    }
   }
+
+  void _scheduleSync() {
+    _syncTimer?.cancel();
+    _syncTimer = Timer(const Duration(milliseconds: 500), _syncReminders);
+  }
+
+  void _syncReminders() => widget.services.notifications.sync(
+    medicines: widget.store.medicines,
+    appointments: widget.store.appointments,
+  );
+
+  void _onDoseTap(DoseResponse r) => handleDoseResponse(
+    response: r,
+    store: widget.store,
+    services: widget.services,
+    navigator: _navigator,
+    messenger: _messenger,
+  );
 
   @override
   void dispose() {
     _lifecycle.dispose();
+    widget.store.removeListener(_scheduleSync);
+    _doseTaps?.cancel();
+    _syncTimer?.cancel();
     super.dispose();
   }
 
@@ -54,6 +96,8 @@ class _ElderlyAppState extends State<ElderlyApp> {
       services: services,
       child: MaterialApp(
         title: 'Elderly Care',
+        navigatorKey: _navigator,
+        scaffoldMessengerKey: _messenger,
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
