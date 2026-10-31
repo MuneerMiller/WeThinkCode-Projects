@@ -35,5 +35,5 @@ jobs:
       - name: Unit and widget tests
         run: flutter test
 
-      - name: Build web app
-        run: flutter build web --release --no-web-resources-cdn
+      - name: Build web app (with Content-Security-Policy)
+        run: tool/build_web.sh

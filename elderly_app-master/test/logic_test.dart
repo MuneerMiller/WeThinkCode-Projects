@@ -1,6 +1,7 @@
 import 'package:elderly_app/data/app_store.dart';
 import 'package:elderly_app/data/models.dart';
 import 'package:elderly_app/data/summary.dart';
+import 'package:elderly_app/security/crypto.dart';
 import 'package:elderly_app/services/location_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -106,7 +107,8 @@ void main() {
   group('AppStore', () {
     test('persists everything across restarts', () async {
       SharedPreferences.setMockInitialValues({});
-      var store = await AppStore.load();
+      final keys = MemoryKeyStore();
+      var store = await AppStore.load(keys: keys);
       await store.saveProfile(UserProfile(name: 'Margaret Smith'));
       await store.saveNote(
         Note(
@@ -126,7 +128,7 @@ void main() {
         ),
       );
 
-      store = await AppStore.load();
+      store = await AppStore.load(keys: keys);
       expect(store.profile?.firstName, 'Margaret');
       expect(store.notes.single.title, 'Ask about knee');
       expect(
@@ -138,7 +140,7 @@ void main() {
 
     test('splits appointments into upcoming and past', () async {
       SharedPreferences.setMockInitialValues({});
-      final store = await AppStore.load();
+      final store = await AppStore.load(keys: MemoryKeyStore());
       final now = DateTime(2026, 6, 1, 12);
       for (final (d, done) in [
         (DateTime(2026, 6, 3), false),
@@ -159,7 +161,7 @@ void main() {
 
     test('reset wipes all data', () async {
       SharedPreferences.setMockInitialValues({});
-      final store = await AppStore.load();
+      final store = await AppStore.load(keys: MemoryKeyStore());
       await store.saveProfile(UserProfile(name: 'X'));
       await store.saveRelative(Relative(id: 1, name: 'A', phone: '1'));
       await store.resetEverything();
@@ -222,7 +224,7 @@ void main() {
   group('Backup', () {
     test('restores everything exactly', () async {
       SharedPreferences.setMockInitialValues({});
-      final store = await AppStore.load();
+      final store = await AppStore.load(keys: MemoryKeyStore());
       await store.saveProfile(
         UserProfile(name: 'Margaret Smith', allergies: 'Penicillin'),
       );
@@ -239,7 +241,7 @@ void main() {
         ),
       );
       await store.setTextScale(1.3);
-      final backup = store.exportBackup();
+      final backup = await store.exportBackup();
 
       await store.resetEverything();
       expect(store.profile, isNull);
@@ -254,7 +256,7 @@ void main() {
 
     test('rejects files that are not backups and keeps current data', () async {
       SharedPreferences.setMockInitialValues({});
-      final store = await AppStore.load();
+      final store = await AppStore.load(keys: MemoryKeyStore());
       await store.saveProfile(UserProfile(name: 'Keep me'));
       for (final bad in [
         'not json',
@@ -273,7 +275,7 @@ void main() {
 
   test('health summary lists details, medicines and recent readings', () async {
     SharedPreferences.setMockInitialValues({});
-    final store = await AppStore.load();
+    final store = await AppStore.load(keys: MemoryKeyStore());
     final now = DateTime(2026, 3, 10, 12);
     await store.saveProfile(
       UserProfile(

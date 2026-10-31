@@ -22,7 +22,8 @@ class ContactService {
     try {
       return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
-      debugPrint('Could not open $uri: $e');
+      // Don't log the number or message: they are personal.
+      debugPrint('Could not open a ${uri.scheme} link (${e.runtimeType})');
       return false;
     }
   }

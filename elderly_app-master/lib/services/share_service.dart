@@ -18,7 +18,7 @@ class ShareService {
       // "unavailable"; only a closed share sheet means nothing happened.
       return r.status != ShareResultStatus.dismissed;
     } catch (e) {
-      debugPrint('Share failed: $e');
+      debugPrint('Share failed (${e.runtimeType})');
       return false;
     }
   }
@@ -49,7 +49,7 @@ class ShareService {
       // "unavailable"; only a closed share sheet means nothing happened.
       return r.status != ShareResultStatus.dismissed;
     } catch (e) {
-      debugPrint('Share failed: $e');
+      debugPrint('Share failed (${e.runtimeType})');
       return false;
     }
   }

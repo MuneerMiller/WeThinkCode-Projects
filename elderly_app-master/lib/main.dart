@@ -5,6 +5,7 @@ import 'data/app_store.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/onboarding/setup_screen.dart';
+import 'security/lock_screen.dart';
 import 'theme.dart';
 
 Future<void> main() async {
@@ -15,14 +16,39 @@ Future<void> main() async {
   runApp(ElderlyApp(store: store, services: services));
 }
 
-class ElderlyApp extends StatelessWidget {
+class ElderlyApp extends StatefulWidget {
   const ElderlyApp({super.key, required this.store, required this.services});
 
   final AppStore store;
   final AppServices services;
 
   @override
+  State<ElderlyApp> createState() => _ElderlyAppState();
+}
+
+class _ElderlyAppState extends State<ElderlyApp> {
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    // Lock again when the app comes back after a while in the background.
+    _lifecycle = AppLifecycleListener(
+      onHide: widget.store.lock.appPaused,
+      onShow: widget.store.lock.appResumed,
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final store = widget.store;
+    final services = widget.services;
     return AppScope(
       store: store,
       services: services,
@@ -35,9 +61,26 @@ class ElderlyApp extends StatelessWidget {
         builder: (context, child) {
           final mq = MediaQuery.of(context);
           final scale = mq.textScaler.scale(1) * context.store.textScale;
+          final locked = context.store.lock.locked;
           return MediaQuery(
             data: mq.copyWith(textScaler: TextScaler.linear(scale)),
-            child: child!,
+            // While locked the app stays alive underneath, but hidden from
+            // view, screen readers, touch and keyboard focus.
+            child: Stack(
+              children: [
+                Offstage(
+                  offstage: locked,
+                  child: ExcludeSemantics(
+                    excluding: locked,
+                    child: ExcludeFocus(
+                      excluding: locked,
+                      child: TickerMode(enabled: !locked, child: child!),
+                    ),
+                  ),
+                ),
+                if (locked) const Positioned.fill(child: LockScreen()),
+              ],
+            ),
           );
         },
         home: const StartGate(),

@@ -64,7 +64,7 @@ case "$MODE" in
       die "Chrome wasn't found. Install Google Chrome, or use './run.sh serve' to open it in any browser."
     fi
     say "Starting Elderly Care in Chrome (press q in this window to quit)"
-    flutter run -d chrome
+    flutter run -d chrome --no-web-resources-cdn
     ;;
   phone)
     say "Looking for a phone or emulator"
@@ -75,7 +75,7 @@ case "$MODE" in
     ;;
   serve)
     say "Starting Elderly Care at http://localhost:8080 (press q to quit)"
-    flutter run -d web-server --web-port 8080 --web-hostname localhost
+    flutter run -d web-server --web-port 8080 --web-hostname localhost --no-web-resources-cdn
     ;;
   test)
     say "Checking the code"

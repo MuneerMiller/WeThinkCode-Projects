@@ -68,6 +68,8 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to find nearby hospitals and, when you ask, to send to your family in an emergency.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Use Face ID to unlock Elderly Care instead of typing your PIN.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Take photos of prescriptions and medical documents to keep them in the app.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

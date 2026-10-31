@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import '../../app_scope.dart';
 import '../../data/models.dart';
 import '../../widgets/common.dart';
+import '../../data/app_store.dart';
+import '../../widgets/secret_dialogs.dart';
 import 'medical_id_screen.dart';
+import 'security_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -142,9 +145,17 @@ class ProfileScreen extends StatelessWidget {
                     children: [
                       ListTile(
                         leading: const Icon(Icons.lock_rounded),
-                        title: const Text('Your data stays on this device'),
-                        subtitle: const Text(
-                          'Nothing is uploaded. Calls and texts use your own phone.',
+                        title: const Text('Privacy & security'),
+                        subtitle: Text(
+                          store.lock.hasPin
+                              ? 'App lock is on'
+                              : 'Set a PIN, see how your data is protected',
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const SecurityScreen(),
+                          ),
                         ),
                       ),
                       ListTile(
@@ -360,10 +371,24 @@ class _BackupCard extends StatelessWidget {
   Future<void> _backUp(BuildContext context) async {
     final store = context.store;
     final sharing = context.services.sharing;
+    final password = await askNewSecret(
+      context,
+      title: 'Protect your backup?',
+      message:
+          'The backup holds your health details. A password keeps them '
+          'private if the file ends up in the wrong hands. Write it down: '
+          'without it the backup cannot be opened.',
+      label: 'Backup password',
+      minLength: 8,
+      skipLabel: 'No password',
+      confirmLabel: 'Use password',
+    );
+    if (password == null || !context.mounted) return;
+    final contents = await store.exportBackup(password: password);
     final stamp = DateTime.now().toIso8601String().substring(0, 10);
     final ok = await sharing.shareFile(
       'elderly-care-backup-$stamp.json',
-      store.exportBackup(),
+      contents,
       subject: 'Elderly Care backup',
     );
     if (context.mounted) {
@@ -388,18 +413,44 @@ class _BackupCard extends StatelessWidget {
       confirmLabel: 'Choose file',
     );
     if (!ok || !context.mounted) return;
+    final String? json;
     try {
-      final json = await sharing.pickBackupFile();
-      if (json == null) return;
-      await store.importBackup(json);
-      if (context.mounted) {
-        showMessage(context, 'Backup restored');
-        Navigator.of(context).popUntil((r) => r.isFirst);
-      }
-    } on FormatException catch (e) {
-      if (context.mounted) showMessage(context, e.message);
+      json = await sharing.pickBackupFile();
     } catch (_) {
       if (context.mounted) showMessage(context, 'Could not read that file.');
+      return;
+    }
+    if (json == null || !context.mounted) return;
+
+    String? password;
+    var message =
+        'This backup is protected. Enter the password you chose '
+        'when you made it.';
+    while (true) {
+      try {
+        await store.importBackup(json, password: password);
+        break;
+      } on BackupPasswordException catch (e) {
+        if (!context.mounted) return;
+        if (e.wrongPassword) {
+          message = 'That password is not right. Please try again.';
+        }
+        password = await askSecret(
+          context,
+          title: 'Backup password',
+          message: message,
+          label: 'Password',
+          confirmLabel: 'Restore',
+        );
+        if (password == null) return;
+      } on FormatException catch (e) {
+        if (context.mounted) showMessage(context, e.message);
+        return;
+      }
+    }
+    if (context.mounted) {
+      showMessage(context, 'Backup restored');
+      Navigator.of(context).popUntil((r) => r.isFirst);
     }
   }
 

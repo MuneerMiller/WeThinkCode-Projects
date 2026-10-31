@@ -1,6 +1,6 @@
 // End-to-end check of the release web build in a real browser.
 //
-//   flutter build web --release --no-web-resources-cdn
+//   tool/build_web.sh
 //   node test_e2e/browser_test.js
 //
 // Serves build/web, drives every feature through Flutter's accessibility
@@ -308,7 +308,8 @@ async function opened() { return page.evaluate(() => window.__opened); }
     await tap('Start video call');
     const o = await opened();
     const call = o.at(-1);
-    assert(call.startsWith('https://meet.jit.si/ElderlyCare-margaretsmith-'), call);
+    assert(/^https:\/\/meet\.jit\.si\/ElderlyCare-[a-z0-9]{16}#/.test(call), call);
+    assert(!call.split('#')[0].includes('margaret'), 'no name in the room address');
     assert(o.at(-2).includes(encodeURIComponent(call.split('#')[0])), 'family texted the room link');
     await back();
   });
@@ -364,6 +365,8 @@ async function opened() { return page.evaluate(() => window.__opened); }
   await check('backup: downloads a backup file of all data', async () => {
     const download = page.waitForEvent('download', { timeout: 15000 });
     await tap('Back up my data');
+    await see('Protect your backup?');
+    await tap('No password');
     const file = await download;
     assert(/^elderly-care-backup-\d{4}-\d\d-\d\d\.json$/.test(file.suggestedFilename()), file.suggestedFilename());
     const backup = JSON.parse(fs.readFileSync(await file.path(), 'utf8'));
@@ -414,6 +417,53 @@ async function opened() { return page.evaluate(() => window.__opened); }
     await tap('Documents');
     await see('Prescription March');
     await back();
+  });
+
+  await check('security: no readable health data in browser storage', async () => {
+    const stored = await page.evaluate(() => JSON.stringify({ ...localStorage }));
+    for (const secret of ['Penicillin', 'Metformin', 'Dr. Naidoo', 'Anna Smith', '124/80', 'Prescription March']) {
+      assert(!stored.includes(secret), `"${secret}" is readable in localStorage`);
+    }
+    assert(stored.includes('enc1:'), 'data is stored encrypted');
+    const csp = await page.evaluate(() =>
+      document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content ?? '');
+    assert(csp.includes("script-src 'self'"), 'release build has a Content-Security-Policy');
+  });
+
+  await check('security: privacy page confirms encryption', async () => {
+    await tapLocator(page.getByRole('button', { name: 'My profile' }));
+    await tap('Privacy & security');
+    await see('Encrypted on this device');
+    await see('App lock is off');
+    await shot('privacy-security');
+  });
+
+  await check('security: app lock with a PIN, also after reloading', async () => {
+    await tap('Lock with a PIN');
+    await fill('New PIN', '2580');
+    await fill('Type it again', '2580');
+    await tap('Save');
+    await see('App lock is on');
+    await tap('Lock now');
+    await see('Enter your PIN');
+    await shot('lock-screen');
+    // Wrong PIN, typed on the keyboard.
+    await page.keyboard.type('1111');
+    await page.keyboard.press('Enter');
+    await see('That PIN is not right');
+    // The emergency panel works while locked.
+    await tap('Emergency');
+    await see('Call 112');
+    await see('Penicillin');
+    await shot('lock-emergency');
+    await back();
+    // Reload: the app must start locked.
+    await load();
+    await see('Enter your PIN');
+    assert(!(await byText('Dr. Naidoo').count()), 'nothing visible while locked');
+    for (const d of '2580') await tapLocator(page.getByRole('button', { name: d, exact: true }));
+    await tapLocator(page.getByRole('button', { name: 'Unlock' }));
+    await see('Dr. Naidoo');
   });
 
   await check('dark mode renders', async () => {

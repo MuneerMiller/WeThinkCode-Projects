@@ -1,6 +1,8 @@
 import 'package:elderly_app/app_scope.dart';
 import 'package:elderly_app/data/app_store.dart';
 import 'package:elderly_app/main.dart';
+import 'package:elderly_app/security/app_lock.dart';
+import 'package:elderly_app/security/crypto.dart';
 import 'package:elderly_app/services/contact_service.dart';
 import 'package:elderly_app/services/location_service.dart';
 import 'package:elderly_app/services/share_service.dart';
@@ -30,6 +32,22 @@ class FakeContacts extends ContactService {
   Future<bool> openUrl(String url) async {
     urls.add(url);
     return true;
+  }
+}
+
+class FakeBiometrics extends Biometrics {
+  FakeBiometrics({this.isAvailable = true, this.succeeds = true});
+  bool isAvailable;
+  bool succeeds;
+  int prompts = 0;
+
+  @override
+  Future<bool> available() async => isAvailable;
+
+  @override
+  Future<bool> authenticate(String reason) async {
+    prompts++;
+    return succeeds;
   }
 }
 
@@ -85,8 +103,18 @@ class FakeHospitals extends HospitalService {
 }
 
 class TestApp {
-  TestApp(this.store, this.contacts, this.location, this.hospitals, this.share);
+  TestApp(
+    this.store,
+    this.contacts,
+    this.location,
+    this.hospitals,
+    this.share,
+    this.keys,
+    this.biometrics,
+  );
   final AppStore store;
+  final MemoryKeyStore keys;
+  final FakeBiometrics biometrics;
   final FakeShare share;
   final FakeContacts contacts;
   final FakeLocation location;
@@ -99,6 +127,8 @@ Future<TestApp> pumpApp(
   Map<String, Object> prefs = const {},
   FakeLocation? location,
   List<Hospital> hospitals = const [],
+  MemoryKeyStore? keys,
+  FakeBiometrics? biometrics,
 }) async {
   // A phone-sized portrait screen.
   tester.view.physicalSize = const Size(1080, 2340);
@@ -106,13 +136,17 @@ Future<TestApp> pumpApp(
   addTearDown(tester.view.reset);
 
   SharedPreferences.setMockInitialValues(prefs);
-  final store = await AppStore.load();
+  keys ??= MemoryKeyStore();
+  biometrics ??= FakeBiometrics();
+  final store = await AppStore.load(keys: keys, biometrics: biometrics);
   final app = TestApp(
     store,
     FakeContacts(),
     location ?? FakeLocation(),
     FakeHospitals(hospitals),
     FakeShare(),
+    keys,
+    biometrics,
   );
   await tester.pumpWidget(
     ElderlyApp(

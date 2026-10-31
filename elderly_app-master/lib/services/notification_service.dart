@@ -28,6 +28,8 @@ class NotificationService {
       channelDescription: 'Reminds you when it is time to take a medicine',
       importance: Importance.max,
       priority: Priority.high,
+      // Hide medicine and doctor names on a secure lock screen.
+      visibility: NotificationVisibility.private,
     ),
     iOS: DarwinNotificationDetails(),
   );
@@ -39,6 +41,8 @@ class NotificationService {
       channelDescription: 'Reminds you an hour before a doctor appointment',
       importance: Importance.high,
       priority: Priority.high,
+      // Hide medicine and doctor names on a secure lock screen.
+      visibility: NotificationVisibility.private,
     ),
     iOS: DarwinNotificationDetails(),
   );
@@ -62,7 +66,7 @@ class NotificationService {
           ?.requestNotificationsPermission();
       _ready = true;
     } catch (e) {
-      debugPrint('Notifications unavailable: $e');
+      debugPrint('Notifications unavailable (${e.runtimeType})');
     }
   }
 

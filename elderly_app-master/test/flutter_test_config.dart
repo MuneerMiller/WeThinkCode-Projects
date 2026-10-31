@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:elderly_app/security/crypto.dart';
 import 'package:flutter/services.dart';
 
 /// Loads the app's real font so text is measured as it will be on a phone
@@ -12,5 +13,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
     lexend.addFont(Future.value(ByteData.sublistView(bytes)));
   }
   await lexend.load();
+  // Widget tests run on a fake clock, where the hashing pauses never end.
+  PasswordCrypto.yieldWhileHashing = false;
   await testMain();
 }

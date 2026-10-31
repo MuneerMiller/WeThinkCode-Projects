@@ -1,25 +1,88 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:cryptography/cryptography.dart'
+    show SecretBoxAuthenticationError;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../security/app_lock.dart';
+import '../security/crypto.dart';
 import 'models.dart';
+
+/// Thrown by [AppStore.importBackup] when a backup is password-protected and
+/// the password is missing or wrong.
+class BackupPasswordException implements Exception {
+  const BackupPasswordException({required this.wrongPassword});
+  final bool wrongPassword;
+  @override
+  String toString() => wrongPassword
+      ? 'That password is not right.'
+      : 'This backup is protected with a password.';
+}
+
+/// Parsed contents of the encrypted data sections.
+class _Data {
+  UserProfile? profile;
+  final relatives = <Relative>[];
+  final medicines = <Medicine>[];
+  final appointments = <Appointment>[];
+  final notes = <Note>[];
+  final documents = <HealthDocument>[];
+  final trackerEntries = <TrackerEntry>[];
+
+  int get maxId => [
+    for (final l in <List<dynamic>>[
+      relatives,
+      medicines,
+      appointments,
+      notes,
+      documents,
+      trackerEntries,
+    ])
+      for (final e in l) e.id as int,
+  ].fold(0, max);
+}
 
 /// All of the user's data, kept on the device.
 ///
-/// Every mutation saves the affected collection and notifies listeners, so
-/// screens simply rebuild from the store.
+/// Health data is encrypted with a key held in the platform's secure key
+/// storage (see [Vault]). Every mutation saves the affected section and
+/// notifies listeners, so screens simply rebuild from the store.
 class AppStore extends ChangeNotifier {
-  AppStore._(this._prefs);
+  AppStore._(this._prefs, this._vault, this.lock) {
+    lock.addListener(notifyListeners);
+  }
 
-  static Future<AppStore> load() async {
-    final store = AppStore._(await SharedPreferences.getInstance());
-    store._read();
+  static Future<AppStore> load({
+    KeyStore keys = const SecureKeyStore(),
+    Biometrics biometrics = const DeviceBiometrics(),
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final vault = await Vault.open(keys);
+    final lock = await AppLock.load(prefs, keys, biometrics);
+    final store = AppStore._(prefs, vault, lock);
+    await store._read();
     return store;
   }
 
   final SharedPreferences _prefs;
+  final Vault _vault;
+  final AppLock lock;
+
+  /// Whether health data is encrypted on this device.
+  bool get isEncrypted => _vault.isEncrypted;
+
+  /// Sections holding personal or health data; always stored encrypted.
+  static const _sealed = [
+    'profile',
+    'relatives',
+    'medicines',
+    'appointments',
+    'notes',
+    'documents',
+    'trackerEntries',
+  ];
 
   UserProfile? profile;
   bool onboardingSeen = false;
@@ -40,56 +103,132 @@ class AppStore extends ChangeNotifier {
     return id;
   }
 
-  /// Random suffix that keeps this user's video-call room private.
+  static final _saltPattern = RegExp(r'^[a-z0-9]{16,64}$');
+
+  /// Random name for this user's video-call room. 16 characters from a
+  /// 32-letter alphabet (80 bits) so the room can't be guessed.
   String get callRoomSalt {
     var salt = _prefs.getString('callRoomSalt');
-    if (salt == null) {
+    if (salt == null || !_saltPattern.hasMatch(salt)) {
       final rnd = Random.secure();
       const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
-      salt = List.generate(8, (_) => chars[rnd.nextInt(chars.length)]).join();
+      salt = List.generate(16, (_) => chars[rnd.nextInt(chars.length)]).join();
       _prefs.setString('callRoomSalt', salt);
     }
     return salt;
   }
 
-  void _read() {
+  Future<void> _read() async {
     onboardingSeen = _prefs.getBool('onboardingSeen') ?? false;
-    textScale = _prefs.getDouble('textScale') ?? 1.0;
+    textScale = (_prefs.getDouble('textScale') ?? 1.0).clamp(1.0, 1.3);
     _nextId = _prefs.getInt('nextId') ?? 1;
-    final p = _prefs.getString('profile');
-    profile = p == null ? null : UserProfile.fromJson(jsonDecode(p));
-    _readList('relatives', relatives, Relative.fromJson);
-    _readList('medicines', medicines, Medicine.fromJson);
-    _readList('appointments', appointments, Appointment.fromJson);
-    _readList('notes', notes, Note.fromJson);
-    _readList('documents', documents, HealthDocument.fromJson);
-    _readList('trackerEntries', trackerEntries, TrackerEntry.fromJson);
-  }
 
-  void _readList<T>(
-    String key,
-    List<T> into,
-    T Function(Map<String, dynamic>) fromJson,
-  ) {
-    into.clear();
-    final raw = _prefs.getString(key);
-    if (raw == null) return;
-    try {
-      for (final item in jsonDecode(raw) as List) {
-        into.add(fromJson(item as Map<String, dynamic>));
+    final sections = <String, String>{};
+    for (final key in _sealed) {
+      final raw = _prefs.getString(key);
+      if (raw == null) continue;
+      try {
+        sections[key] = await _vault.unseal(raw);
+      } catch (e) {
+        debugPrint('Could not decrypt $key (${e.runtimeType})');
       }
-    } catch (e) {
-      debugPrint('Could not read $key: $e');
+    }
+    // A damaged section is skipped rather than stopping the app from opening.
+    _adopt(_parse(sections, strict: false));
+
+    // Encrypt anything saved before encryption was added.
+    if (_vault.isEncrypted) {
+      for (final MapEntry(:key, :value) in sections.entries) {
+        if (!Vault.isSealed(_prefs.getString(key)!)) _write(key, value);
+      }
     }
   }
 
-  Future<void> _save(String key, List<dynamic> list) async {
-    notifyListeners();
-    await _prefs.setString(
-      key,
-      jsonEncode([for (final item in list) item.toJson()]),
-    );
+  /// Turns decrypted JSON sections into data. With [strict], any problem
+  /// throws a [FormatException]; otherwise bad sections are left empty.
+  static _Data _parse(Map<String, String> sections, {required bool strict}) {
+    final data = _Data();
+    void section(String key, void Function(Object? json) apply) {
+      final raw = sections[key];
+      if (raw == null) return;
+      try {
+        apply(jsonDecode(raw));
+      } catch (e) {
+        if (strict) {
+          throw const FormatException(
+            'This backup is damaged and could not be read.',
+          );
+        }
+        debugPrint('Could not read $key (${e.runtimeType})');
+      }
+    }
+
+    void list<T>(
+      String key,
+      List<T> into,
+      T Function(Map<String, dynamic>) f,
+    ) => section(key, (json) {
+      final items = [
+        for (final item in json as List) f(item as Map<String, dynamic>),
+      ];
+      into.addAll(items);
+    });
+
+    section('profile', (json) {
+      data.profile = UserProfile.fromJson(json as Map<String, dynamic>);
+    });
+    list('relatives', data.relatives, Relative.fromJson);
+    list('medicines', data.medicines, Medicine.fromJson);
+    list('appointments', data.appointments, Appointment.fromJson);
+    list('notes', data.notes, Note.fromJson);
+    list('documents', data.documents, HealthDocument.fromJson);
+    list('trackerEntries', data.trackerEntries, TrackerEntry.fromJson);
+    return data;
   }
+
+  void _adopt(_Data d) {
+    profile = d.profile;
+    relatives
+      ..clear()
+      ..addAll(d.relatives);
+    medicines
+      ..clear()
+      ..addAll(d.medicines);
+    appointments
+      ..clear()
+      ..addAll(d.appointments);
+    notes
+      ..clear()
+      ..addAll(d.notes);
+    documents
+      ..clear()
+      ..addAll(d.documents);
+    trackerEntries
+      ..clear()
+      ..addAll(d.trackerEntries);
+    _nextId = max(_nextId, d.maxId + 1);
+  }
+
+  final _pending = <String, Future<void>>{};
+
+  /// Encrypts and stores [plain] under [key]. Writes to the same key run in
+  /// order, so the latest state always wins.
+  Future<void> _write(String key, String plain) {
+    final previous = _pending[key] ?? Future<void>.value();
+    final next = previous.then((_) async {
+      await _prefs.setString(key, await _vault.seal(plain));
+    });
+    _pending[key] = next;
+    return next;
+  }
+
+  Future<void> _save(String key, List<dynamic> list) {
+    notifyListeners();
+    return _write(key, jsonEncode([for (final item in list) item.toJson()]));
+  }
+
+  /// Waits until every pending save has reached storage.
+  Future<void> flush() => Future.wait(_pending.values);
 
   // Profile & onboarding
 
@@ -99,10 +238,10 @@ class AppStore extends ChangeNotifier {
     await _prefs.setBool('onboardingSeen', true);
   }
 
-  Future<void> saveProfile(UserProfile value) async {
+  Future<void> saveProfile(UserProfile value) {
     profile = value;
     notifyListeners();
-    await _prefs.setString('profile', jsonEncode(value.toJson()));
+    return _write('profile', jsonEncode(value.toJson()));
   }
 
   Future<void> setTextScale(double value) async {
@@ -114,62 +253,136 @@ class AppStore extends ChangeNotifier {
   // Backup & restore
 
   static const _backupFormat = 'elderly-care-backup';
+  static const maxBackupLength = 60 * 1024 * 1024;
 
-  /// Everything the app has stored, as one JSON document.
-  String exportBackup() {
-    final data = <String, Object?>{
-      for (final key in _prefs.getKeys()) key: _prefs.get(key),
-    };
-    return const JsonEncoder.withIndent(' ').convert({
+  Map<String, Object?> _backupData() => {
+    'onboardingSeen': onboardingSeen,
+    'textScale': textScale,
+    'nextId': _nextId,
+    'callRoomSalt': callRoomSalt,
+    if (profile != null) 'profile': jsonEncode(profile!.toJson()),
+    for (final (key, list) in <(String, List<dynamic>)>[
+      ('relatives', relatives),
+      ('medicines', medicines),
+      ('appointments', appointments),
+      ('notes', notes),
+      ('documents', documents),
+      ('trackerEntries', trackerEntries),
+    ])
+      key: jsonEncode([for (final item in list) item.toJson()]),
+  };
+
+  /// Everything the app holds, as one JSON document. With a [password] the
+  /// contents are encrypted (PBKDF2 + AES-256-GCM).
+  Future<String> exportBackup({String? password}) async {
+    final plain = jsonEncode({
       'format': _backupFormat,
-      'version': 1,
+      'version': 2,
       'exportedAt': DateTime.now().toIso8601String(),
-      'data': data,
+      'data': _backupData(),
+    });
+    if (password == null || password.isEmpty) return plain;
+    return jsonEncode({
+      'format': _backupFormat,
+      'version': 2,
+      'encrypted': await PasswordCrypto.encrypt(plain, password),
     });
   }
 
   /// Replaces all data with a backup made by [exportBackup].
   ///
-  /// Throws a [FormatException] if [json] isn't such a backup; existing data
-  /// is left untouched in that case.
-  Future<void> importBackup(String json) async {
-    final Object? decoded;
+  /// The whole file is checked before anything is changed, so a wrong or
+  /// damaged file leaves current data untouched. Throws [FormatException]
+  /// for bad files and [BackupPasswordException] for protected ones.
+  Future<void> importBackup(String json, {String? password}) async {
+    const notBackup = FormatException(
+      'This file is not an Elderly Care backup.',
+    );
+    if (json.length > maxBackupLength) {
+      throw const FormatException('This file is too large to be a backup.');
+    }
+    Object? decoded;
     try {
       decoded = jsonDecode(json);
     } on FormatException {
-      throw const FormatException('This file is not an Elderly Care backup.');
+      throw notBackup;
     }
-    if (decoded is! Map ||
-        decoded['format'] != _backupFormat ||
-        decoded['data'] is! Map) {
-      throw const FormatException('This file is not an Elderly Care backup.');
+    if (decoded is! Map || decoded['format'] != _backupFormat) throw notBackup;
+
+    final sealed = decoded['encrypted'];
+    if (sealed is Map) {
+      if (password == null || password.isEmpty) {
+        throw const BackupPasswordException(wrongPassword: false);
+      }
+      final String inner;
+      try {
+        inner = await PasswordCrypto.decrypt(
+          sealed.cast<String, Object?>(),
+          password,
+        );
+      } on SecretBoxAuthenticationError {
+        throw const BackupPasswordException(wrongPassword: true);
+      } on FormatException {
+        rethrow;
+      } catch (_) {
+        throw const FormatException(
+          'This backup is damaged and could not be read.',
+        );
+      }
+      return importBackup(inner);
     }
-    final data = (decoded['data'] as Map).cast<String, Object?>();
+
+    final rawData = decoded['data'];
+    if (rawData is! Map) throw notBackup;
+    final data = rawData.cast<String, Object?>();
     if (data['profile'] is! String) {
       throw const FormatException('This backup has no profile in it.');
     }
-    await _prefs.clear();
-    for (final MapEntry(:key, :value) in data.entries) {
-      switch (value) {
-        case final bool v:
-          await _prefs.setBool(key, v);
-        case final int v:
-          await _prefs.setInt(key, v);
-        case final double v:
-          await _prefs.setDouble(key, v);
-        case final String v:
-          await _prefs.setString(key, v);
-        case final List v:
-          await _prefs.setStringList(key, v.cast<String>());
+    final sections = <String, String>{};
+    for (final key in _sealed) {
+      final v = data[key];
+      if (v == null) continue;
+      if (v is! String) {
+        throw const FormatException(
+          'This backup is damaged and could not be read.',
+        );
       }
+      sections[key] = v;
     }
-    _read();
+    // Throws before anything is touched if any part is unreadable.
+    final parsed = _parse(sections, strict: true);
+    if (parsed.profile == null) {
+      throw const FormatException('This backup has no profile in it.');
+    }
+
+    final scale = data['textScale'];
+    final salt = data['callRoomSalt'];
+    await _prefs.clear();
+    await _prefs.setBool('onboardingSeen', true);
+    if (scale is num) {
+      await _prefs.setDouble('textScale', scale.toDouble().clamp(1.0, 1.3));
+    }
+    if (salt is String && _saltPattern.hasMatch(salt)) {
+      await _prefs.setString('callRoomSalt', salt);
+    }
+    final nextId = data['nextId'];
+    _nextId = max(nextId is int ? nextId : 1, parsed.maxId + 1);
+    await _prefs.setInt('nextId', _nextId);
+    for (final MapEntry(:key, :value) in sections.entries) {
+      await _write(key, value);
+    }
+    onboardingSeen = true;
+    textScale = _prefs.getDouble('textScale') ?? 1.0;
+    _adopt(parsed);
     notifyListeners();
   }
 
+  /// Deletes all data and the app lock, as if freshly installed.
   Future<void> resetEverything() async {
+    await flush();
     await _prefs.clear();
-    _read();
+    await lock.clear();
+    await _read();
     notifyListeners();
   }
 

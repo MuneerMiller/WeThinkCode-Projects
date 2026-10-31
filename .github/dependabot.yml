@@ -1,0 +1,17 @@
+# Weekly pull requests for outdated or vulnerable dependencies. CI tests each one.
+version: 2
+updates:
+  - package-ecosystem: pub
+    directory: /elderly_app-master
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      flutter-packages:
+        patterns: ['*']
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

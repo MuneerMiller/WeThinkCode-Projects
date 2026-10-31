@@ -351,7 +351,12 @@ void main() {
     await tester.tapText('Start video call');
 
     final url = app.contacts.urls.single;
-    expect(url, startsWith('https://meet.jit.si/ElderlyCare-margaretsmith-'));
+    // Named only by random characters: nothing personal in the address.
+    expect(
+      url,
+      matches(RegExp(r'^https://meet\.jit\.si/ElderlyCare-[a-z0-9]{16}#')),
+    );
+    expect(url.split('#').first, isNot(contains('margaret')));
     expect(url, contains('config.startAudioOnly=true'));
     final room = url.split('#').first;
     expect(app.contacts.texts.single.body, contains(room));
@@ -506,7 +511,7 @@ void main() {
     ]) {
       expect(find.text(t), findsOneWidget, reason: t);
     }
-    await tester.tap(find.byTooltip('Call Anna'));
+    await tester.tap(find.bySemanticsLabel('Call Anna'));
     expect(app.contacts.calls, ['082 555 0101']);
   });
 
@@ -534,6 +539,8 @@ void main() {
     await tester.tap(find.byTooltip('My profile'));
     await tester.pumpAndSettle();
     await tester.tapText('Back up my data');
+    expect(find.text('Protect your backup?'), findsOneWidget);
+    await tester.tapText('No password');
     final file = app.share.files.single;
     expect(
       file.name,

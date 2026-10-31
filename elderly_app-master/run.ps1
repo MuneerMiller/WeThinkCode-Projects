@@ -70,7 +70,7 @@ switch ($Mode) {
       Die "Chrome wasn't found. Install Google Chrome, or use '.\run.ps1 serve' to open it in any browser."
     }
     Say "Starting Elderly Care in Chrome (press q in this window to quit)"
-    flutter run -d chrome
+    flutter run -d chrome --no-web-resources-cdn
   }
   "phone" {
     Say "Looking for a phone or emulator"
@@ -81,7 +81,7 @@ switch ($Mode) {
   }
   "serve" {
     Say "Starting Elderly Care at http://localhost:8080 (press q to quit)"
-    flutter run -d web-server --web-port 8080 --web-hostname localhost
+    flutter run -d web-server --web-port 8080 --web-hostname localhost --no-web-resources-cdn
   }
   "test" {
     Say "Checking the code"

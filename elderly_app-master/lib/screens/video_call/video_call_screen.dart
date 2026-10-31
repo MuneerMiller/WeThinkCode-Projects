@@ -17,14 +17,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   bool _startMuted = false;
   bool _textFamily = true;
 
-  String _room(BuildContext context) {
-    final p = context.store.profile!;
-    final slug = p.name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '');
-    // Stable per install so family can bookmark it, but not guessable from
-    // the name alone.
-    final salt = context.store.callRoomSalt;
-    return 'ElderlyCare-$slug-$salt';
-  }
+  /// The same room every time so family can bookmark it. It is named only
+  /// by 16 random characters: no personal details, and too long to guess.
+  String _room(BuildContext context) =>
+      'ElderlyCare-${context.store.callRoomSalt}';
 
   Future<void> _start() async {
     final services = context.services;

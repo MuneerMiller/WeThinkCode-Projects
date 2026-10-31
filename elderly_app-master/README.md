@@ -87,8 +87,10 @@ flutter build apk --release
 ```
 
 ```bash
-flutter build web --release --no-web-resources-cdn
+tool/build_web.sh
 ```
+
+`tool/build_web.sh` builds the website into `build/web` and adds a Content-Security-Policy to it. Publish it over **https**: browsers only provide the secure storage used for encryption on https sites (and `localhost`).
 
 On the web, reminders appear inside the app rather than as phone notifications, and calls and texts open the computer's default handler.
 
@@ -109,12 +111,42 @@ flutter test
 `test_e2e/browser_test.js` drives the release **web build** in headless Chromium (Playwright). It goes from onboarding through every feature, reloads the page to check the data persisted, and saves a screenshot of each step to `test_e2e/output/`. Location is faked and the hospital API is answered from a fixture.
 
 ```bash
-flutter build web --release --no-web-resources-cdn
+tool/build_web.sh
 ```
 
 ```bash
 node test_e2e/browser_test.js
 ```
+
+## Security & privacy
+
+- **Encrypted on the device.** Health data (profile, medicines, readings, notes, documents, contacts) is encrypted with AES-256-GCM. The key is random and stays in the platform's secure storage: Android Keystore, iOS Keychain, or Web Crypto in the browser. Data saved by older versions is encrypted automatically on first start.
+- **App lock.** An optional 4–8 digit PIN, with fingerprint/face unlock on phones. Only a salted PBKDF2 hash of the PIN is stored. After 5 wrong tries each further try is delayed (30 s, doubling up to 15 min). The app locks when opened and after 2 minutes in the background, and while locked it is hidden from view, screen readers, touch and the keyboard. The Medical ID and the emergency call stay reachable from the lock screen; this can be switched off. A forgotten PIN can only be cleared by erasing all data.
+- **Backups.** Created only when the user asks. They can be password-protected (PBKDF2-HMAC-SHA256, 210,000 rounds, then AES-256-GCM). A restore checks the whole file before changing anything, so a wrong or damaged file can't wipe existing data. Files over 60 MB are refused.
+- **No automatic cloud copy.** Android cloud backup and device-to-device transfer are turned off for this app.
+- **What leaves the device.** The hospital search sends the current location to OpenStreetMap's Overpass API. Video calls use meet.jit.si, in a room named by 16 random characters with no personal details. Calls, texts and shares go through the phone's own apps, and only when the user taps. There are no accounts, servers, analytics or ads, and no secrets or API keys in the app.
+- **Web.** The release build has a Content-Security-Policy that only allows the app's own code and the hospital-search API.
+- **Logs** never include phone numbers, messages or health data.
+- **Dependencies** are kept current by Dependabot (`.github/dependabot.yml`), and every change is checked by CI.
+
+### Signing the Android app for release
+
+Without a key, release builds are signed with the debug key; those must not be published. Create a key once and keep it (and its passwords) safe, outside git:
+
+```bash
+keytool -genkey -v -keystore ~/elderly-care-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+```
+
+Then create `android/key.properties`, which git ignores:
+
+```properties
+storePassword=your-store-password
+keyPassword=your-key-password
+keyAlias=upload
+storeFile=/home/you/elderly-care-upload.jks
+```
+
+`flutter build appbundle --release` will then sign with it.
 
 ## Project layout
 
@@ -123,7 +155,8 @@ lib/
   main.dart                 app start, theme, first-run gate
   app_scope.dart            gives screens the data store and services
   theme.dart                colours, type scale, per-feature accents
-  data/                     models + on-device store (shared_preferences)
+  data/                     models, encrypted on-device store, health summary
+  security/                 encryption, app lock, lock screen
   services/                 calls/SMS/links, location + hospital search, notifications
   screens/<feature>/        one folder per feature
   widgets/common.dart       shared building blocks
@@ -135,3 +168,4 @@ lib/
 - **Notifications**: for medicine and appointment reminders, which are rescheduled after a reboot.
 - **Camera / photos**: to save photos of documents.
 - **Internet**: for the hospital search.
+- **Fingerprint / face**: optional, to unlock the app.
