@@ -6,26 +6,25 @@ import '../../widgets/common.dart';
 import '../../widgets/secret_dialogs.dart';
 import '../../legal/legal.dart';
 import '../../legal/legal_screens.dart';
+import '../../l10n/l10n.dart';
 
 class SecurityScreen extends StatelessWidget {
   const SecurityScreen({super.key});
 
-  static String pinMessage(PinResult r) => switch (r) {
+  static String pinMessage(AppLocalizations l, PinResult r) => switch (r) {
     PinResult.ok => '',
-    PinResult.wrong => 'That PIN is not right.',
-    PinResult.tooManyAttempts =>
-      'Too many wrong tries. Please wait a little and try again.',
+    PinResult.wrong => l.securityWrongPin,
+    PinResult.tooManyAttempts => l.securityTooManyAttempts,
   };
 
   Future<void> _setPin(BuildContext context) async {
+    final l = context.l10n;
     final lock = context.store.lock;
     final pin = await askNewSecret(
       context,
-      title: 'Choose a PIN',
-      message:
-          'You will type this PIN to open Elderly Care. Use 4 to 8 numbers '
-          'that others would not guess.',
-      label: 'New PIN',
+      title: l.securityChoosePin,
+      message: l.securityChoosePinMessage,
+      label: l.securityNewPin,
       digitsOnly: true,
       maxLength: 8,
     );
@@ -34,50 +33,50 @@ class SecurityScreen extends StatelessWidget {
       await lock.setPin(pin);
     } catch (_) {
       if (context.mounted) {
-        showMessage(
-          context,
-          'This device cannot store a PIN securely, so app lock is not '
-          'available here.',
-        );
+        showMessage(context, l.securityPinUnavailable);
       }
       return;
     }
-    if (context.mounted) showMessage(context, 'App lock is on');
+    if (context.mounted) showMessage(context, l.securityAppLockOn);
   }
 
   /// Asks for the current PIN; true if it was right.
   Future<bool> _confirmCurrent(BuildContext context, String title) async {
+    final l = context.l10n;
     final lock = context.store.lock;
     final pin = await askSecret(
       context,
       title: title,
-      message: 'Enter your current PIN.',
-      label: 'Current PIN',
+      message: l.securityEnterCurrentPin,
+      label: l.securityCurrentPin,
       digitsOnly: true,
     );
     if (pin == null) return false;
     final result = await lock.checkPin(pin);
     if (result != PinResult.ok && context.mounted) {
-      showMessage(context, pinMessage(result));
+      showMessage(context, pinMessage(l, result));
     }
     return result == PinResult.ok;
   }
 
   Future<void> _changePin(BuildContext context) async {
-    if (await _confirmCurrent(context, 'Change PIN') && context.mounted) {
+    if (await _confirmCurrent(context, context.l10n.securityChangePin) &&
+        context.mounted) {
       await _setPin(context);
     }
   }
 
   Future<void> _turnOff(BuildContext context) async {
+    final l = context.l10n;
     final lock = context.store.lock;
-    if (!await _confirmCurrent(context, 'Turn off app lock')) return;
+    if (!await _confirmCurrent(context, l.securityTurnOffAppLock)) return;
     await lock.clear();
-    if (context.mounted) showMessage(context, 'App lock is off');
+    if (context.mounted) showMessage(context, l.securityAppLockOff);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final store = context.store;
     final lock = store.lock;
     final theme = Theme.of(context);
@@ -86,7 +85,7 @@ class SecurityScreen extends StatelessWidget {
         ListTile(leading: Icon(icon), title: Text(title), subtitle: Text(text));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Privacy & security')),
+      appBar: AppBar(title: Text(l.securityTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
@@ -94,7 +93,7 @@ class SecurityScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SectionHeader('App lock'),
+                SectionHeader(l.securityAppLock),
                 Card(
                   child: Column(
                     children: [
@@ -105,14 +104,14 @@ class SecurityScreen extends StatelessWidget {
                               : Icons.lock_open_rounded,
                         ),
                         title: Text(
-                          lock.hasPin ? 'App lock is on' : 'App lock is off',
+                          lock.hasPin
+                              ? l.securityAppLockOn
+                              : l.securityAppLockOff,
                         ),
                         subtitle: Text(
                           lock.hasPin
-                              ? 'The app asks for your PIN when it opens, and '
-                                    'after 2 minutes away.'
-                              : 'Anyone holding your phone can see your health '
-                                    'details. A PIN keeps them private.',
+                              ? l.securityAppLockOnDetail
+                              : l.securityAppLockOffDetail,
                         ),
                       ),
                       Padding(
@@ -124,15 +123,15 @@ class SecurityScreen extends StatelessWidget {
                                 children: [
                                   FilledButton.tonal(
                                     onPressed: lock.lockNow,
-                                    child: const Text('Lock now'),
+                                    child: Text(l.securityLockNow),
                                   ),
                                   OutlinedButton(
                                     onPressed: () => _changePin(context),
-                                    child: const Text('Change PIN'),
+                                    child: Text(l.securityChangePin),
                                   ),
                                   TextButton(
                                     onPressed: () => _turnOff(context),
-                                    child: const Text('Turn off'),
+                                    child: Text(l.securityTurnOff),
                                   ),
                                 ],
                               )
@@ -141,7 +140,7 @@ class SecurityScreen extends StatelessWidget {
                                 child: FilledButton.icon(
                                   onPressed: () => _setPin(context),
                                   icon: const Icon(Icons.pin_rounded),
-                                  label: const Text('Lock with a PIN'),
+                                  label: Text(l.securityLockWithPin),
                                 ),
                               ),
                       ),
@@ -153,9 +152,7 @@ class SecurityScreen extends StatelessWidget {
                                   secondary: const Icon(
                                     Icons.fingerprint_rounded,
                                   ),
-                                  title: const Text(
-                                    'Unlock with fingerprint or face',
-                                  ),
+                                  title: Text(l.securityBiometrics),
                                   value: lock.biometricsEnabled,
                                   onChanged: lock.setBiometricsEnabled,
                                 )
@@ -165,11 +162,8 @@ class SecurityScreen extends StatelessWidget {
                           secondary: const Icon(
                             Icons.medical_information_rounded,
                           ),
-                          title: const Text('Show Medical ID when locked'),
-                          subtitle: const Text(
-                            'Lets paramedics see your allergies and medicines '
-                            'and call for help without your PIN.',
-                          ),
+                          title: Text(l.securityMedicalIdWhenLocked),
+                          subtitle: Text(l.securityMedicalIdWhenLockedDetail),
                           value: lock.medicalIdWhenLocked,
                           onChanged: lock.setMedicalIdWhenLocked,
                         ),
@@ -177,7 +171,7 @@ class SecurityScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SectionHeader('How your information is protected'),
+                SectionHeader(l.securityHowProtected),
                 Card(
                   child: Column(
                     children: [
@@ -186,47 +180,36 @@ class SecurityScreen extends StatelessWidget {
                             ? Icons.enhanced_encryption_rounded
                             : Icons.no_encryption_gmailerrorred_rounded,
                         store.isEncrypted
-                            ? 'Encrypted on this device'
-                            : 'Not encrypted on this device',
+                            ? l.securityEncrypted
+                            : l.securityNotEncrypted,
                         store.isEncrypted
-                            ? 'Your health details are scrambled with a key '
-                                  'kept in this device\'s secure storage.'
-                            : 'This browser has no secure storage. Use the '
-                                  'phone app, or open the website over https.',
+                            ? l.securityEncryptedDetail
+                            : l.securityNotEncryptedDetail,
                       ),
                       point(
                         Icons.phone_android_rounded,
-                        'Kept only on this device',
-                        'There is no account and no server. Nothing is '
-                            'uploaded, and there are no ads or tracking.',
+                        l.securityLocalOnly,
+                        l.securityLocalOnlyDetail,
                       ),
                       point(
                         Icons.send_rounded,
-                        'Only shared when you choose',
-                        'Calls and texts go through your own phone. Health '
-                            'summaries and backups only leave the app when '
-                            'you send them.',
+                        l.securitySharedByChoice,
+                        l.securitySharedByChoiceDetail,
                       ),
                       point(
                         Icons.travel_explore_rounded,
-                        'Hospital search',
-                        'To find hospitals, your location is sent to the '
-                            'free OpenStreetMap service. Nothing else about '
-                            'you is sent.',
+                        l.securityHospitalSearch,
+                        l.securityHospitalSearchDetail,
                       ),
                       point(
                         Icons.videocam_rounded,
-                        'Video calls',
-                        'Calls use the free Jitsi Meet service in a private '
-                            'room with a long random name. Only people you '
-                            'send the link to can join.',
+                        l.securityVideoCalls,
+                        l.securityVideoCallsDetail,
                       ),
                       point(
                         Icons.cloud_off_rounded,
-                        'No automatic cloud copy',
-                        'The phone does not copy this app\'s data to the '
-                            'cloud. Use "Back up my data" in My profile, '
-                            'ideally with a password.',
+                        l.securityNoCloudCopy,
+                        l.securityNoCloudCopyDetail,
                       ),
                     ],
                   ),
@@ -235,11 +218,11 @@ class SecurityScreen extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: () => openLegalDoc(context, LegalDoc.privacy),
                   icon: const Icon(Icons.policy_rounded),
-                  label: const Text('Read the full privacy policy'),
+                  label: Text(l.securityReadPrivacyPolicy),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'You can erase everything at any time in My profile.',
+                  l.securityEraseAnyTime,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

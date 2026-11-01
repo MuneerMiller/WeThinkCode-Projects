@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
+import '../../l10n/l10n.dart';
 import '../../services/contact_service.dart';
 import '../../services/location_service.dart';
 import '../../theme.dart';
@@ -41,15 +42,16 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final services = context.services;
     final emergency = context.store.profile?.emergencyNumber ?? '112';
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hospitals nearby'),
+        title: Text(l.featureHospitals),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: l.hospitalRefresh,
             onPressed: _retry,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -69,7 +71,7 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
                   ),
                   onPressed: () => services.contacts.call(emergency),
                   icon: const Icon(Icons.emergency_rounded),
-                  label: Text('Emergency? Call $emergency'),
+                  label: Text(l.hospitalEmergencyCall(emergency)),
                 ),
                 const SizedBox(height: 8),
                 FutureBuilder<List<Hospital>>(
@@ -83,7 +85,7 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
                             const CircularProgressIndicator(),
                             const SizedBox(height: 20),
                             Text(
-                              'Looking for hospitals near you…',
+                              l.hospitalSearching,
                               style: theme.textTheme.bodyLarge,
                             ),
                           ],
@@ -96,49 +98,45 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
                         children: [
                           EmptyState(
                             icon: Icons.location_off_rounded,
-                            title: 'Could not search',
+                            title: l.hospitalSearchFailed,
                             message: error is LocationException
-                                ? error.message
-                                : 'Please check your internet connection and try again.',
+                                ? error.message(l)
+                                : l.hospitalCheckInternet,
                           ),
                           OutlinedButton.icon(
                             onPressed: _retry,
                             icon: const Icon(Icons.refresh_rounded),
-                            label: const Text('Try again'),
+                            label: Text(l.hospitalTryAgain),
                           ),
                         ],
                       );
                     }
                     final hospitals = snap.data!;
                     if (hospitals.isEmpty) {
-                      return const EmptyState(
+                      return EmptyState(
                         icon: Icons.local_hospital_rounded,
-                        title: 'None found within 10 km',
-                        message: 'In an emergency, call the number above.',
+                        title: l.hospitalNoneFound,
+                        message: l.hospitalNoneFoundMessage,
                       );
                     }
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        SectionHeader(
-                          '${hospitals.length} places within 10 km',
-                        ),
+                        SectionHeader(l.hospitalCount(hospitals.length)),
                         for (final h in hospitals)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: _HospitalCard(h),
                           ),
                         Text(
-                          'This list comes from OpenStreetMap and may be '
-                          'incomplete or out of date. Not every place has an '
-                          'emergency unit: phone first if you can.',
+                          l.hospitalListNote,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Data © OpenStreetMap contributors',
+                          l.hospitalAttribution,
                           style: theme.textTheme.bodySmall,
                           textAlign: TextAlign.center,
                         ),
@@ -168,11 +166,12 @@ class _HospitalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     final contacts = context.services.contacts;
     final km = h.distanceKm < 1
-        ? '${(h.distanceKm * 1000).round()} m away'
-        : '${h.distanceKm.toStringAsFixed(1)} km away';
+        ? l.hospitalDistanceMeters((h.distanceKm * 1000).round())
+        : l.hospitalDistanceKm(h.distanceKm.toStringAsFixed(1));
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -212,7 +211,7 @@ class _HospitalCard extends StatelessWidget {
                       directionsLink(h.location.lat, h.location.lon),
                     ),
                     icon: const Icon(Icons.directions_rounded),
-                    label: const Text('Directions'),
+                    label: Text(l.hospitalDirections),
                   ),
                 ),
                 if (h.phone != null) ...[
@@ -222,7 +221,7 @@ class _HospitalCard extends StatelessWidget {
                       style: _compact,
                       onPressed: () => contacts.call(h.phone!),
                       icon: const Icon(Icons.call_rounded),
-                      label: const Text('Call'),
+                      label: Text(l.commonCall),
                     ),
                   ),
                 ],

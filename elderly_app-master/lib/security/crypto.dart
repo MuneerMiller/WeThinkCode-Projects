@@ -103,6 +103,12 @@ class Vault {
 }
 
 /// Password protection for backup files: PBKDF2-HMAC-SHA256 then AES-GCM.
+/// Thrown when password-protected data uses a method this app can't read.
+class UnknownProtectionException extends FormatException {
+  const UnknownProtectionException()
+    : super('This backup uses an unknown protection method.');
+}
+
 class PasswordCrypto {
   static const iterations = 210000;
 
@@ -154,9 +160,7 @@ class PasswordCrypto {
         rounds is! int ||
         rounds < 10000 ||
         rounds > 5000000) {
-      throw const FormatException(
-        'This backup uses an unknown protection method.',
-      );
+      throw const UnknownProtectionException();
     }
     final key = await _derive(
       password,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
+import '../../l10n/l10n.dart';
 import '../../services/contact_service.dart';
 import '../../services/location_service.dart';
 import '../../theme.dart';
@@ -16,6 +17,7 @@ Future<void> showSosSheet(BuildContext context) {
     isScrollControlled: true,
     showDragHandle: true,
     builder: (sheetContext) {
+      final l = sheetContext.l10n;
       final store = context.store;
       final services = context.services;
       final theme = Theme.of(sheetContext);
@@ -27,13 +29,13 @@ Future<void> showSosSheet(BuildContext context) {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('How can we help?', style: theme.textTheme.headlineSmall),
+                Text(l.sosTitle, style: theme.textTheme.headlineSmall),
                 const SizedBox(height: 16),
                 _SosAction(
                   icon: Icons.local_phone_rounded,
                   color: AppTheme.sos,
-                  title: 'Call emergency services',
-                  subtitle: 'Dial $emergency',
+                  title: l.sosCallEmergency,
+                  subtitle: l.sosDial(emergency),
                   onTap: () {
                     Navigator.pop(sheetContext);
                     services.contacts.call(emergency);
@@ -42,8 +44,8 @@ Future<void> showSosSheet(BuildContext context) {
                 _SosAction(
                   icon: Icons.share_location_rounded,
                   color: Feature.family.color,
-                  title: 'Alert my family',
-                  subtitle: 'Text everyone my location',
+                  title: l.sosAlertFamily,
+                  subtitle: l.sosAlertFamilySubtitle,
                   onTap: () {
                     Navigator.pop(sheetContext);
                     alertFamily(context);
@@ -52,8 +54,8 @@ Future<void> showSosSheet(BuildContext context) {
                 _SosAction(
                   icon: Icons.medical_information_rounded,
                   color: Feature.health.color,
-                  title: 'Show my medical ID',
-                  subtitle: 'Allergies, medicines and contacts for helpers',
+                  title: l.sosShowMedicalId,
+                  subtitle: l.sosShowMedicalIdSubtitle,
                   onTap: () {
                     Navigator.pop(sheetContext);
                     openMedicalId(context);
@@ -63,7 +65,7 @@ Future<void> showSosSheet(BuildContext context) {
                   _SosAction(
                     icon: Icons.call_rounded,
                     color: Feature.hospitals.color,
-                    title: 'Call ${r.name}',
+                    title: l.sosCallPerson(r.name),
                     subtitle: r.relationship.isEmpty
                         ? r.phone
                         : '${r.relationship} · ${r.phone}',
@@ -112,14 +114,15 @@ class _SosAction extends StatelessWidget {
 
 /// Finds the user's location and opens a text message to every relative.
 Future<void> alertFamily(BuildContext context) async {
+  final l = context.l10n;
   final store = context.store;
   final services = context.services;
   if (store.relatives.isEmpty) {
     final add = await confirm(
       context,
-      title: 'No family added yet',
-      message: 'Add a family member so we know who to alert.',
-      confirmLabel: 'Add family',
+      title: l.familyNoneTitle,
+      message: l.sosAddFamilyFirst,
+      confirmLabel: l.sosAddFamily,
     );
     if (add && context.mounted) {
       Navigator.of(context).push(
@@ -134,19 +137,22 @@ Future<void> alertFamily(BuildContext context) async {
     return;
   }
 
-  final name = store.profile?.firstName ?? 'I';
-  var message = '$name needs help and asked Elderly Care to alert you.';
-  showMessage(context, 'Finding your location…');
+  final name = store.profile?.firstName;
+  var message = name == null ? l.sosAlertSmsNoName : l.sosAlertSms(name);
+  showMessage(context, l.sosFindingLocation);
   try {
     final here = await services.location.current();
-    message += ' Current location: ${mapsLink(here.lat, here.lon)}';
+    final link = mapsLink(here.lat, here.lon);
+    message = name == null
+        ? l.sosAlertSmsNoNameWithLocation(link)
+        : l.sosAlertSmsWithLocation(name, link);
   } on LocationException catch (e) {
     if (context.mounted) {
-      showMessage(context, '${e.message} Sending without location.');
+      showMessage(context, l.sosSendingWithoutLocation(e.message(l)));
     }
   } catch (_) {
     if (context.mounted) {
-      showMessage(context, 'Location unavailable. Sending without it.');
+      showMessage(context, l.sosLocationUnavailable);
     }
   }
   await services.contacts.sms([

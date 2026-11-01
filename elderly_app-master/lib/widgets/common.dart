@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../app_scope.dart';
+import '../l10n/l10n.dart';
 
 /// Keeps content readable on tablets and in desktop browsers.
 class ContentWidth extends StatelessWidget {
@@ -133,7 +134,7 @@ Future<bool> confirm(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.commonCancel),
           ),
           FilledButton(
             style: destructive
@@ -158,8 +159,9 @@ void showMessage(BuildContext context, String message) {
     ..showSnackBar(SnackBar(content: Text(message)));
 }
 
-String? requiredField(String? value, String what) =>
-    (value == null || value.trim().isEmpty) ? 'Please enter $what' : null;
+/// Returns [message] when [value] is empty, for a form field's validator.
+String? requiredField(String? value, String message) =>
+    (value == null || value.trim().isEmpty) ? message : null;
 
 String formatTime(BuildContext context, DateTime t) =>
     MaterialLocalizations.of(context).formatTimeOfDay(
@@ -167,21 +169,22 @@ String formatTime(BuildContext context, DateTime t) =>
       alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
     );
 
-String formatDay(DateTime d, {DateTime? now}) {
+String formatDay(BuildContext context, DateTime d, {DateTime? now}) {
+  final l = context.l10n;
   now ??= DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   final day = DateTime(d.year, d.month, d.day);
   final diff = day.difference(today).inDays;
-  if (diff == 0) return 'Today';
-  if (diff == 1) return 'Tomorrow';
-  if (diff == -1) return 'Yesterday';
+  if (diff == 0) return l.commonToday;
+  if (diff == 1) return l.commonTomorrow;
+  if (diff == -1) return l.commonYesterday;
   return DateFormat(d.year == now.year ? 'EEE d MMM' : 'EEE d MMM y').format(d);
 }
 
-String greeting(DateTime now) {
-  if (now.hour < 12) return 'Good morning';
-  if (now.hour < 17) return 'Good afternoon';
-  return 'Good evening';
+String greeting(AppLocalizations l, DateTime now) {
+  if (now.hour < 12) return l.greetingMorning;
+  if (now.hour < 17) return l.greetingAfternoon;
+  return l.greetingEvening;
 }
 
 /// Lets a user pick a date then a time.
@@ -249,7 +252,11 @@ class ReadAloudButton extends StatelessWidget {
           icon: Icon(
             active ? Icons.stop_circle_outlined : Icons.volume_up_rounded,
           ),
-          label: Text(active ? 'Stop reading' : 'Read aloud'),
+          label: Text(
+            active
+                ? context.l10n.commonStopReading
+                : context.l10n.commonReadAloud,
+          ),
         );
       },
     );
@@ -293,7 +300,7 @@ class DisclaimerNote extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton(
               onPressed: onReadMore,
-              child: const Text('Read the medical disclaimer'),
+              child: Text(context.l10n.commonReadMedicalDisclaimer),
             ),
           ),
         ],

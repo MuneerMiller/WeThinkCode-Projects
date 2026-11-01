@@ -10,6 +10,34 @@ import '../security/app_lock.dart';
 import '../security/crypto.dart';
 import 'models.dart';
 
+/// Why a backup could not be restored. Shown to the user, translated, by
+/// the screen that restores it.
+enum BackupError {
+  notBackup('This file is not an Elderly Care backup.'),
+  tooLarge('This file is too large to be a backup.'),
+  damaged('This backup is damaged and could not be read.'),
+  noProfile('This backup has no profile in it.'),
+  unknownProtection('This backup uses an unknown protection method.');
+
+  const BackupError(this.english);
+
+  /// English description, for logs and tests only.
+  final String english;
+}
+
+/// Thrown by [AppStore.importBackup] when a file is not a usable backup.
+///
+/// It is a [FormatException] so callers that only care that the file was
+/// bad can keep catching that.
+class BackupException extends FormatException {
+  const BackupException(this.reason) : super('');
+  final BackupError reason;
+  @override
+  String get message => reason.english;
+  @override
+  String toString() => 'BackupException: ${reason.english}';
+}
+
 /// Thrown by [AppStore.importBackup] when a backup is password-protected and
 /// the password is missing or wrong.
 class BackupPasswordException implements Exception {
@@ -90,6 +118,9 @@ class AppStore extends ChangeNotifier {
   /// Extra text enlargement on top of the phone's own setting.
   double textScale = 1.0;
 
+  /// The app's language ('en', 'af', 'zu' or 'xh'); null follows the phone.
+  String? languageCode;
+
   /// Which version of the legal documents was accepted (0: none yet), and when.
   int legalAcceptedVersion = 0;
   DateTime? legalAcceptedAt;
@@ -125,6 +156,7 @@ class AppStore extends ChangeNotifier {
   Future<void> _read() async {
     onboardingSeen = _prefs.getBool('onboardingSeen') ?? false;
     textScale = (_prefs.getDouble('textScale') ?? 1.0).clamp(1.0, 1.3);
+    languageCode = _prefs.getString('language');
     legalAcceptedVersion = _prefs.getInt('legal.version') ?? 0;
     final acceptedAt = _prefs.getString('legal.acceptedAt');
     legalAcceptedAt = acceptedAt == null ? null : DateTime.tryParse(acceptedAt);
@@ -152,7 +184,7 @@ class AppStore extends ChangeNotifier {
   }
 
   /// Turns decrypted JSON sections into data. With [strict], any problem
-  /// throws a [FormatException]; otherwise bad sections are left empty.
+  /// throws a [BackupException]; otherwise bad sections are left empty.
   static _Data _parse(Map<String, String> sections, {required bool strict}) {
     final data = _Data();
     void section(String key, void Function(Object? json) apply) {
@@ -162,9 +194,7 @@ class AppStore extends ChangeNotifier {
         apply(jsonDecode(raw));
       } catch (e) {
         if (strict) {
-          throw const FormatException(
-            'This backup is damaged and could not be read.',
-          );
+          throw const BackupException(BackupError.damaged);
         }
         debugPrint('Could not read $key (${e.runtimeType})');
       }
@@ -269,6 +299,16 @@ class AppStore extends ChangeNotifier {
     await _prefs.setDouble('textScale', value);
   }
 
+  Future<void> setLanguage(String? code) async {
+    languageCode = code;
+    notifyListeners();
+    if (code == null) {
+      await _prefs.remove('language');
+    } else {
+      await _prefs.setString('language', code);
+    }
+  }
+
   // Backup & restore
 
   static const _backupFormat = 'elderly-care-backup';
@@ -311,14 +351,12 @@ class AppStore extends ChangeNotifier {
   /// Replaces all data with a backup made by [exportBackup].
   ///
   /// The whole file is checked before anything is changed, so a wrong or
-  /// damaged file leaves current data untouched. Throws [FormatException]
+  /// damaged file leaves current data untouched. Throws [BackupException]
   /// for bad files and [BackupPasswordException] for protected ones.
   Future<void> importBackup(String json, {String? password}) async {
-    const notBackup = FormatException(
-      'This file is not an Elderly Care backup.',
-    );
+    const notBackup = BackupException(BackupError.notBackup);
     if (json.length > maxBackupLength) {
-      throw const FormatException('This file is too large to be a backup.');
+      throw const BackupException(BackupError.tooLarge);
     }
     Object? decoded;
     try {
@@ -341,12 +379,11 @@ class AppStore extends ChangeNotifier {
         );
       } on SecretBoxAuthenticationError {
         throw const BackupPasswordException(wrongPassword: true);
-      } on FormatException {
-        rethrow;
+      } on UnknownProtectionException {
+        throw const BackupException(BackupError.unknownProtection);
       } catch (_) {
-        throw const FormatException(
-          'This backup is damaged and could not be read.',
-        );
+        // Anything else (bad base64 and so on) means a damaged file.
+        throw const BackupException(BackupError.damaged);
       }
       return importBackup(inner);
     }
@@ -355,23 +392,21 @@ class AppStore extends ChangeNotifier {
     if (rawData is! Map) throw notBackup;
     final data = rawData.cast<String, Object?>();
     if (data['profile'] is! String) {
-      throw const FormatException('This backup has no profile in it.');
+      throw const BackupException(BackupError.noProfile);
     }
     final sections = <String, String>{};
     for (final key in _sealed) {
       final v = data[key];
       if (v == null) continue;
       if (v is! String) {
-        throw const FormatException(
-          'This backup is damaged and could not be read.',
-        );
+        throw const BackupException(BackupError.damaged);
       }
       sections[key] = v;
     }
     // Throws before anything is touched if any part is unreadable.
     final parsed = _parse(sections, strict: true);
     if (parsed.profile == null) {
-      throw const FormatException('This backup has no profile in it.');
+      throw const BackupException(BackupError.noProfile);
     }
 
     final scale = data['textScale'];

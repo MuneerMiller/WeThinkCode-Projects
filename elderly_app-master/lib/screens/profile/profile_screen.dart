@@ -6,6 +6,8 @@ import '../../widgets/common.dart';
 import '../../data/app_store.dart';
 import '../../widgets/secret_dialogs.dart';
 import '../../legal/legal_screens.dart';
+import '../../l10n/l10n.dart';
+import '../../l10n/language_setting.dart';
 import 'medical_id_screen.dart';
 import 'security_screen.dart';
 
@@ -14,6 +16,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final store = context.store;
     final p = store.profile;
     final theme = Theme.of(context);
@@ -28,7 +31,7 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
       subtitle: Text(
-        value.isEmpty ? 'Not set' : value,
+        value.isEmpty ? l.profileNotSet : value,
         style: theme.textTheme.titleMedium?.copyWith(
           color: value.isEmpty ? theme.colorScheme.onSurfaceVariant : null,
         ),
@@ -37,7 +40,7 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My profile'),
+        title: Text(l.profileTitle),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8),
@@ -48,7 +51,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               icon: const Icon(Icons.edit_rounded),
-              label: const Text('Edit'),
+              label: Text(l.commonEdit),
             ),
           ),
         ],
@@ -80,77 +83,83 @@ class ProfileScreen extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: () => openMedicalId(context),
                   icon: const Icon(Icons.medical_information_rounded),
-                  label: const Text('Show my medical ID'),
+                  label: Text(l.profileShowMedicalId),
                 ),
-                const SectionHeader('Contact'),
+                SectionHeader(l.profileContact),
                 Card(
                   child: Column(
                     children: [
-                      row(Icons.phone_rounded, 'Phone', p.phone),
-                      row(Icons.email_rounded, 'Email', p.email),
+                      row(Icons.phone_rounded, l.profilePhone, p.phone),
+                      row(Icons.email_rounded, l.profileEmail, p.email),
                       row(
                         Icons.emergency_rounded,
-                        'Emergency number',
+                        l.profileEmergencyNumber,
                         p.emergencyNumber,
                       ),
                     ],
                   ),
                 ),
-                const SectionHeader('Medical details'),
+                SectionHeader(l.profileMedicalDetails),
                 Card(
                   child: Column(
                     children: [
-                      row(Icons.cake_rounded, 'Age', p.age),
-                      row(Icons.wc_rounded, 'Gender', p.gender),
-                      row(Icons.bloodtype_rounded, 'Blood group', p.bloodGroup),
+                      row(Icons.cake_rounded, l.profileAge, p.age),
+                      row(Icons.wc_rounded, l.profileGender, p.gender),
+                      row(
+                        Icons.bloodtype_rounded,
+                        l.profileBloodGroup,
+                        p.bloodGroup,
+                      ),
                       row(
                         Icons.height_rounded,
-                        'Height',
+                        l.profileHeight,
                         p.height.isEmpty ? '' : '${p.height} cm',
                       ),
                       row(
                         Icons.monitor_weight_rounded,
-                        'Weight',
+                        l.profileWeight,
                         p.weight.isEmpty ? '' : '${p.weight} kg',
                       ),
                       row(
                         Icons.favorite_rounded,
-                        'Usual blood pressure',
+                        l.profileUsualBloodPressure,
                         p.bloodPressure,
                       ),
                       row(
                         Icons.water_drop_rounded,
-                        'Usual blood sugar',
+                        l.profileUsualBloodSugar,
                         p.bloodSugar,
                       ),
                       row(
                         Icons.warning_amber_rounded,
-                        'Allergies',
+                        l.profileAllergies,
                         p.allergies,
                       ),
                       row(
                         Icons.healing_rounded,
-                        'Medical conditions',
+                        l.profileConditions,
                         p.conditions,
                       ),
                     ],
                   ),
                 ),
-                const SectionHeader('Text size'),
+                SectionHeader(l.profileTextSize),
                 const _TextSizePicker(),
-                const SectionHeader('Backup'),
+                const SizedBox(height: 12),
+                const Card(child: LanguageSetting()),
+                SectionHeader(l.profileBackup),
                 const _BackupCard(),
-                const SectionHeader('This app'),
+                SectionHeader(l.profileThisApp),
                 Card(
                   child: Column(
                     children: [
                       ListTile(
                         leading: const Icon(Icons.lock_rounded),
-                        title: const Text('Privacy & security'),
+                        title: Text(l.profilePrivacySecurity),
                         subtitle: Text(
                           store.lock.hasPin
-                              ? 'App lock is on'
-                              : 'Set a PIN, see how your data is protected',
+                              ? l.profileAppLockOn
+                              : l.profileSetPinHint,
                         ),
                         trailing: const Icon(Icons.chevron_right_rounded),
                         onTap: () => Navigator.of(context).push(
@@ -161,10 +170,8 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       ListTile(
                         leading: const Icon(Icons.description_rounded),
-                        title: const Text('Legal & about'),
-                        subtitle: const Text(
-                          'Terms, medical disclaimer, privacy, licences',
-                        ),
+                        title: Text(l.profileLegalAbout),
+                        subtitle: Text(l.profileLegalAboutSubtitle),
                         trailing: const Icon(Icons.chevron_right_rounded),
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
@@ -178,17 +185,15 @@ class ProfileScreen extends StatelessWidget {
                           color: theme.colorScheme.error,
                         ),
                         title: Text(
-                          'Erase all my data',
+                          l.profileEraseAll,
                           style: TextStyle(color: theme.colorScheme.error),
                         ),
                         onTap: () async {
                           final ok = await confirm(
                             context,
-                            title: 'Erase everything?',
-                            message:
-                                'All medicines, appointments, readings, notes, documents '
-                                'and family contacts will be deleted. This cannot be undone.',
-                            confirmLabel: 'Erase',
+                            title: l.profileEraseTitle,
+                            message: l.profileEraseMessage,
+                            confirmLabel: l.profileEraseConfirm,
                             destructive: true,
                           );
                           if (!ok || !context.mounted) return;
@@ -241,7 +246,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     });
     await context.store.saveProfile(updated);
     if (mounted) {
-      showMessage(context, 'Profile saved');
+      showMessage(context, context.l10n.profileSaved);
       Navigator.pop(context);
     }
   }
@@ -274,16 +279,17 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     const number = TextInputType.numberWithOptions(decimal: true);
     return Scaffold(
       bottomNavigationBar: BottomAction(
         child: FilledButton.icon(
           onPressed: _save,
           icon: const Icon(Icons.check_rounded),
-          label: const Text('Save profile'),
+          label: Text(l.profileSave),
         ),
       ),
-      appBar: AppBar(title: const Text('Edit profile')),
+      appBar: AppBar(title: Text(l.profileEditTitle)),
       body: Form(
         key: _form,
         // Clear an error as soon as the user fixes it.
@@ -297,43 +303,66 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 children: [
                   _field(
                     'name',
-                    'Name',
-                    validator: (v) => requiredField(v, 'your name'),
+                    l.profileName,
+                    validator: (v) => requiredField(v, l.profileNameRequired),
                   ),
-                  _field('phone', 'Phone', keyboard: TextInputType.phone),
+                  _field(
+                    'phone',
+                    l.profilePhone,
+                    keyboard: TextInputType.phone,
+                  ),
                   _field(
                     'email',
-                    'Email',
+                    l.profileEmail,
                     keyboard: TextInputType.emailAddress,
                   ),
                   _field(
                     'emergencyNumber',
-                    'Emergency number',
+                    l.profileEmergencyNumber,
                     keyboard: TextInputType.phone,
-                    hint: '112 works from any mobile phone',
-                    validator: (v) => requiredField(v, 'an emergency number'),
+                    hint: l.profileEmergencyNumberHint,
+                    validator: (v) =>
+                        requiredField(v, l.profileEmergencyNumberRequired),
                   ),
-                  const SectionHeader('Medical details'),
-                  _field('age', 'Age', keyboard: TextInputType.number),
-                  _field('gender', 'Gender'),
-                  _field('bloodGroup', 'Blood group', hint: 'e.g. O+'),
-                  _field('height', 'Height', keyboard: number, suffix: 'cm'),
-                  _field('weight', 'Weight', keyboard: number, suffix: 'kg'),
+                  SectionHeader(l.profileMedicalDetails),
+                  _field('age', l.profileAge, keyboard: TextInputType.number),
+                  _field('gender', l.profileGender),
+                  _field(
+                    'bloodGroup',
+                    l.profileBloodGroup,
+                    hint: l.profileBloodGroupHint,
+                  ),
+                  _field(
+                    'height',
+                    l.profileHeight,
+                    keyboard: number,
+                    suffix: 'cm',
+                  ),
+                  _field(
+                    'weight',
+                    l.profileWeight,
+                    keyboard: number,
+                    suffix: 'kg',
+                  ),
                   _field(
                     'bloodPressure',
-                    'Usual blood pressure',
-                    hint: 'e.g. 120/80',
+                    l.profileUsualBloodPressure,
+                    hint: l.profileBloodPressureHint,
                   ),
                   _field(
                     'bloodSugar',
-                    'Usual blood sugar',
-                    hint: 'e.g. Normal',
+                    l.profileUsualBloodSugar,
+                    hint: l.profileBloodSugarHint,
                   ),
-                  _field('allergies', 'Allergies', hint: 'e.g. Penicillin'),
+                  _field(
+                    'allergies',
+                    l.profileAllergies,
+                    hint: l.profileAllergiesHint,
+                  ),
                   _field(
                     'conditions',
-                    'Medical conditions',
-                    hint: 'e.g. Type 2 diabetes, high blood pressure',
+                    l.profileConditions,
+                    hint: l.profileConditionsHint,
                   ),
                 ],
               ),
@@ -348,11 +377,15 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 class _TextSizePicker extends StatelessWidget {
   const _TextSizePicker();
 
-  static final sizes = {1.0: 'Normal', 1.15: 'Large', 1.3: 'Extra large'};
-
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final store = context.store;
+    final sizes = {
+      1.0: l.profileTextSizeNormal,
+      1.15: l.profileTextSizeLarge,
+      1.3: l.profileTextSizeExtraLarge,
+    };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -360,7 +393,14 @@ class _TextSizePicker extends StatelessWidget {
           showSelectedIcon: false,
           segments: [
             for (final MapEntry(:key, :value) in sizes.entries)
-              ButtonSegment(value: key, label: Text(value)),
+              ButtonSegment(
+                value: key,
+                // Several words wrap onto two lines; a single word too long
+                // for its button is shrunk rather than broken.
+                label: value.contains(' ')
+                    ? Text(value, textAlign: TextAlign.center)
+                    : FittedBox(fit: BoxFit.scaleDown, child: Text(value)),
+              ),
           ],
           selected: {
             sizes.containsKey(store.textScale) ? store.textScale : 1.0,
@@ -369,7 +409,7 @@ class _TextSizePicker extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Makes all writing in the app bigger. It adds to your phone\'s own text size.',
+          l.profileTextSizeExplain,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -383,19 +423,17 @@ class _BackupCard extends StatelessWidget {
   const _BackupCard();
 
   Future<void> _backUp(BuildContext context) async {
+    final l = context.l10n;
     final store = context.store;
     final sharing = context.services.sharing;
     final password = await askNewSecret(
       context,
-      title: 'Protect your backup?',
-      message:
-          'The backup holds your health details. A password keeps them '
-          'private if the file ends up in the wrong hands. Write it down: '
-          'without it the backup cannot be opened.',
-      label: 'Backup password',
+      title: l.backupProtectTitle,
+      message: l.backupProtectMessage,
+      label: l.backupPasswordLabel,
       minLength: 8,
-      skipLabel: 'No password',
-      confirmLabel: 'Use password',
+      skipLabel: l.backupNoPassword,
+      confirmLabel: l.backupUsePassword,
     );
     if (password == null || !context.mounted) return;
     final contents = await store.exportBackup(password: password);
@@ -403,43 +441,35 @@ class _BackupCard extends StatelessWidget {
     final ok = await sharing.shareFile(
       'elderly-care-backup-$stamp.json',
       contents,
-      subject: 'Elderly Care backup',
+      subject: l.backupShareSubject,
     );
     if (context.mounted) {
-      showMessage(
-        context,
-        ok
-            ? 'Backup ready. Keep it somewhere safe, like your email or cloud storage.'
-            : 'Could not create the backup.',
-      );
+      showMessage(context, ok ? l.backupReady : l.backupFailed);
     }
   }
 
   Future<void> _restore(BuildContext context) async {
+    final l = context.l10n;
     final store = context.store;
     final sharing = context.services.sharing;
     final ok = await confirm(
       context,
-      title: 'Restore from a backup?',
-      message:
-          'Everything currently in the app will be replaced by what is '
-          'in the backup file.',
-      confirmLabel: 'Choose file',
+      title: l.backupRestoreTitle,
+      message: l.backupRestoreMessage,
+      confirmLabel: l.backupChooseFile,
     );
     if (!ok || !context.mounted) return;
     final String? json;
     try {
-      json = await sharing.pickBackupFile();
+      json = await sharing.pickBackupFile(title: l.shareBackupPickerTitle);
     } catch (_) {
-      if (context.mounted) showMessage(context, 'Could not read that file.');
+      if (context.mounted) showMessage(context, l.backupCouldNotReadFile);
       return;
     }
     if (json == null || !context.mounted) return;
 
     String? password;
-    var message =
-        'This backup is protected. Enter the password you chose '
-        'when you made it.';
+    var message = l.backupProtectedMessage;
     while (true) {
       try {
         await store.importBackup(json, password: password);
@@ -447,47 +477,49 @@ class _BackupCard extends StatelessWidget {
       } on BackupPasswordException catch (e) {
         if (!context.mounted) return;
         if (e.wrongPassword) {
-          message = 'That password is not right. Please try again.';
+          message = l.backupWrongPasswordRetry;
         }
         password = await askSecret(
           context,
-          title: 'Backup password',
+          title: l.backupPasswordTitle,
           message: message,
-          label: 'Password',
-          confirmLabel: 'Restore',
+          label: l.backupPassword,
+          confirmLabel: l.backupRestore,
         );
         if (password == null) return;
-      } on FormatException catch (e) {
-        if (context.mounted) showMessage(context, e.message);
+      } on BackupException catch (e) {
+        if (context.mounted) showMessage(context, backupErrorText(l, e.reason));
+        return;
+      } on FormatException {
+        if (context.mounted) {
+          showMessage(context, l.backupErrorDamaged);
+        }
         return;
       }
     }
     if (context.mounted) {
-      showMessage(context, 'Backup restored');
+      showMessage(context, l.backupRestored);
       Navigator.of(context).popUntil((r) => r.isFirst);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Card(
       child: Column(
         children: [
           ListTile(
             leading: const Icon(Icons.cloud_upload_rounded),
-            title: const Text('Back up my data'),
-            subtitle: const Text(
-              'Save everything to a file you can email to yourself or keep in the cloud.',
-            ),
+            title: Text(l.backupBackUp),
+            subtitle: Text(l.backupBackUpSubtitle),
             onTap: () => _backUp(context),
           ),
           const Divider(indent: 20, endIndent: 20),
           ListTile(
             leading: const Icon(Icons.settings_backup_restore_rounded),
-            title: const Text('Restore from a backup'),
-            subtitle: const Text(
-              'Use this on a new phone to get your data back.',
-            ),
+            title: Text(l.backupRestoreFrom),
+            subtitle: Text(l.backupRestoreFromSubtitle),
             onTap: () => _restore(context),
           ),
         ],
@@ -495,3 +527,12 @@ class _BackupCard extends StatelessWidget {
     );
   }
 }
+
+/// The message shown when a backup cannot be restored.
+String backupErrorText(AppLocalizations l, BackupError e) => switch (e) {
+  BackupError.notBackup => l.backupErrorNotBackup,
+  BackupError.tooLarge => l.backupErrorTooLarge,
+  BackupError.damaged => l.backupErrorDamaged,
+  BackupError.noProfile => l.backupErrorNoProfile,
+  BackupError.unknownProtection => l.backupErrorUnknownProtection,
+};

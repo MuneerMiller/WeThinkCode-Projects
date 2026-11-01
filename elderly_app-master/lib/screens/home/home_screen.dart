@@ -16,6 +16,8 @@ import '../medicines/medicines_screen.dart';
 import '../notes/notes_screen.dart';
 import '../profile/profile_screen.dart';
 import '../video_call/video_call_screen.dart';
+import '../../l10n/l10n.dart';
+import '../../l10n/labels.dart';
 
 Widget screenFor(Feature f) => switch (f) {
   Feature.medicines => const MedicinesScreen(),
@@ -41,6 +43,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final store = context.store;
     final theme = Theme.of(context);
     final now = DateTime.now();
@@ -57,16 +60,14 @@ class HomeScreen extends StatelessWidget {
               excludeFromSemantics: true,
             ),
             const SizedBox(width: 12),
-            const Flexible(
-              child: Text('Elderly Care', overflow: TextOverflow.ellipsis),
-            ),
+            Flexible(child: Text(l.appTitle, overflow: TextOverflow.ellipsis)),
           ],
         ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: IconButton(
-              tooltip: 'My profile',
+              tooltip: l.homeMyProfile,
               onPressed: () => Navigator.of(
                 context,
               ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
@@ -93,7 +94,7 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  '${greeting(now)}, ${profile.firstName}',
+                  l.homeGreeting(greeting(l, now), profile.firstName),
                   style: theme.textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 4),
@@ -107,7 +108,7 @@ class HomeScreen extends StatelessWidget {
                 const _SosButton(),
                 const SizedBox(height: 16),
                 _TodayCard(now: now),
-                const SectionHeader('What would you like to do?'),
+                SectionHeader(l.homeWhatToDo),
                 LayoutBuilder(
                   builder: (context, c) {
                     // Each tile needs about 170px at normal text size; with
@@ -158,6 +159,7 @@ class _SosButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     return Material(
       color: AppTheme.sos,
@@ -188,13 +190,13 @@ class _SosButton extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'I need help',
+                      l.homeSosTitle,
                       style: theme.textTheme.titleLarge?.copyWith(
                         color: Colors.white,
                       ),
                     ),
                     Text(
-                      'Call for help or alert your family',
+                      l.homeSosSubtitle,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.white.withValues(alpha: 0.9),
                       ),
@@ -222,6 +224,7 @@ class _TodayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final store = context.store;
     final theme = Theme.of(context);
     final doses = store.dosesToday(now);
@@ -235,23 +238,38 @@ class _TodayCard extends StatelessWidget {
     final runningLow = store.medicines.where((m) => m.isLow).toList();
     final profile = store.profile;
     final nextDose = pending.firstOrNull;
+    String spokenDose(Dose d) {
+      final name = d.medicine.name;
+      final dosage = d.medicine.dosage;
+      final time = formatTime(context, d.time);
+      final due = d.status == DoseStatus.due;
+      if (dosage.isEmpty) {
+        return due
+            ? l.homeSpokenDoseDue(name, time)
+            : l.homeSpokenDoseNext(name, time);
+      }
+      return due
+          ? l.homeSpokenDoseDueWithDosage(name, dosage, time)
+          : l.homeSpokenDoseNextWithDosage(name, dosage, time);
+    }
+
     final spoken = [
-      if (profile != null) '${greeting(now)}, ${profile.firstName}.',
-      'Today is ${DateFormat('EEEE d MMMM').format(now)}.',
+      if (profile != null)
+        l.homeSpokenGreeting(greeting(l, now), profile.firstName),
+      l.homeSpokenToday(DateFormat('EEEE d MMMM').format(now)),
       if (doses.isEmpty)
-        'You have no medicines set up.'
+        l.homeSpokenNoMedicines
       else if (nextDose == null)
-        'You have taken all your medicines for today.'
+        l.homeSpokenAllTaken
       else
-        '${nextDose.status == DoseStatus.due ? 'It is time for' : 'Your next medicine is'} '
-            '${nextDose.medicine.name}'
-            '${nextDose.medicine.dosage.isEmpty ? '' : ', ${nextDose.medicine.dosage},'} '
-            'at ${formatTime(context, nextDose.time)}.',
-      for (final m in runningLow) 'Remember to refill ${m.name} soon.',
+        spokenDose(nextDose),
+      for (final m in runningLow) l.homeSpokenRefill(m.name),
       if (nextAppt != null)
-        'Your next appointment is with ${nextAppt.doctor}, '
-            '${formatDay(nextAppt.dateTime, now: now).toLowerCase()} at '
-            '${formatTime(context, nextAppt.dateTime)}.',
+        l.homeSpokenAppointment(
+          nextAppt.doctor,
+          formatDay(context, nextAppt.dateTime, now: now).toLowerCase(),
+          formatTime(context, nextAppt.dateTime),
+        ),
     ].join(' ');
 
     final Widget medicineRow;
@@ -261,8 +279,8 @@ class _TodayCard extends StatelessWidget {
           Feature.medicines.icon,
           color: Feature.medicines.color,
         ),
-        title: const Text('No medicines yet'),
-        subtitle: const Text('Add one to get reminders'),
+        title: Text(l.homeNoMedicines),
+        subtitle: Text(l.homeNoMedicinesHint),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: () => openFeature(context, Feature.medicines),
       );
@@ -272,8 +290,8 @@ class _TodayCard extends StatelessWidget {
           Icons.check_circle_rounded,
           color: Feature.notes.color,
         ),
-        title: const Text('All medicines done for today'),
-        subtitle: Text('$taken of ${doses.length} taken'),
+        title: Text(l.homeAllMedicinesDone),
+        subtitle: Text(l.homeDosesTaken(taken, doses.length)),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: () => openFeature(context, Feature.medicines),
       );
@@ -287,8 +305,8 @@ class _TodayCard extends StatelessWidget {
         ),
         title: Text(
           isDue
-              ? 'Time for ${next.medicine.name}'
-              : 'Next: ${next.medicine.name}',
+              ? l.homeTimeFor(next.medicine.name)
+              : l.homeNextMedicine(next.medicine.name),
         ),
         subtitle: Text(
           '${formatTime(context, next.time)}'
@@ -297,7 +315,7 @@ class _TodayCard extends StatelessWidget {
         trailing: isDue
             ? FilledButton.tonal(
                 onPressed: () => openDoseCheck(context, next),
-                child: const Text('Check'),
+                child: Text(l.homeCheckDose),
               )
             : const Icon(Icons.chevron_right_rounded),
         onTap: () => isDue
@@ -312,11 +330,15 @@ class _TodayCard extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 12, 12, 0),
-            child: Row(
+            // Wraps the button under the heading when a language's words
+            // are too long to share one line.
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
-                Expanded(
-                  child: Text('Today', style: theme.textTheme.titleMedium),
-                ),
+                Text(l.commonToday, style: theme.textTheme.titleMedium),
                 ReadAloudButton(text: spoken),
               ],
             ),
@@ -329,8 +351,8 @@ class _TodayCard extends StatelessWidget {
                 Icons.warning_amber_rounded,
                 color: Theme.of(context).colorScheme.error,
               ),
-              title: Text('Refill ${m.name} soon'),
-              subtitle: Text('Only ${m.supply} doses left'),
+              title: Text(l.homeRefillSoon(m.name)),
+              subtitle: Text(l.homeDosesLeft(m.supply!)),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => openFeature(context, Feature.medicines),
             ),
@@ -344,7 +366,10 @@ class _TodayCard extends StatelessWidget {
               ),
               title: Text(nextAppt.doctor),
               subtitle: Text(
-                '${formatDay(nextAppt.dateTime, now: now)} at ${formatTime(context, nextAppt.dateTime)}',
+                l.homeAppointmentWhen(
+                  formatDay(context, nextAppt.dateTime, now: now),
+                  formatTime(context, nextAppt.dateTime),
+                ),
               ),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => openFeature(context, Feature.appointments),
@@ -363,6 +388,7 @@ class _FeatureTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     final s = feature.scheme(theme.brightness);
     return Material(
@@ -389,7 +415,7 @@ class _FeatureTile extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                feature.label,
+                feature.title(l),
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: s.onPrimaryContainer,
                 ),
@@ -397,7 +423,7 @@ class _FeatureTile extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                feature.subtitle,
+                feature.description(l),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: s.onSurfaceVariant,
                 ),

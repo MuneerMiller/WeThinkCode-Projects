@@ -1,0 +1,1593 @@
+{
+  "@@locale": "en",
+  "appTitle": "Elderly Care",
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonDelete": "Delete",
+  "commonEdit": "Edit",
+  "commonClose": "Close",
+  "commonContinue": "Continue",
+  "commonBack": "Back",
+  "commonNext": "Next",
+  "commonDone": "Done",
+  "commonRemove": "Remove",
+  "commonCall": "Call",
+  "commonText": "Text",
+  "commonShare": "Share",
+  "commonToday": "Today",
+  "commonTomorrow": "Tomorrow",
+  "commonYesterday": "Yesterday",
+  "commonReadAloud": "Read aloud",
+  "commonStopReading": "Stop reading",
+  "commonReadMedicalDisclaimer": "Read the medical disclaimer",
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
+  "languageTitle": "Language",
+  "languageSystem": "Same as my phone",
+  "languageReviewNote": "This translation is new. If something reads oddly, please tell us so we can improve it.",
+  "@languageReviewNote": {
+    "description": "Shown under the language setting when isiZulu or isiXhosa is chosen."
+  },
+  "languageEnglishOnlyNote": "The legal documents and the summaries for your doctor are in English.",
+  "featureMedicines": "Medicines",
+  "featureMedicinesSubtitle": "Reminders & doses",
+  "featureAppointments": "Appointments",
+  "featureAppointmentsSubtitle": "Doctor visits",
+  "featureHealth": "Health tracker",
+  "featureHealthSubtitle": "BP, sugar, weight, sleep",
+  "@featureHealthSubtitle": {
+    "description": "BP is blood pressure; keep it short, it is a tile subtitle."
+  },
+  "featureFamily": "My family",
+  "featureFamilySubtitle": "Call, text & alert",
+  "featureHospitals": "Hospitals nearby",
+  "featureHospitalsSubtitle": "Find & get directions",
+  "featureVideoCall": "Video call",
+  "featureVideoCallSubtitle": "See your family",
+  "featureDocuments": "Documents",
+  "featureDocumentsSubtitle": "Prescriptions & reports",
+  "featureNotes": "Notes",
+  "featureNotesSubtitle": "Things to remember",
+  "medicineTypeTablet": "Tablet",
+  "medicineTypeCapsule": "Capsule",
+  "medicineTypeSyrup": "Syrup",
+  "medicineTypeDrops": "Drops",
+  "medicineTypeInjection": "Injection",
+  "medicineTypeInhaler": "Inhaler",
+  "medicineTypeOther": "Other",
+  "trackerBloodPressure": "Blood pressure",
+  "trackerBloodPressureTip": "Healthy range is below 120/80 mmHg.",
+  "trackerBloodSugar": "Blood sugar",
+  "trackerBloodSugarTip": "Fasting levels of 70–100 mg/dL are typical.",
+  "trackerWeight": "Weight",
+  "trackerWeightTip": "Weigh yourself at the same time each day.",
+  "trackerSleep": "Sleep",
+  "trackerSleepTip": "Most adults need 7–8 hours of sleep.",
+  "trackerFieldSystolic": "Systolic (top number)",
+  "trackerFieldDiastolic": "Diastolic (bottom number)",
+  "trackerFieldPulse": "Pulse",
+  "trackerFieldGlucose": "Blood glucose",
+  "trackerFieldWeight": "Weight",
+  "trackerFieldHours": "Hours slept",
+  "trackerFieldMinutes": "Extra minutes",
+  "trackerSleepValue": "{hours} h {minutes} min",
+  "@trackerSleepValue": {
+    "placeholders": {
+      "hours": {
+        "type": "num"
+      },
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "notifyDoseTitle": "Time for {medicine}",
+  "@notifyDoseTitle": {
+    "description": "Phone notification title.",
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "notifyDoseBody": "Tap \"Taken\" once you have taken it.",
+  "notifyDoseBodyWithDosage": "Take {dosage}, then tap \"Taken\".",
+  "@notifyDoseBodyWithDosage": {
+    "description": "\"Taken\" must match notifyActionTaken.",
+    "placeholders": {
+      "dosage": {
+        "type": "String",
+        "example": "1 tablet"
+      }
+    }
+  },
+  "notifyFollowUpTitle": "Did you take your {medicine}?",
+  "@notifyFollowUpTitle": {
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "notifyFollowUpBody": "It was due at {time}. Let us know so your record stays right.",
+  "@notifyFollowUpBody": {
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "08:00"
+      }
+    }
+  },
+  "notifySnoozeBody": "Reminding you again, as you asked.",
+  "notifyAppointmentTitle": "Appointment in 1 hour",
+  "notifyActionTaken": "Taken",
+  "notifyActionSnooze": "In 10 min",
+  "notifyActionNotYet": "Not yet",
+  "notifyMedicineChannel": "Medicine reminders",
+  "notifyMedicineChannelDescription": "Reminds you when it is time to take a medicine",
+  "notifyAppointmentChannel": "Appointment reminders",
+  "notifyAppointmentChannelDescription": "Reminds you an hour before a doctor appointment",
+  "languageChoose": "Choose a language",
+  "profileTitle": "My profile",
+  "profileNotSet": "Not set",
+  "@profileNotSet": {
+    "description": "Shown in the profile instead of a detail the user has not filled in."
+  },
+  "profileShowMedicalId": "Show my medical ID",
+  "profileContact": "Contact",
+  "@profileContact": {
+    "description": "Section heading for the user's phone, email and emergency number."
+  },
+  "profilePhone": "Phone",
+  "profileEmail": "Email",
+  "profileEmergencyNumber": "Emergency number",
+  "profileMedicalDetails": "Medical details",
+  "profileAge": "Age",
+  "profileGender": "Gender",
+  "profileBloodGroup": "Blood group",
+  "profileHeight": "Height",
+  "profileWeight": "Weight",
+  "profileUsualBloodPressure": "Usual blood pressure",
+  "profileUsualBloodSugar": "Usual blood sugar",
+  "profileAllergies": "Allergies",
+  "profileConditions": "Medical conditions",
+  "profileTextSize": "Text size",
+  "profileBackup": "Backup",
+  "@profileBackup": {
+    "description": "Section heading (noun) for backing up and restoring data."
+  },
+  "profileThisApp": "This app",
+  "@profileThisApp": {
+    "description": "Section heading for settings about the app itself (security, legal, erase)."
+  },
+  "profilePrivacySecurity": "Privacy & security",
+  "profileAppLockOn": "App lock is on",
+  "profileSetPinHint": "Set a PIN, see how your data is protected",
+  "profileLegalAbout": "Legal & about",
+  "profileLegalAboutSubtitle": "Terms, medical disclaimer, privacy, licences",
+  "profileEraseAll": "Erase all my data",
+  "profileEraseTitle": "Erase everything?",
+  "profileEraseMessage": "All medicines, appointments, readings, notes, documents and family contacts will be deleted. This cannot be undone.",
+  "profileEraseConfirm": "Erase",
+  "profileSaved": "Profile saved",
+  "profileSave": "Save profile",
+  "profileEditTitle": "Edit profile",
+  "profileName": "Name",
+  "profileNameRequired": "Please enter your name",
+  "profileEmergencyNumberHint": "112 works from any mobile phone",
+  "@profileEmergencyNumberHint": {
+    "description": "Hint under the emergency number field. 112 is the international emergency number; keep it."
+  },
+  "profileEmergencyNumberRequired": "Please enter an emergency number",
+  "profileBloodGroupHint": "e.g. O+",
+  "profileBloodPressureHint": "e.g. 120/80",
+  "profileBloodSugarHint": "e.g. Normal",
+  "profileAllergiesHint": "e.g. Penicillin",
+  "profileConditionsHint": "e.g. Type 2 diabetes, high blood pressure",
+  "profileTextSizeNormal": "Normal",
+  "profileTextSizeLarge": "Large",
+  "profileTextSizeExtraLarge": "Extra large",
+  "@profileTextSizeNormal": {
+    "description": "Text size option; the three options sit side by side in a small segmented button, so keep them short."
+  },
+  "profileTextSizeExplain": "Makes all writing in the app bigger. It adds to your phone's own text size.",
+  "backupProtectTitle": "Protect your backup?",
+  "backupProtectMessage": "The backup holds your health details. A password keeps them private if the file ends up in the wrong hands. Write it down: without it the backup cannot be opened.",
+  "backupPasswordLabel": "Backup password",
+  "backupNoPassword": "No password",
+  "@backupNoPassword": {
+    "description": "Button: make the backup without a password."
+  },
+  "backupUsePassword": "Use password",
+  "backupShareSubject": "Elderly Care backup",
+  "@backupShareSubject": {
+    "description": "Subject line when the backup file is shared, e.g. by email. 'Elderly Care' is the app's name."
+  },
+  "backupReady": "Backup ready. Keep it somewhere safe, like your email or cloud storage.",
+  "backupFailed": "Could not create the backup.",
+  "backupRestoreTitle": "Restore from a backup?",
+  "backupRestoreMessage": "Everything currently in the app will be replaced by what is in the backup file.",
+  "backupChooseFile": "Choose file",
+  "backupCouldNotReadFile": "Could not read that file.",
+  "backupProtectedMessage": "This backup is protected. Enter the password you chose when you made it.",
+  "backupWrongPasswordRetry": "That password is not right. Please try again.",
+  "backupPasswordTitle": "Backup password",
+  "backupPassword": "Password",
+  "backupRestore": "Restore",
+  "@backupRestore": {
+    "description": "Button (verb) in the password dialog that restores the backup."
+  },
+  "backupRestored": "Backup restored",
+  "backupBackUp": "Back up my data",
+  "backupBackUpSubtitle": "Save everything to a file you can email to yourself or keep in the cloud.",
+  "backupRestoreFrom": "Restore from a backup",
+  "backupRestoreFromSubtitle": "Use this on a new phone to get your data back.",
+  "backupErrorNotBackup": "This file is not an Elderly Care backup.",
+  "backupErrorTooLarge": "This file is too large to be a backup.",
+  "backupErrorDamaged": "This backup is damaged and could not be read.",
+  "backupErrorNoProfile": "This backup has no profile in it.",
+  "backupErrorUnknownProtection": "This backup uses an unknown protection method.",
+  "@backupErrorUnknownProtection": {
+    "description": "The backup file is protected with an encryption method this app version does not know."
+  },
+  "securityTitle": "Privacy & security",
+  "securityWrongPin": "That PIN is not right.",
+  "securityTooManyAttempts": "Too many wrong tries. Please wait a little and try again.",
+  "securityChoosePin": "Choose a PIN",
+  "securityChoosePinMessage": "You will type this PIN to open Elderly Care. Use 4 to 8 numbers that others would not guess.",
+  "@securityChoosePinMessage": {
+    "description": "'Elderly Care' is the app's name. 'numbers' means digits."
+  },
+  "securityNewPin": "New PIN",
+  "securityPinUnavailable": "This device cannot store a PIN securely, so app lock is not available here.",
+  "securityAppLockOn": "App lock is on",
+  "securityAppLockOff": "App lock is off",
+  "securityEnterCurrentPin": "Enter your current PIN.",
+  "securityCurrentPin": "Current PIN",
+  "securityChangePin": "Change PIN",
+  "securityTurnOffAppLock": "Turn off app lock",
+  "securityAppLock": "App lock",
+  "@securityAppLock": {
+    "description": "Section heading for the PIN lock settings."
+  },
+  "securityAppLockOnDetail": "The app asks for your PIN when it opens, and after 2 minutes away.",
+  "securityAppLockOffDetail": "Anyone holding your phone can see your health details. A PIN keeps them private.",
+  "securityLockNow": "Lock now",
+  "securityTurnOff": "Turn off",
+  "@securityTurnOff": {
+    "description": "Button that turns off the app lock."
+  },
+  "securityLockWithPin": "Lock with a PIN",
+  "securityBiometrics": "Unlock with fingerprint or face",
+  "securityMedicalIdWhenLocked": "Show Medical ID when locked",
+  "securityMedicalIdWhenLockedDetail": "Lets paramedics see your allergies and medicines and call for help without your PIN.",
+  "securityHowProtected": "How your information is protected",
+  "securityEncrypted": "Encrypted on this device",
+  "securityNotEncrypted": "Not encrypted on this device",
+  "securityEncryptedDetail": "Your health details are scrambled with a key kept in this device's secure storage.",
+  "securityNotEncryptedDetail": "This browser has no secure storage. Use the phone app, or open the website over https.",
+  "securityLocalOnly": "Kept only on this device",
+  "securityLocalOnlyDetail": "There is no account and no server. Nothing is uploaded, and there are no ads or tracking.",
+  "securitySharedByChoice": "Only shared when you choose",
+  "securitySharedByChoiceDetail": "Calls and texts go through your own phone. Health summaries and backups only leave the app when you send them.",
+  "securityHospitalSearch": "Hospital search",
+  "securityHospitalSearchDetail": "To find hospitals, your location is sent to the free OpenStreetMap service. Nothing else about you is sent.",
+  "@securityHospitalSearchDetail": {
+    "description": "OpenStreetMap is a service name; keep it."
+  },
+  "securityVideoCalls": "Video calls",
+  "securityVideoCallsDetail": "Calls use the free Jitsi Meet service in a private room with a long random name. Only people you send the link to can join.",
+  "@securityVideoCallsDetail": {
+    "description": "Jitsi Meet is a service name; keep it."
+  },
+  "securityNoCloudCopy": "No automatic cloud copy",
+  "securityNoCloudCopyDetail": "The phone does not copy this app's data to the cloud. Use \"Back up my data\" in My profile, ideally with a password.",
+  "@securityNoCloudCopyDetail": {
+    "description": "\"Back up my data\" and \"My profile\" are the names of a button and a screen in the app; use the same words as those translations."
+  },
+  "securityReadPrivacyPolicy": "Read the full privacy policy",
+  "securityEraseAnyTime": "You can erase everything at any time in My profile.",
+  "medicalIdTitle": "Medical ID",
+  "medicalIdFooter": "Keep your details up to date in My profile.",
+  "medicalIdNotRecorded": "Not recorded",
+  "medicalIdAge": "Age",
+  "medicalIdBloodGroup": "Blood group",
+  "medicalIdAllergies": "Allergies",
+  "medicalIdConditions": "Medical conditions",
+  "medicalIdMedicines": "Medicines",
+  "medicalIdEmergencyContacts": "Emergency contacts",
+  "medicalIdCallContact": "Call {name}",
+  "@medicalIdCallContact": {
+    "description": "Screen-reader label of the Call button next to a contact.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "medicalIdSpeakTitle": "Medical ID for {name}.",
+  "@medicalIdSpeakTitle": {
+    "description": "Read aloud by the phone (text to speech) to a paramedic. The spoken sentences are joined with spaces.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "medicalIdSpeakAge": "Age {age}.",
+  "@medicalIdSpeakAge": {
+    "description": "Read aloud. age is what the user typed, usually a number of years.",
+    "placeholders": {
+      "age": {
+        "type": "String"
+      }
+    }
+  },
+  "medicalIdSpeakBloodGroup": "Blood group {group}.",
+  "@medicalIdSpeakBloodGroup": {
+    "description": "Read aloud.",
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "medicalIdSpeakNoAllergies": "No allergies recorded.",
+  "@medicalIdSpeakNoAllergies": {
+    "description": "Read aloud."
+  },
+  "medicalIdSpeakAllergies": "Allergies: {allergies}.",
+  "@medicalIdSpeakAllergies": {
+    "description": "Read aloud.",
+    "placeholders": {
+      "allergies": {
+        "type": "String"
+      }
+    }
+  },
+  "medicalIdSpeakConditions": "Medical conditions: {conditions}.",
+  "@medicalIdSpeakConditions": {
+    "description": "Read aloud.",
+    "placeholders": {
+      "conditions": {
+        "type": "String"
+      }
+    }
+  },
+  "medicalIdSpeakMedicines": "Medicines: {medicines}.",
+  "@medicalIdSpeakMedicines": {
+    "description": "Read aloud. medicines is a comma-separated list of names and doses.",
+    "placeholders": {
+      "medicines": {
+        "type": "String"
+      }
+    }
+  },
+  "medicalIdSpeakContact": "Emergency contact: {name}, {phone}.",
+  "@medicalIdSpeakContact": {
+    "description": "Read aloud. phone is the number with spaces between the digits so it is read digit by digit.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "medicalIdSpeakContactWithRelationship": "Emergency contact: {name}, {relationship}, {phone}.",
+  "@medicalIdSpeakContactWithRelationship": {
+    "description": "Read aloud. relationship is what the user typed, e.g. Daughter. phone is read digit by digit.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "relationship": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "secretOk": "OK",
+  "@secretOk": {
+    "description": "Default button that confirms a typed PIN or password."
+  },
+  "secretMinDigits": "{count, plural, =1{Use at least 1 number} other{Use at least {count} numbers}}",
+  "@secretMinDigits": {
+    "description": "Error under a PIN field that is too short. 'numbers' means digits.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "secretMinCharacters": "{count, plural, =1{Use at least 1 character} other{Use at least {count} characters}}",
+  "@secretMinCharacters": {
+    "description": "Error under a password field that is too short.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "secretTypeAgain": "Type it again",
+  "@secretTypeAgain": {
+    "description": "Label of the second field where the user repeats the new PIN or password."
+  },
+  "secretNoMatch": "The two do not match",
+  "secretShowPin": "Show PIN",
+  "secretShowPassword": "Show password",
+  "homeMyProfile": "My profile",
+  "@homeMyProfile": {
+    "description": "Tooltip on the profile picture button at the top of the home screen."
+  },
+  "homeGreeting": "{greeting}, {name}",
+  "@homeGreeting": {
+    "description": "Big greeting at the top of the home screen. greeting is e.g. 'Good morning'; name is the user's first name.",
+    "placeholders": {
+      "greeting": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeWhatToDo": "What would you like to do?",
+  "@homeWhatToDo": {
+    "description": "Heading above the grid of feature tiles on the home screen."
+  },
+  "homeSosTitle": "I need help",
+  "@homeSosTitle": {
+    "description": "Large red emergency button on the home screen."
+  },
+  "homeSosSubtitle": "Call for help or alert your family",
+  "homeNoMedicines": "No medicines yet",
+  "homeNoMedicinesHint": "Add one to get reminders",
+  "homeAllMedicinesDone": "All medicines done for today",
+  "homeDosesTaken": "{taken} of {total} taken",
+  "@homeDosesTaken": {
+    "description": "How many of today's medicine doses were taken, e.g. '3 of 3 taken'.",
+    "placeholders": {
+      "taken": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homeTimeFor": "Time for {medicine}",
+  "@homeTimeFor": {
+    "description": "A medicine dose is due now. medicine is the medicine's name.",
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "homeNextMedicine": "Next: {medicine}",
+  "@homeNextMedicine": {
+    "description": "The next medicine dose later today. medicine is the medicine's name.",
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCheckDose": "Check",
+  "@homeCheckDose": {
+    "description": "Button that opens a screen to confirm the right medicine before taking it."
+  },
+  "homeRefillSoon": "Refill {medicine} soon",
+  "@homeRefillSoon": {
+    "description": "Warning that a medicine is running out.",
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "homeDosesLeft": "{count, plural, =1{Only 1 dose left} other{Only {count} doses left}}",
+  "@homeDosesLeft": {
+    "description": "How many doses of a medicine are left.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeAppointmentWhen": "{day} at {time}",
+  "@homeAppointmentWhen": {
+    "description": "When the next appointment is. day is e.g. 'Today', 'Tomorrow' or a date; time is a clock time.",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSpokenGreeting": "{greeting}, {name}.",
+  "@homeSpokenGreeting": {
+    "description": "Read aloud at the start of today's summary. greeting is e.g. 'Good morning'; name is the user's first name.",
+    "placeholders": {
+      "greeting": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSpokenToday": "Today is {date}.",
+  "@homeSpokenToday": {
+    "description": "Read aloud. date is the weekday and date, e.g. 'Monday 2 November'.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSpokenNoMedicines": "You have no medicines set up.",
+  "@homeSpokenNoMedicines": {
+    "description": "Read aloud in today's summary."
+  },
+  "homeSpokenAllTaken": "You have taken all your medicines for today.",
+  "@homeSpokenAllTaken": {
+    "description": "Read aloud in today's summary."
+  },
+  "homeSpokenDoseDue": "It is time for {medicine} at {time}.",
+  "@homeSpokenDoseDue": {
+    "description": "Read aloud: a dose is due now.",
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSpokenDoseDueWithDosage": "It is time for {medicine}, {dosage}, at {time}.",
+  "@homeSpokenDoseDueWithDosage": {
+    "description": "Read aloud: a dose is due now. dosage is free text typed by the user, e.g. '1 tablet'.",
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      },
+      "dosage": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSpokenDoseNext": "Your next medicine is {medicine} at {time}.",
+  "@homeSpokenDoseNext": {
+    "description": "Read aloud: the next dose later today.",
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSpokenDoseNextWithDosage": "Your next medicine is {medicine}, {dosage}, at {time}.",
+  "@homeSpokenDoseNextWithDosage": {
+    "description": "Read aloud: the next dose later today. dosage is free text typed by the user, e.g. '1 tablet'.",
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      },
+      "dosage": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSpokenRefill": "Remember to refill {medicine} soon.",
+  "@homeSpokenRefill": {
+    "description": "Read aloud when a medicine is running out.",
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSpokenAppointment": "Your next appointment is with {doctor}, {day} at {time}.",
+  "@homeSpokenAppointment": {
+    "description": "Read aloud. doctor is the doctor's name as typed by the user; day is e.g. 'today', 'tomorrow' or a date (in lower case); time is a clock time.",
+    "placeholders": {
+      "doctor": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "lockEnterPin": "Enter your PIN",
+  "@lockEnterPin": {
+    "description": "Title of the lock screen. PIN is the secret number that unlocks the app."
+  },
+  "lockPinTooShort": "Your PIN has at least 4 numbers.",
+  "lockPinWrong": "That PIN is not right. {left, plural, =1{1 try left} other{{left} tries left}} before a short wait.",
+  "@lockPinWrong": {
+    "description": "left is how many more wrong PINs are allowed before the app makes the user wait.",
+    "placeholders": {
+      "left": {
+        "type": "int"
+      }
+    }
+  },
+  "lockTooManyTries": "Too many wrong tries.",
+  "lockWait": "Too many wrong tries. Try again in {time}.",
+  "@lockWait": {
+    "description": "time is a countdown in minutes and seconds, e.g. '0:45'.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "lockPinDigitsEntered": "{count, plural, =1{1 number entered} other{{count} numbers entered}}",
+  "@lockPinDigitsEntered": {
+    "description": "Screen-reader label for the dots that show how many PIN numbers were typed.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lockUseBiometrics": "Use fingerprint or face",
+  "@lockUseBiometrics": {
+    "description": "Button to unlock with the phone's fingerprint or face recognition."
+  },
+  "lockEmergency": "Emergency",
+  "@lockEmergency": {
+    "description": "Button on the lock screen, and the title of the emergency panel that shows the Medical ID and a call button."
+  },
+  "lockForgotPin": "Forgot PIN?",
+  "lockCallNumber": "Call {number}",
+  "@lockCallNumber": {
+    "description": "Button that phones the emergency number, e.g. 'Call 112'.",
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "lockMedicalIdHidden": "The Medical ID is hidden while the app is locked.",
+  "@lockMedicalIdHidden": {
+    "description": "Medical ID is the user's health summary for emergency workers."
+  },
+  "lockForgotTitle": "Forgot your PIN?",
+  "lockForgotBody": "For your privacy the PIN cannot be recovered. You can erase everything in the app and start again. If you made a backup, you can restore it afterwards from My profile.",
+  "@lockForgotBody": {
+    "description": "'My profile' is the name of the profile screen; keep it the same as that screen's name."
+  },
+  "lockEraseEverything": "Erase everything and start again",
+  "lockEraseConfirm": "Yes, erase everything",
+  "lockEraseWarning": "This cannot be undone. Tap again to confirm.",
+  "lockKeyDelete": "Delete",
+  "@lockKeyDelete": {
+    "description": "Screen-reader label for the backspace key on the PIN keypad (removes the last number)."
+  },
+  "lockKeyUnlock": "Unlock",
+  "@lockKeyUnlock": {
+    "description": "Screen-reader label for the tick key on the PIN keypad."
+  },
+  "onboardingSkip": "Skip",
+  "@onboardingSkip": {
+    "description": "Skips the introduction pages."
+  },
+  "onboardingGetStarted": "Get started",
+  "@onboardingGetStarted": {
+    "description": "Button on the last introduction page."
+  },
+  "onboardingMedicinesTitle": "Never miss a medicine",
+  "onboardingMedicinesText": "Get a reminder when each dose is due, and let your family know if one is missed.",
+  "onboardingAppointmentsTitle": "Remember appointments",
+  "onboardingAppointmentsText": "Keep your doctor visits in one place and get a reminder an hour before.",
+  "onboardingHealthTitle": "Track your health",
+  "onboardingHealthText": "Record blood pressure, blood sugar, weight and sleep, and see how they change.",
+  "onboardingHospitalsTitle": "Find help nearby",
+  "onboardingHospitalsText": "See the closest hospitals and clinics with directions and phone numbers.",
+  "onboardingFamilyTitle": "Family is one tap away",
+  "onboardingFamilyText": "Call, text or video call your family, or send them your location in an emergency.",
+  "setupWelcome": "Welcome to Elderly Care",
+  "@setupWelcome": {
+    "description": "Elderly Care is the app's name."
+  },
+  "setupIntro": "Just a few details to get you started. Everything stays on this phone.",
+  "setupAboutYou": "About you",
+  "@setupAboutYou": {
+    "description": "Section heading in the first-run form."
+  },
+  "setupYourName": "Your name",
+  "setupNameRequired": "Please enter your name",
+  "setupYourPhone": "Your phone number (optional)",
+  "setupEmergencyContact": "Emergency contact",
+  "@setupEmergencyContact": {
+    "description": "Section heading: the person to contact in an emergency."
+  },
+  "setupEmergencyContactInfo": "Someone we can call or text for you when you need help.",
+  "setupTheirName": "Their name",
+  "@setupTheirName": {
+    "description": "The emergency contact's name."
+  },
+  "setupRelationship": "Relationship",
+  "@setupRelationship": {
+    "description": "How the emergency contact is related to the user."
+  },
+  "setupRelationshipHint": "e.g. Daughter",
+  "setupTheirPhone": "Their phone number",
+  "@setupTheirPhone": {
+    "description": "The emergency contact's phone number."
+  },
+  "setupTheirPhoneRequired": "Please enter their phone number",
+  "setupAddMoreLater": "You can add more family members later.",
+  "legalDocTerms": "Terms of Use",
+  "@legalDocTerms": {
+    "description": "Title of a legal document."
+  },
+  "legalDocMedical": "Medical disclaimer",
+  "@legalDocMedical": {
+    "description": "Title of a legal document saying the app does not replace a doctor."
+  },
+  "legalDocPrivacy": "Privacy policy",
+  "@legalDocPrivacy": {
+    "description": "Title of a legal document."
+  },
+  "legalDocAccessibility": "Accessibility statement",
+  "@legalDocAccessibility": {
+    "description": "Title of a document about how the app supports people with disabilities."
+  },
+  "legalDocCredits": "Credits and third-party notices",
+  "@legalDocCredits": {
+    "description": "Title of a document listing fonts, images and software by others."
+  },
+  "legalReadTerms": "Read the terms of use",
+  "@legalReadTerms": {
+    "description": "Link that opens the Terms of Use."
+  },
+  "legalReadPrivacy": "Read the privacy policy",
+  "@legalReadPrivacy": {
+    "description": "Link that opens the Privacy policy."
+  },
+  "legalEnglishOnly": "This document is available in English only. The English version is the binding one.",
+  "@legalEnglishOnly": {
+    "description": "Shown above a legal document when the app is not in English."
+  },
+  "legalHubTitle": "Legal & about",
+  "@legalHubTitle": {
+    "description": "Screen listing the legal documents, licences and app version."
+  },
+  "legalOpenSourceLicences": "Open-source licences",
+  "legalAppVersion": "Elderly Care, version {version}",
+  "@legalAppVersion": {
+    "description": "Elderly Care is the app's name; version is e.g. '2.1.0'.",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "legalVersion": "Version {version}",
+  "@legalVersion": {
+    "description": "Shown on the open-source licences page; version is e.g. '2.1.0'.",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "legalAcceptedOn": "You accepted version {version} of these documents on {date}.",
+  "@legalAcceptedOn": {
+    "description": "version is the legal documents' version number; date is e.g. '1 November 2026'.",
+    "placeholders": {
+      "version": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "legalAgree": "I agree to the Terms of Use, and I have read the Medical disclaimer and the Privacy policy",
+  "@legalAgree": {
+    "description": "Checkbox label. Use the same document names as legalDocTerms, legalDocMedical and legalDocPrivacy."
+  },
+  "legalTickBox": "Please tick the box to continue.",
+  "legalNotMedicalService": "Elderly Care is not a medical service. In an emergency, call 112.",
+  "@legalNotMedicalService": {
+    "description": "Elderly Care is the app's name; 112 is the emergency number, keep it."
+  },
+  "legalReviewTitle": "Please review our terms",
+  "@legalReviewTitle": {
+    "description": "Title when an existing user is asked to accept the legal documents for the first time."
+  },
+  "legalUpdatedTitle": "Our terms have been updated",
+  "legalUpdateBody": "Before you continue, please read and accept the Terms of Use, the Medical disclaimer and the Privacy policy (version {version}, effective {date}). Your information stays on this device.",
+  "@legalUpdateBody": {
+    "description": "version is the documents' version number; date is when they take effect, e.g. '1 November 2026'.",
+    "placeholders": {
+      "version": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "medicinesTitle": "Medicines",
+  "medicinesAdd": "Add medicine",
+  "@medicinesAdd": {
+    "description": "Button on the medicines list that opens the form for a new medicine; also the title of that form."
+  },
+  "medicinesEmptyTitle": "No medicines yet",
+  "medicinesEmptyMessage": "Add your medicines and we will remind you when each dose is due.",
+  "medicinesTodaySchedule": "Today's schedule",
+  "medicinesTakenToday": "{taken} of {total} taken",
+  "@medicinesTakenToday": {
+    "description": "Next to today's schedule: how many of today's doses have been taken.",
+    "placeholders": {
+      "taken": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "medicinesMine": "My medicines",
+  "@medicinesMine": {
+    "description": "Section heading above the list of the user's medicines."
+  },
+  "medicinesTimesADay": "{count}× a day",
+  "@medicinesTimesADay": {
+    "description": "How often a medicine is taken, shown short, e.g. '2× a day'. The × sign means 'times'.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "medicinesDisclaimer": "Always take medicines as your doctor or pharmacist told you. Reminders can sometimes be late, so do not rely on them alone.",
+  "medicinesSupplyLow": "Only {count} doses left – time to refill",
+  "@medicinesSupplyLow": {
+    "description": "Warning when a medicine pack is nearly empty.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "medicinesSupplyLeft": "{count} doses left (about {days} days)",
+  "@medicinesSupplyLeft": {
+    "description": "How many doses are left in the pack and roughly how many days that lasts.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "medicinesLastWeek": "Last 7 days: {taken} of {due} doses taken",
+  "@medicinesLastWeek": {
+    "placeholders": {
+      "taken": {
+        "type": "int"
+      },
+      "due": {
+        "type": "int"
+      }
+    }
+  },
+  "medicinesLateTitle": "Reminders may arrive late",
+  "medicinesLateMessage": "Your phone is saving battery by delaying reminders. Allow Elderly Care to remind you at the exact time.",
+  "@medicinesLateMessage": {
+    "description": "Android only. 'Elderly Care' is the app's name."
+  },
+  "medicinesLateAllow": "Allow on-time reminders",
+  "@medicinesLateAllow": {
+    "description": "Button that opens the phone setting allowing reminders at the exact time."
+  },
+  "doseStatusTaken": "Taken",
+  "@doseStatusTaken": {
+    "description": "Status of a dose in today's schedule: the user took it."
+  },
+  "doseStatusNotTaken": "Not taken",
+  "@doseStatusNotTaken": {
+    "description": "Status of a dose: the user said they did not take it."
+  },
+  "doseStatusOverdue": "Overdue",
+  "@doseStatusOverdue": {
+    "description": "Status of a dose that was due more than an hour ago and has no answer yet."
+  },
+  "doseStatusDue": "Due now",
+  "doseStatusLater": "Later",
+  "@doseStatusLater": {
+    "description": "Status of a dose that is due later today."
+  },
+  "doseRowSubtitle": "{time} · {status}",
+  "@doseRowSubtitle": {
+    "description": "A dose in today's schedule: its time and its status, e.g. '08:00 · Due now'.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "doseCheck": "Check",
+  "@doseCheck": {
+    "description": "Button on a due dose that opens the 'Did you take it?' screen."
+  },
+  "doseCheckTitle": "Medicine check",
+  "doseCheckQuestion": "Did you take your {medicine}?",
+  "@doseCheckQuestion": {
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "doseCheckWhen": "{day} at {time}",
+  "@doseCheckWhen": {
+    "description": "When a dose was due, e.g. 'Today at 08:00'. {day} is a word like Today/Yesterday or a date.",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "doseCheckYes": "Yes, I took it",
+  "doseCheckNo": "No, not yet",
+  "doseTellFamilyTitle": "Let your family know?",
+  "doseTellFamilyMessage": "We can send a text to {names} saying you missed your {medicine}.",
+  "@doseTellFamilyMessage": {
+    "description": "{names} is a comma-separated list of family members' names.",
+    "placeholders": {
+      "names": {
+        "type": "String"
+      },
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "doseTellFamilySend": "Send text",
+  "@doseTellFamilySend": {
+    "description": "Button that sends an SMS to family."
+  },
+  "doseMissedSms": "{name} did not take {medicine} ({time}) today. Please check in.",
+  "@doseMissedSms": {
+    "description": "SMS sent to family members when the user missed a dose. {name} is the user's first name; {time} is when the dose was due.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "medicine": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "doseMissedSmsNoName": "I did not take {medicine} ({time}) today. Please check in.",
+  "@doseMissedSmsNoName": {
+    "description": "SMS sent to family when the user missed a dose and has not entered a name; written as the user speaking.",
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "doseRecordedTaken": "Well done! {medicine} recorded.",
+  "@doseRecordedTaken": {
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "doseRecordedNotTaken": "Noted. {medicine} not taken.",
+  "@doseRecordedNotTaken": {
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "doseTakenFromNotification": "{medicine} recorded as taken. Well done!",
+  "@doseTakenFromNotification": {
+    "description": "Shown after the user taps 'Taken' on a reminder notification.",
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "doseSnoozed": "We will remind you about {medicine} again in 10 minutes.",
+  "@doseSnoozed": {
+    "description": "Shown after the user taps 'In 10 min' on a reminder notification.",
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "medicineEditTitle": "Edit medicine",
+  "medicineEditSaveChanges": "Save changes",
+  "medicineEditSaveNew": "Save reminder",
+  "@medicineEditSaveNew": {
+    "description": "Button that saves a new medicine and sets its reminders."
+  },
+  "medicineEditDeleteTooltip": "Delete medicine",
+  "medicineEditDeleteTitle": "Delete {medicine}?",
+  "@medicineEditDeleteTitle": {
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "medicineEditDeleteMessage": "You will no longer get reminders for this medicine.",
+  "medicineEditReminderSet": "Reminder set for {medicine}",
+  "@medicineEditReminderSet": {
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "medicineEditSaved": "Saved {medicine}",
+  "@medicineEditSaved": {
+    "placeholders": {
+      "medicine": {
+        "type": "String"
+      }
+    }
+  },
+  "medicineEditNameLabel": "Medicine name",
+  "medicineEditNameHint": "e.g. Metformin",
+  "medicineEditNameRequired": "Please enter the medicine name",
+  "medicineEditDosageLabel": "How much (optional)",
+  "medicineEditDosageHint": "e.g. 1 tablet, 500 mg",
+  "medicineEditSupplyLabel": "Doses left in the pack (optional)",
+  "medicineEditSupplyHint": "e.g. 30",
+  "medicineEditSupplyHelper": "We will warn you when it is time to refill.",
+  "medicineEditSupplyInvalid": "Please enter a whole number",
+  "medicineEditType": "Type",
+  "@medicineEditType": {
+    "description": "Heading above the choices Tablet, Capsule, Syrup, …"
+  },
+  "medicineEditHowOften": "How many times a day?",
+  "medicineEditOnce": "Once",
+  "medicineEditTwice": "Twice",
+  "medicineEditThreeTimes": "3 times",
+  "medicineEditAtWhatTimes": "At what times?",
+  "medicineEditDoseNumber": "Dose {number}",
+  "@medicineEditDoseNumber": {
+    "description": "Label for the 1st, 2nd or 3rd dose of the day.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "medicineEditDoseTime": "Dose {number} time",
+  "@medicineEditDoseTime": {
+    "description": "Heading of the time picker for the 1st, 2nd or 3rd dose.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "medicineEditChange": "Change",
+  "@medicineEditChange": {
+    "description": "Shown at the end of a row that can be tapped to change a time."
+  },
+  "appointmentsTitle": "Appointments",
+  "appointmentsUpcomingTab": "Upcoming ({count})",
+  "@appointmentsUpcomingTab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "appointmentsPastTab": "Past ({count})",
+  "@appointmentsPastTab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "appointmentsAdd": "Add appointment",
+  "appointmentsNoPast": "No past appointments",
+  "appointmentsNoUpcoming": "No upcoming appointments",
+  "appointmentsNoPastMessage": "Appointments move here once they are over.",
+  "appointmentsNoUpcomingMessage": "Add your next doctor visit and we will remind you an hour before.",
+  "appointmentsAttended": "Attended",
+  "@appointmentsAttended": {
+    "description": "Marks an appointment the user went to."
+  },
+  "appointmentEditTitle": "Appointment",
+  "appointmentEditNewTitle": "New appointment",
+  "appointmentEditSaveChanges": "Save changes",
+  "appointmentEditSaveNew": "Save appointment",
+  "appointmentEditDeleteTooltip": "Delete appointment",
+  "appointmentEditDeleteTitle": "Delete appointment?",
+  "appointmentEditDeleteMessage": "Your appointment with {doctor} will be removed.",
+  "@appointmentEditDeleteMessage": {
+    "placeholders": {
+      "doctor": {
+        "type": "String"
+      }
+    }
+  },
+  "appointmentEditSaved": "Appointment with {doctor} saved",
+  "@appointmentEditSaved": {
+    "placeholders": {
+      "doctor": {
+        "type": "String"
+      }
+    }
+  },
+  "appointmentEditDoctorLabel": "Doctor's name",
+  "appointmentEditDoctorHint": "e.g. Dr. Naidoo",
+  "appointmentEditDoctorRequired": "Please enter the doctor's name",
+  "appointmentEditSpecialtyLabel": "Type of doctor (optional)",
+  "appointmentEditSpecialtyHint": "e.g. Cardiologist",
+  "appointmentEditPlaceLabel": "Where (optional)",
+  "appointmentEditPlaceHint": "Hospital, clinic or home visit",
+  "appointmentEditWhen": "When",
+  "@appointmentEditWhen": {
+    "description": "Heading above the appointment's date and time."
+  },
+  "appointmentEditChange": "Change",
+  "@appointmentEditChange": {
+    "description": "Shown at the end of the date row; tapping it changes the date and time."
+  },
+  "appointmentEditNotesLabel": "Notes (optional)",
+  "appointmentEditNotesHint": "Questions to ask, things to bring…",
+  "appointmentEditAttended": "I went to this appointment",
+  "notesTitle": "Notes",
+  "notesNew": "New note",
+  "notesEmptyTitle": "No notes yet",
+  "notesEmptyMessage": "Write down things to remember, questions for the doctor, or anything else.",
+  "notesUpdated": "Updated {day}",
+  "@notesUpdated": {
+    "description": "When a note was last changed. {day} is 'today', 'yesterday' or a date, already in lower case.",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "notesImportantUpdated": "Important · Updated {day}",
+  "@notesImportantUpdated": {
+    "description": "Same as notesUpdated, for a note marked important.",
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "noteEditTitle": "Edit note",
+  "noteEditSave": "Save note",
+  "noteEditSaved": "Note saved",
+  "noteEditDeleteTooltip": "Delete note",
+  "noteEditDeleteTitle": "Delete this note?",
+  "noteEditDeleteMessage": "\"{title}\" will be removed.",
+  "@noteEditDeleteMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "noteEditTitleLabel": "Title",
+  "@noteEditTitleLabel": {
+    "description": "Label of the field for a note's title."
+  },
+  "noteEditTitleRequired": "Please enter a title",
+  "noteEditBodyLabel": "Note",
+  "@noteEditBodyLabel": {
+    "description": "Label of the field for a note's text."
+  },
+  "noteEditHowImportant": "How important is it?",
+  "noteEditImportant": "Important",
+  "noteEditNormal": "Normal",
+  "@noteEditNormal": {
+    "description": "Priority of a note that is not marked important."
+  },
+  "healthIntro": "Keep a record of your readings, then tap Share to send your doctor a summary.",
+  "@healthIntro": {
+    "description": "\"Share\" must match commonShare (the button at the top of the screen)."
+  },
+  "healthDisclaimer": "Tips here are general information for adults, not medical advice. Ask your doctor what readings are right for you. If you feel very unwell, call 112.",
+  "@healthDisclaimer": {
+    "description": "112 is the emergency phone number; keep it as is."
+  },
+  "healthNoReadings": "No readings yet",
+  "healthShareSubject": "Health summary for {name}",
+  "@healthShareSubject": {
+    "description": "Subject line of the email/message that sends the health summary to the doctor.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Margaret Smith"
+      }
+    }
+  },
+  "healthShareSubjectNoName": "Health summary for me",
+  "@healthShareSubjectNoName": {
+    "description": "Subject line used when the user has not entered a name."
+  },
+  "healthShareTitle": "Send your doctor a summary of the last 30 days",
+  "healthShareAsPdf": "As a PDF document",
+  "healthShareAsPdfSubtitle": "Neat tables, easy to print",
+  "healthShareAsText": "As a message",
+  "healthShareAsTextSubtitle": "Plain text for email or WhatsApp",
+  "trackingAddReading": "Add reading",
+  "trackingFirstReading": "Add your first reading to start tracking.",
+  "trackingOneMore": "Add one more reading to see a chart.",
+  "trackingReadings": "Readings",
+  "@trackingReadings": {
+    "description": "Section heading above the list of saved health readings."
+  },
+  "trackingDeleteReading": "Delete reading",
+  "trackingDeleteReadingTitle": "Delete reading?",
+  "trackingDeleteReadingMessage": "{reading} on {day}",
+  "@trackingDeleteReadingMessage": {
+    "description": "Asks to confirm deleting a reading, e.g. \"120/80 mmHg on Today\".",
+    "placeholders": {
+      "reading": {
+        "type": "String",
+        "example": "120/80 mmHg"
+      },
+      "day": {
+        "type": "String",
+        "example": "Today"
+      }
+    }
+  },
+  "trackingChartLabel": "{count, plural, other{{type} chart of the last {count} readings. Latest {latest}.}}",
+  "@trackingChartLabel": {
+    "description": "Read by screen readers for the chart. type is the reading type, e.g. Blood pressure; latest is the latest value.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "type": {
+        "type": "String",
+        "example": "Blood pressure"
+      },
+      "latest": {
+        "type": "String",
+        "example": "120/80 mmHg"
+      }
+    }
+  },
+  "trackingFieldRequired": "Please enter {field}",
+  "@trackingFieldRequired": {
+    "description": "Form error. field is the field name in lower case, e.g. \"diastolic (bottom number)\".",
+    "placeholders": {
+      "field": {
+        "type": "String",
+        "example": "diastolic (bottom number)"
+      }
+    }
+  },
+  "trackingEnterNumber": "Please enter a number",
+  "trackingOutOfRange": "Should be between {min} and {max}",
+  "@trackingOutOfRange": {
+    "description": "Form error when a reading is outside the allowed range.",
+    "placeholders": {
+      "min": {
+        "type": "String",
+        "example": "60"
+      },
+      "max": {
+        "type": "String",
+        "example": "250"
+      }
+    }
+  },
+  "trackingReadingSaved": "{type} reading saved",
+  "@trackingReadingSaved": {
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "Blood pressure"
+      }
+    }
+  },
+  "trackingSaveReading": "Save reading",
+  "trackingNewReadingTitle": "New {type} reading",
+  "@trackingNewReadingTitle": {
+    "description": "Screen title. type is the reading type in lower case, e.g. \"blood pressure\".",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "blood pressure"
+      }
+    }
+  },
+  "trackingChangeTime": "Change",
+  "@trackingChangeTime": {
+    "description": "Shown next to the date and time of a reading; tap to change it."
+  },
+  "trackingNotes": "Notes (optional)",
+  "trackingNotesHint": "e.g. after breakfast",
+  "documentTakePhoto": "Take a photo",
+  "documentChooseFromGallery": "Choose from gallery",
+  "documentPickFailed": "Could not open the camera or gallery.",
+  "documentAdd": "Add document",
+  "documentNoneTitle": "No documents yet",
+  "documentNoneMessage": "Take photos of prescriptions, test results and medical aid cards to keep them handy.",
+  "@documentNoneMessage": {
+    "description": "\"Medical aid\" is South African health insurance."
+  },
+  "documentSearch": "Search documents",
+  "documentNoMatch": "Nothing matches \"{query}\".",
+  "@documentNoMatch": {
+    "description": "Shown when a search finds nothing. query is what the user typed.",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "documentSaved": "Document saved",
+  "documentSave": "Save document",
+  "documentName": "Name",
+  "documentNameHint": "e.g. Blood test March",
+  "documentNameRequired": "Please enter a name so you can find it later",
+  "documentDelete": "Delete document",
+  "documentDeleteTitle": "Delete {name}?",
+  "@documentDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Blood test March"
+      }
+    }
+  },
+  "documentDeleteMessage": "This photo will be removed from the app.",
+  "hospitalRefresh": "Refresh",
+  "hospitalEmergencyCall": "Emergency? Call {number}",
+  "@hospitalEmergencyCall": {
+    "placeholders": {
+      "number": {
+        "type": "String",
+        "example": "112"
+      }
+    }
+  },
+  "hospitalSearching": "Looking for hospitals near you…",
+  "hospitalSearchFailed": "Could not search",
+  "hospitalCheckInternet": "Please check your internet connection and try again.",
+  "hospitalTryAgain": "Try again",
+  "hospitalNoneFound": "None found within 10 km",
+  "hospitalNoneFoundMessage": "In an emergency, call the number above.",
+  "hospitalCount": "{count, plural, =1{1 place within 10 km} other{{count} places within 10 km}}",
+  "@hospitalCount": {
+    "description": "Heading above the list of hospitals and clinics found.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hospitalListNote": "This list comes from OpenStreetMap and may be incomplete or out of date. Not every place has an emergency unit: phone first if you can.",
+  "hospitalAttribution": "Data © OpenStreetMap contributors",
+  "@hospitalAttribution": {
+    "description": "Required map data credit; keep \"OpenStreetMap\" and \"©\" unchanged."
+  },
+  "hospitalDistanceMeters": "{meters} m away",
+  "@hospitalDistanceMeters": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "hospitalDistanceKm": "{km} km away",
+  "@hospitalDistanceKm": {
+    "placeholders": {
+      "km": {
+        "type": "String",
+        "example": "4.2"
+      }
+    }
+  },
+  "hospitalDirections": "Directions",
+  "@hospitalDirections": {
+    "description": "Button that opens a map with directions to the hospital."
+  },
+  "sosTitle": "How can we help?",
+  "@sosTitle": {
+    "description": "Heading of the emergency (SOS) options sheet."
+  },
+  "sosCallEmergency": "Call emergency services",
+  "sosDial": "Dial {number}",
+  "@sosDial": {
+    "placeholders": {
+      "number": {
+        "type": "String",
+        "example": "112"
+      }
+    }
+  },
+  "sosAlertFamily": "Alert my family",
+  "sosAlertFamilySubtitle": "Text everyone my location",
+  "sosShowMedicalId": "Show my medical ID",
+  "sosShowMedicalIdSubtitle": "Allergies, medicines and contacts for helpers",
+  "sosCallPerson": "Call {name}",
+  "@sosCallPerson": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Peter"
+      }
+    }
+  },
+  "sosAddFamilyFirst": "Add a family member so we know who to alert.",
+  "sosAddFamily": "Add family",
+  "sosFindingLocation": "Finding your location…",
+  "sosSendingWithoutLocation": "{problem} Sending without location.",
+  "@sosSendingWithoutLocation": {
+    "description": "problem is a full sentence explaining why the location could not be found.",
+    "placeholders": {
+      "problem": {
+        "type": "String",
+        "example": "Location is switched off. Please turn it on in your phone settings."
+      }
+    }
+  },
+  "sosLocationUnavailable": "Location unavailable. Sending without it.",
+  "sosAlertSms": "{name} needs help and asked Elderly Care to alert you.",
+  "@sosAlertSms": {
+    "description": "Text message sent to family in an emergency. name is the user's first name. Elderly Care is the app's name.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Margaret"
+      }
+    }
+  },
+  "sosAlertSmsWithLocation": "{name} needs help and asked Elderly Care to alert you. Current location: {link}",
+  "@sosAlertSmsWithLocation": {
+    "description": "Text message sent to family in an emergency, with a map link to where the user is.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Margaret"
+      },
+      "link": {
+        "type": "String",
+        "example": "https://www.google.com/maps/search/?api=1&query=-33.92,18.42"
+      }
+    }
+  },
+  "sosAlertSmsNoName": "I need help and asked Elderly Care to alert you.",
+  "@sosAlertSmsNoName": {
+    "description": "Emergency text message, written by the user in the first person, used when no name is set."
+  },
+  "sosAlertSmsNoNameWithLocation": "I need help and asked Elderly Care to alert you. Current location: {link}",
+  "@sosAlertSmsNoNameWithLocation": {
+    "placeholders": {
+      "link": {
+        "type": "String"
+      }
+    }
+  },
+  "familyAddPerson": "Add person",
+  "familyNoneTitle": "No family added yet",
+  "familyNoneMessage": "Add the people who look after you so you can reach them quickly.",
+  "familyAlertEveryone": "Alert everyone with my location",
+  "familyEditPerson": "Edit {name}",
+  "@familyEditPerson": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Peter"
+      }
+    }
+  },
+  "relativeSaved": "{name} saved",
+  "@relativeSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Peter"
+      }
+    }
+  },
+  "relativeRemoveTitle": "Remove {name}?",
+  "@relativeRemoveTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Peter"
+      }
+    }
+  },
+  "relativeRemoveMessage": "They will no longer be alerted in an emergency.",
+  "relativeEditTitle": "Edit family member",
+  "relativeAddTitle": "Add family member",
+  "relativeRemove": "Remove family member",
+  "relativeName": "Name",
+  "relativeNameRequired": "Please enter a name",
+  "relativeRelationship": "Relationship (optional)",
+  "relativeRelationshipHint": "e.g. Son, Neighbour, Nurse",
+  "relativePhone": "Phone number",
+  "relativePhoneRequired": "Please enter a phone number",
+  "relativePhoneTooShort": "That number looks too short",
+  "relativeEmail": "Email (optional)",
+  "videoHeading": "See and talk to your family",
+  "videoExplanation": "The call opens in your browser or the Jitsi Meet app. It is free and needs no account.",
+  "@videoExplanation": {
+    "description": "Jitsi Meet is the name of a video call app; keep it unchanged."
+  },
+  "videoTextFamily": "Text my family the link",
+  "videoAddFamilyFirst": "Add family first",
+  "videoVoiceOnly": "Voice only (no camera)",
+  "videoStartMuted": "Start with microphone off",
+  "videoStart": "Start video call",
+  "videoOpenFailed": "Could not open the video call.",
+  "videoInviteSms": "{name} would like a video call. Join here: {link}",
+  "@videoInviteSms": {
+    "description": "Text message sent to family. name is the user's first name.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Margaret"
+      },
+      "link": {
+        "type": "String",
+        "example": "https://meet.jit.si/ElderlyCare-abc123"
+      }
+    }
+  },
+  "locationOff": "Location is switched off. Please turn it on in your phone settings.",
+  "locationNoPermission": "Elderly Care needs permission to see your location.",
+  "@locationNoPermission": {
+    "description": "Elderly Care is the app's name."
+  },
+  "locationNotFound": "We could not find your location.",
+  "shareBackupPickerTitle": "Choose your Elderly Care backup",
+  "@shareBackupPickerTitle": {
+    "description": "Title of the file picker used to restore a backup file."
+  }
+}

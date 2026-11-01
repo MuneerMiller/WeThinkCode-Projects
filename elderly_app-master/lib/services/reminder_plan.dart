@@ -1,4 +1,5 @@
 import '../data/models.dart';
+import '../l10n/gen/app_localizations.dart';
 
 enum ReminderKind { dose, followUp, appointment }
 
@@ -88,6 +89,7 @@ class ReminderPlan {
     required List<Medicine> medicines,
     required List<Appointment> appointments,
     required DateTime now,
+    required AppLocalizations l10n,
   }) {
     final out = <PlannedReminder>[];
     for (final m in medicines) {
@@ -102,10 +104,10 @@ class ReminderPlan {
             kind: ReminderKind.dose,
             at: first,
             daily: true,
-            title: 'Time for ${m.name}',
+            title: l10n.notifyDoseTitle(m.name),
             body: m.dosage.isEmpty
-                ? 'Tap "Taken" once you have taken it.'
-                : 'Take ${m.dosage}, then tap "Taken".',
+                ? l10n.notifyDoseBody
+                : l10n.notifyDoseBodyWithDosage(m.dosage),
             payload: payload,
           ),
         );
@@ -120,10 +122,8 @@ class ReminderPlan {
               id: followUpId(m.id, i, d),
               kind: ReminderKind.followUp,
               at: at,
-              title: 'Did you take your ${m.name}?',
-              body:
-                  'It was due at ${slot.key}. Let us know so your record '
-                  'stays right.',
+              title: l10n.notifyFollowUpTitle(m.name),
+              body: l10n.notifyFollowUpBody(slot.key),
               payload: payload,
             ),
           );
@@ -138,7 +138,7 @@ class ReminderPlan {
           id: appointmentId(a.id),
           kind: ReminderKind.appointment,
           at: at,
-          title: 'Appointment in 1 hour',
+          title: l10n.notifyAppointmentTitle,
           body: [a.doctor, if (a.place.isNotEmpty) a.place].join(' · '),
         ),
       );

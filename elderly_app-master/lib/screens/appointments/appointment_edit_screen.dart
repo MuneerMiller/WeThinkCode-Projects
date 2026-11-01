@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../app_scope.dart';
 import '../../data/models.dart';
+import '../../l10n/l10n.dart';
 import '../../widgets/common.dart';
 
 class AppointmentEditScreen extends StatefulWidget {
@@ -57,18 +58,19 @@ class _AppointmentEditScreenState extends State<AppointmentEditScreen> {
       ..done = _done;
     await store.saveAppointment(a);
     if (mounted) {
-      showMessage(context, 'Appointment with ${a.doctor} saved');
+      showMessage(context, context.l10n.appointmentEditSaved(a.doctor));
       Navigator.pop(context);
     }
   }
 
   Future<void> _delete() async {
+    final l = context.l10n;
     final a = widget.appointment!;
     final ok = await confirm(
       context,
-      title: 'Delete appointment?',
-      message: 'Your appointment with ${a.doctor} will be removed.',
-      confirmLabel: 'Delete',
+      title: l.appointmentEditDeleteTitle,
+      message: l.appointmentEditDeleteMessage(a.doctor),
+      confirmLabel: l.commonDelete,
       destructive: true,
     );
     if (!ok || !mounted) return;
@@ -79,6 +81,7 @@ class _AppointmentEditScreenState extends State<AppointmentEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     final editing = widget.appointment != null;
     return Scaffold(
@@ -86,15 +89,19 @@ class _AppointmentEditScreenState extends State<AppointmentEditScreen> {
         child: FilledButton.icon(
           onPressed: _save,
           icon: const Icon(Icons.check_rounded),
-          label: Text(editing ? 'Save changes' : 'Save appointment'),
+          label: Text(
+            editing ? l.appointmentEditSaveChanges : l.appointmentEditSaveNew,
+          ),
         ),
       ),
       appBar: AppBar(
-        title: Text(editing ? 'Appointment' : 'New appointment'),
+        title: Text(
+          editing ? l.appointmentEditTitle : l.appointmentEditNewTitle,
+        ),
         actions: [
           if (editing)
             IconButton(
-              tooltip: 'Delete appointment',
+              tooltip: l.appointmentEditDeleteTooltip,
               onPressed: _delete,
               icon: const Icon(Icons.delete_outline_rounded),
             ),
@@ -113,32 +120,33 @@ class _AppointmentEditScreenState extends State<AppointmentEditScreen> {
                 children: [
                   TextFormField(
                     controller: _doctor,
-                    decoration: const InputDecoration(
-                      labelText: "Doctor's name",
-                      hintText: 'e.g. Dr. Naidoo',
+                    decoration: InputDecoration(
+                      labelText: l.appointmentEditDoctorLabel,
+                      hintText: l.appointmentEditDoctorHint,
                     ),
                     textCapitalization: TextCapitalization.words,
-                    validator: (v) => requiredField(v, "the doctor's name"),
+                    validator: (v) =>
+                        requiredField(v, l.appointmentEditDoctorRequired),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _specialty,
-                    decoration: const InputDecoration(
-                      labelText: 'Type of doctor (optional)',
-                      hintText: 'e.g. Cardiologist',
+                    decoration: InputDecoration(
+                      labelText: l.appointmentEditSpecialtyLabel,
+                      hintText: l.appointmentEditSpecialtyHint,
                     ),
                     textCapitalization: TextCapitalization.sentences,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _place,
-                    decoration: const InputDecoration(
-                      labelText: 'Where (optional)',
-                      hintText: 'Hospital, clinic or home visit',
+                    decoration: InputDecoration(
+                      labelText: l.appointmentEditPlaceLabel,
+                      hintText: l.appointmentEditPlaceHint,
                     ),
                     textCapitalization: TextCapitalization.sentences,
                   ),
-                  const SectionHeader('When'),
+                  SectionHeader(l.appointmentEditWhen),
                   Card(
                     child: ListTile(
                       leading: const Icon(
@@ -150,16 +158,16 @@ class _AppointmentEditScreenState extends State<AppointmentEditScreen> {
                         formatTime(context, _when),
                         style: theme.textTheme.titleMedium,
                       ),
-                      trailing: const Text('Change'),
+                      trailing: Text(l.appointmentEditChange),
                       onTap: _pickWhen,
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _notes,
-                    decoration: const InputDecoration(
-                      labelText: 'Notes (optional)',
-                      hintText: 'Questions to ask, things to bring…',
+                    decoration: InputDecoration(
+                      labelText: l.appointmentEditNotesLabel,
+                      hintText: l.appointmentEditNotesHint,
                       alignLabelWithHint: true,
                     ),
                     minLines: 3,
@@ -170,7 +178,7 @@ class _AppointmentEditScreenState extends State<AppointmentEditScreen> {
                     const SizedBox(height: 12),
                     SwitchListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                      title: const Text('I went to this appointment'),
+                      title: Text(l.appointmentEditAttended),
                       value: _done,
                       onChanged: (v) => setState(() => _done = v),
                     ),

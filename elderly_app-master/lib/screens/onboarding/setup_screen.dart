@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../data/models.dart';
+import '../../l10n/l10n.dart';
 import '../../widgets/common.dart';
 import '../../legal/legal.dart';
 import '../../legal/legal_screens.dart';
@@ -56,10 +57,11 @@ class _SetupScreenState extends State<SetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     return Scaffold(
       bottomNavigationBar: BottomAction(
-        child: FilledButton(onPressed: _finish, child: const Text('Continue')),
+        child: FilledButton(onPressed: _finish, child: Text(l.commonContinue)),
       ),
       body: SafeArea(
         child: Form(
@@ -80,38 +82,36 @@ class _SetupScreenState extends State<SetupScreen> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Welcome to Elderly Care',
+                      l.setupWelcome,
                       style: theme.textTheme.headlineMedium,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Just a few details to get you started. Everything stays on this phone.',
+                      l.setupIntro,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SectionHeader('About you'),
+                    SectionHeader(l.setupAboutYou),
                     TextFormField(
                       controller: _name,
-                      decoration: const InputDecoration(labelText: 'Your name'),
+                      decoration: InputDecoration(labelText: l.setupYourName),
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.next,
-                      validator: (v) => requiredField(v, 'your name'),
+                      validator: (v) => requiredField(v, l.setupNameRequired),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _phone,
-                      decoration: const InputDecoration(
-                        labelText: 'Your phone number (optional)',
-                      ),
+                      decoration: InputDecoration(labelText: l.setupYourPhone),
                       keyboardType: TextInputType.phone,
                       textInputAction: TextInputAction.next,
                     ),
-                    const SectionHeader('Emergency contact'),
+                    SectionHeader(l.setupEmergencyContact),
                     Text(
-                      'Someone we can call or text for you when you need help.',
+                      l.setupEmergencyContactInfo,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -119,18 +119,16 @@ class _SetupScreenState extends State<SetupScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _relName,
-                      decoration: const InputDecoration(
-                        labelText: 'Their name',
-                      ),
+                      decoration: InputDecoration(labelText: l.setupTheirName),
                       textCapitalization: TextCapitalization.words,
                       textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _relRelationship,
-                      decoration: const InputDecoration(
-                        labelText: 'Relationship',
-                        hintText: 'e.g. Daughter',
+                      decoration: InputDecoration(
+                        labelText: l.setupRelationship,
+                        hintText: l.setupRelationshipHint,
                       ),
                       textCapitalization: TextCapitalization.sentences,
                       textInputAction: TextInputAction.next,
@@ -138,17 +136,15 @@ class _SetupScreenState extends State<SetupScreen> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _relPhone,
-                      decoration: const InputDecoration(
-                        labelText: 'Their phone number',
-                      ),
+                      decoration: InputDecoration(labelText: l.setupTheirPhone),
                       keyboardType: TextInputType.phone,
                       validator: (v) => _relName.text.trim().isNotEmpty
-                          ? requiredField(v, 'their phone number')
+                          ? requiredField(v, l.setupTheirPhoneRequired)
                           : null,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'You can add more family members later.',
+                      l.setupAddMoreLater,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),

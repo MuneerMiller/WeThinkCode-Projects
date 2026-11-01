@@ -6,6 +6,7 @@ import '../../theme.dart';
 import '../../widgets/common.dart';
 import '../../legal/legal_screens.dart';
 import '../../legal/legal.dart';
+import '../../l10n/l10n.dart';
 import 'dose_check_screen.dart';
 import 'medicine_edit_screen.dart';
 
@@ -14,6 +15,7 @@ class MedicinesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final store = context.store;
     final now = DateTime.now();
     final doses = store.dosesToday(now);
@@ -21,7 +23,7 @@ class MedicinesScreen extends StatelessWidget {
       ..sort((a, b) => a.name.compareTo(b.name));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Medicines')),
+      appBar: AppBar(title: Text(l.medicinesTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(
@@ -32,16 +34,15 @@ class MedicinesScreen extends StatelessWidget {
           ),
         ),
         icon: const Icon(Icons.add_rounded, size: 28),
-        label: const Text('Add medicine'),
+        label: Text(l.medicinesAdd),
       ),
       body: medicines.isEmpty
-          ? const Center(
+          ? Center(
               child: EmptyState(
                 icon: Icons.medication_rounded,
                 image: 'assets/images/medicines.png',
-                title: 'No medicines yet',
-                message:
-                    'Add your medicines and we will remind you when each dose is due.',
+                title: l.medicinesEmptyTitle,
+                message: l.medicinesEmptyMessage,
               ),
             )
           : ListView(
@@ -53,10 +54,14 @@ class MedicinesScreen extends StatelessWidget {
                     children: [
                       const _OnTimeRemindersCard(),
                       SectionHeader(
-                        "Today's schedule",
+                        l.medicinesTodaySchedule,
                         trailing: Text(
-                          '${doses.where((d) => d.status == DoseStatus.taken).length}'
-                          ' of ${doses.length} taken',
+                          l.medicinesTakenToday(
+                            doses
+                                .where((d) => d.status == DoseStatus.taken)
+                                .length,
+                            doses.length,
+                          ),
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),
@@ -71,7 +76,7 @@ class MedicinesScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SectionHeader('My medicines'),
+                      SectionHeader(l.medicinesMine),
                       for (final m in medicines)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 12),
@@ -85,7 +90,7 @@ class MedicinesScreen extends StatelessWidget {
                                   Text(
                                     [
                                       if (m.dosage.isNotEmpty) m.dosage,
-                                      '${m.times.length}× a day',
+                                      l.medicinesTimesADay(m.times.length),
                                       ([...m.times]..sort())
                                           .map(
                                             (t) => t.timeOfDay.format(context),
@@ -109,9 +114,7 @@ class MedicinesScreen extends StatelessWidget {
                           ),
                         ),
                       DisclaimerNote(
-                        'Always take medicines as your doctor or pharmacist '
-                        'told you. Reminders can sometimes be late, so do not '
-                        'rely on them alone.',
+                        l.medicinesDisclaimer,
                         onReadMore: () =>
                             openLegalDoc(context, LegalDoc.medical),
                       ),
@@ -130,36 +133,41 @@ class _DoseRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     final (IconData icon, Color color, String label) = switch (dose.status) {
       DoseStatus.taken => (
         Icons.check_circle_rounded,
         const Color(0xFF2E7D32),
-        'Taken',
+        l.doseStatusTaken,
       ),
-      DoseStatus.skipped => (Icons.cancel_rounded, scheme.error, 'Not taken'),
+      DoseStatus.skipped => (
+        Icons.cancel_rounded,
+        scheme.error,
+        l.doseStatusNotTaken,
+      ),
       DoseStatus.due => (
         Icons.notifications_active_rounded,
         scheme.primary,
         // More than an hour late reads as overdue rather than due.
         DateTime.now().difference(dose.time).inMinutes > 60
-            ? 'Overdue'
-            : 'Due now',
+            ? l.doseStatusOverdue
+            : l.doseStatusDue,
       ),
       DoseStatus.upcoming => (
         Icons.schedule_rounded,
         scheme.onSurfaceVariant,
-        'Later',
+        l.doseStatusLater,
       ),
     };
     return ListTile(
       leading: Icon(icon, color: color, size: 34),
       title: Text(dose.medicine.name),
-      subtitle: Text('${formatTime(context, dose.time)} · $label'),
+      subtitle: Text(l.doseRowSubtitle(formatTime(context, dose.time), label)),
       trailing: dose.status == DoseStatus.due
           ? FilledButton(
               onPressed: () => openDoseCheck(context, dose),
-              child: const Text('Check'),
+              child: Text(l.doseCheck),
             )
           : null,
       onTap: () => openDoseCheck(context, dose),
@@ -175,6 +183,7 @@ class _MedicineFacts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     final a = m.adherence(now);
     final lines = <Widget>[
@@ -192,8 +201,8 @@ class _MedicineFacts extends StatelessWidget {
             Expanded(
               child: Text(
                 m.isLow
-                    ? 'Only ${m.supply} doses left – time to refill'
-                    : '${m.supply} doses left (about ${m.daysLeft} days)',
+                    ? l.medicinesSupplyLow(m.supply!)
+                    : l.medicinesSupplyLeft(m.supply!, m.daysLeft!),
                 style: m.isLow
                     ? TextStyle(
                         color: theme.colorScheme.error,
@@ -204,7 +213,7 @@ class _MedicineFacts extends StatelessWidget {
             ),
           ],
         ),
-      if (a.due > 0) Text('Last 7 days: ${a.taken} of ${a.due} doses taken'),
+      if (a.due > 0) Text(l.medicinesLastWeek(a.taken, a.due)),
     ];
     if (lines.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -256,6 +265,7 @@ class _OnTimeRemindersCardState extends State<_OnTimeRemindersCard>
   @override
   Widget build(BuildContext context) {
     if (_allowed != false) return const SizedBox.shrink();
+    final l = context.l10n;
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 16),
@@ -275,7 +285,7 @@ class _OnTimeRemindersCardState extends State<_OnTimeRemindersCard>
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Reminders may arrive late',
+                      l.medicinesLateTitle,
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: theme.colorScheme.onTertiaryContainer,
                       ),
@@ -285,8 +295,7 @@ class _OnTimeRemindersCardState extends State<_OnTimeRemindersCard>
               ),
               const SizedBox(height: 6),
               Text(
-                'Your phone is saving battery by delaying reminders. Allow '
-                'Elderly Care to remind you at the exact time.',
+                l.medicinesLateMessage,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onTertiaryContainer,
                 ),
@@ -295,7 +304,7 @@ class _OnTimeRemindersCardState extends State<_OnTimeRemindersCard>
               FilledButton(
                 onPressed: () =>
                     context.services.notifications.requestExactTiming(),
-                child: const Text('Allow on-time reminders'),
+                child: Text(l.medicinesLateAllow),
               ),
             ],
           ),

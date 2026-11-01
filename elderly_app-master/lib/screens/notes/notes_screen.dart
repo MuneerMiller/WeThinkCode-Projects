@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../data/models.dart';
+import '../../l10n/l10n.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 
@@ -21,23 +22,23 @@ class NotesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final notes = context.store.sortedNotes;
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Notes')),
+      appBar: AppBar(title: Text(l.notesTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _open(context),
         icon: const Icon(Icons.edit_note_rounded, size: 28),
-        label: const Text('New note'),
+        label: Text(l.notesNew),
       ),
       body: notes.isEmpty
-          ? const Center(
+          ? Center(
               child: SingleChildScrollView(
                 child: EmptyState(
                   icon: Icons.sticky_note_2_rounded,
-                  title: 'No notes yet',
-                  message:
-                      'Write down things to remember, questions for the doctor, or anything else.',
+                  title: l.notesEmptyTitle,
+                  message: l.notesEmptyMessage,
                 ),
               ),
             )
@@ -85,8 +86,14 @@ class NotesScreen extends StatelessWidget {
                                 ],
                                 const SizedBox(height: 8),
                                 Text(
-                                  '${n.priority == NotePriority.high ? 'Important · ' : ''}'
-                                  'Updated ${formatDay(n.updatedAt).toLowerCase()}',
+                                  (n.priority == NotePriority.high
+                                      ? l.notesImportantUpdated
+                                      : l.notesUpdated)(
+                                    formatDay(
+                                      context,
+                                      n.updatedAt,
+                                    ).toLowerCase(),
+                                  ),
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.colorScheme.onSurfaceVariant,
                                   ),
@@ -146,18 +153,19 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
       ..updatedAt = now;
     await store.saveNote(n);
     if (mounted) {
-      showMessage(context, 'Note saved');
+      showMessage(context, context.l10n.noteEditSaved);
       Navigator.pop(context);
     }
   }
 
   Future<void> _delete() async {
+    final l = context.l10n;
     final n = widget.note!;
     final ok = await confirm(
       context,
-      title: 'Delete this note?',
-      message: '"${n.title}" will be removed.',
-      confirmLabel: 'Delete',
+      title: l.noteEditDeleteTitle,
+      message: l.noteEditDeleteMessage(n.title),
+      confirmLabel: l.commonDelete,
       destructive: true,
     );
     if (!ok || !mounted) return;
@@ -167,21 +175,22 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final editing = widget.note != null;
     return Scaffold(
       bottomNavigationBar: BottomAction(
         child: FilledButton.icon(
           onPressed: _save,
           icon: const Icon(Icons.check_rounded),
-          label: const Text('Save note'),
+          label: Text(l.noteEditSave),
         ),
       ),
       appBar: AppBar(
-        title: Text(editing ? 'Edit note' : 'New note'),
+        title: Text(editing ? l.noteEditTitle : l.notesNew),
         actions: [
           if (editing)
             IconButton(
-              tooltip: 'Delete note',
+              tooltip: l.noteEditDeleteTooltip,
               onPressed: _delete,
               icon: const Icon(Icons.delete_outline_rounded),
             ),
@@ -200,32 +209,34 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
                 children: [
                   TextFormField(
                     controller: _title,
-                    decoration: const InputDecoration(labelText: 'Title'),
+                    decoration: InputDecoration(
+                      labelText: l.noteEditTitleLabel,
+                    ),
                     textCapitalization: TextCapitalization.sentences,
-                    validator: (v) => requiredField(v, 'a title'),
+                    validator: (v) => requiredField(v, l.noteEditTitleRequired),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _body,
-                    decoration: const InputDecoration(
-                      labelText: 'Note',
+                    decoration: InputDecoration(
+                      labelText: l.noteEditBodyLabel,
                       alignLabelWithHint: true,
                     ),
                     minLines: 6,
                     maxLines: 14,
                     textCapitalization: TextCapitalization.sentences,
                   ),
-                  const SectionHeader('How important is it?'),
+                  SectionHeader(l.noteEditHowImportant),
                   SegmentedButton<NotePriority>(
-                    segments: const [
+                    segments: [
                       ButtonSegment(
                         value: NotePriority.high,
-                        icon: Icon(Icons.priority_high_rounded),
-                        label: Text('Important'),
+                        icon: const Icon(Icons.priority_high_rounded),
+                        label: Text(l.noteEditImportant),
                       ),
                       ButtonSegment(
                         value: NotePriority.normal,
-                        label: Text('Normal'),
+                        label: Text(l.noteEditNormal),
                       ),
                     ],
                     selected: {_priority},

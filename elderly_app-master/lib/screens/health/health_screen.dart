@@ -4,6 +4,8 @@ import '../../app_scope.dart';
 import '../../data/models.dart';
 import '../../data/summary.dart';
 import '../../data/summary_pdf.dart';
+import '../../l10n/l10n.dart';
+import '../../l10n/labels.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../../theme.dart';
 import '../../widgets/common.dart';
@@ -16,18 +18,19 @@ class HealthScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final store = context.store;
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Health tracker'),
+        title: Text(l.featureHealth),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: TextButton.icon(
               onPressed: () => shareHealthSummary(context),
               icon: const Icon(Icons.ios_share_rounded),
-              label: const Text('Share'),
+              label: Text(l.commonShare),
             ),
           ),
         ],
@@ -40,7 +43,7 @@ class HealthScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Keep a record of your readings, then tap Share to send your doctor a summary.',
+                  l.healthIntro,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -54,9 +57,7 @@ class HealthScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                 ],
                 DisclaimerNote(
-                  'Tips here are general information for adults, not medical '
-                  'advice. Ask your doctor what readings are right for you. '
-                  'If you feel very unwell, call 112.',
+                  l.healthDisclaimer,
                   onReadMore: () => openLegalDoc(context, LegalDoc.medical),
                 ),
               ],
@@ -75,6 +76,7 @@ class _TrackerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     return Card(
       child: InkWell(
@@ -96,12 +98,12 @@ class _TrackerCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(type.label, style: theme.textTheme.titleMedium),
+                    Text(type.title(l), style: theme.textTheme.titleMedium),
                     const SizedBox(height: 2),
                     Text(
                       latest == null
-                          ? 'No readings yet'
-                          : '${latest!.display}\n${formatDay(latest!.at)}, ${formatTime(context, latest!.at)}',
+                          ? l.healthNoReadings
+                          : '${latest!.displayIn(l)}\n${formatDay(context, latest!.at)}, ${formatTime(context, latest!.at)}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -122,7 +124,11 @@ class _TrackerCard extends StatelessWidget {
 Future<void> shareHealthSummary(BuildContext context) async {
   final store = context.store;
   final sharing = context.services.sharing;
-  final subject = 'Health summary for ${store.profile?.name ?? 'me'}';
+  final l = context.l10n;
+  final name = store.profile?.name;
+  final subject = name == null
+      ? l.healthShareSubjectNoName
+      : l.healthShareSubject(name);
   final choice = await showModalBottomSheet<String>(
     context: context,
     showDragHandle: true,
@@ -136,20 +142,20 @@ Future<void> shareHealthSummary(BuildContext context) async {
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
               child: Text(
-                'Send your doctor a summary of the last 30 days',
+                l.healthShareTitle,
                 style: Theme.of(sheet).textTheme.titleMedium,
               ),
             ),
             ListTile(
               leading: const Icon(Icons.picture_as_pdf_rounded, size: 30),
-              title: const Text('As a PDF document'),
-              subtitle: const Text('Neat tables, easy to print'),
+              title: Text(l.healthShareAsPdf),
+              subtitle: Text(l.healthShareAsPdfSubtitle),
               onTap: () => Navigator.pop(sheet, 'pdf'),
             ),
             ListTile(
               leading: const Icon(Icons.sms_rounded, size: 30),
-              title: const Text('As a message'),
-              subtitle: const Text('Plain text for email or WhatsApp'),
+              title: Text(l.healthShareAsText),
+              subtitle: Text(l.healthShareAsTextSubtitle),
               onTap: () => Navigator.pop(sheet, 'text'),
             ),
           ],

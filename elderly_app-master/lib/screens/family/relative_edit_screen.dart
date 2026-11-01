@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../data/models.dart';
+import '../../l10n/l10n.dart';
 import '../../widgets/common.dart';
 
 class RelativeEditScreen extends StatefulWidget {
@@ -41,18 +42,19 @@ class _RelativeEditScreenState extends State<RelativeEditScreen> {
       ..email = _email.text.trim();
     await store.saveRelative(r);
     if (mounted) {
-      showMessage(context, '${r.name} saved');
+      showMessage(context, context.l10n.relativeSaved(r.name));
       Navigator.pop(context);
     }
   }
 
   Future<void> _delete() async {
+    final l = context.l10n;
     final r = widget.relative!;
     final ok = await confirm(
       context,
-      title: 'Remove ${r.name}?',
-      message: 'They will no longer be alerted in an emergency.',
-      confirmLabel: 'Remove',
+      title: l.relativeRemoveTitle(r.name),
+      message: l.relativeRemoveMessage,
+      confirmLabel: l.commonRemove,
       destructive: true,
     );
     if (!ok || !mounted) return;
@@ -62,21 +64,22 @@ class _RelativeEditScreenState extends State<RelativeEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final editing = widget.relative != null;
     return Scaffold(
       bottomNavigationBar: BottomAction(
         child: FilledButton.icon(
           onPressed: _save,
           icon: const Icon(Icons.check_rounded),
-          label: const Text('Save'),
+          label: Text(l.commonSave),
         ),
       ),
       appBar: AppBar(
-        title: Text(editing ? 'Edit family member' : 'Add family member'),
+        title: Text(editing ? l.relativeEditTitle : l.relativeAddTitle),
         actions: [
           if (editing)
             IconButton(
-              tooltip: 'Remove family member',
+              tooltip: l.relativeRemove,
               onPressed: _delete,
               icon: const Icon(Icons.delete_outline_rounded),
             ),
@@ -95,41 +98,35 @@ class _RelativeEditScreenState extends State<RelativeEditScreen> {
                 children: [
                   TextFormField(
                     controller: _name,
-                    decoration: const InputDecoration(labelText: 'Name'),
+                    decoration: InputDecoration(labelText: l.relativeName),
                     textCapitalization: TextCapitalization.words,
-                    validator: (v) => requiredField(v, 'a name'),
+                    validator: (v) => requiredField(v, l.relativeNameRequired),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _relationship,
-                    decoration: const InputDecoration(
-                      labelText: 'Relationship (optional)',
-                      hintText: 'e.g. Son, Neighbour, Nurse',
+                    decoration: InputDecoration(
+                      labelText: l.relativeRelationship,
+                      hintText: l.relativeRelationshipHint,
                     ),
                     textCapitalization: TextCapitalization.sentences,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Phone number',
-                    ),
+                    decoration: InputDecoration(labelText: l.relativePhone),
                     keyboardType: TextInputType.phone,
                     validator: (v) {
-                      final missing = requiredField(v, 'a phone number');
+                      final missing = requiredField(v, l.relativePhoneRequired);
                       if (missing != null) return missing;
                       final digits = v!.replaceAll(RegExp(r'\D'), '');
-                      return digits.length < 6
-                          ? 'That number looks too short'
-                          : null;
+                      return digits.length < 6 ? l.relativePhoneTooShort : null;
                     },
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _email,
-                    decoration: const InputDecoration(
-                      labelText: 'Email (optional)',
-                    ),
+                    decoration: InputDecoration(labelText: l.relativeEmail),
                     keyboardType: TextInputType.emailAddress,
                   ),
                 ],

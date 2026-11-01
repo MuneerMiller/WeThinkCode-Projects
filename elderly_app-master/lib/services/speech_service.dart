@@ -7,6 +7,11 @@ class SpeechService {
 
   FlutterTts? _tts;
 
+  /// The app's language, e.g. 'af'. Read-aloud uses a matching voice when the
+  /// phone has one, and the phone's own voice otherwise.
+  String? language;
+  String? _voiceLanguage;
+
   /// The text being read right now, if any.
   final speaking = ValueNotifier<String?>(null);
 
@@ -26,11 +31,26 @@ class SpeechService {
     try {
       final tts = await _engine();
       await tts.stop();
+      await _useLanguage(tts);
       speaking.value = text;
       await tts.speak(text);
     } catch (e) {
       speaking.value = null;
       debugPrint('Read aloud unavailable (${e.runtimeType})');
+    }
+  }
+
+  Future<void> _useLanguage(FlutterTts tts) async {
+    final lang = language;
+    if (lang == null || lang == _voiceLanguage) return;
+    _voiceLanguage = lang;
+    for (final tag in ['$lang-ZA', lang]) {
+      try {
+        if (await tts.isLanguageAvailable(tag) == true) {
+          await tts.setLanguage(tag);
+          return;
+        }
+      } catch (_) {}
     }
   }
 

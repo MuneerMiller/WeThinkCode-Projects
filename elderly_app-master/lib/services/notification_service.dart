@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -7,6 +8,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../data/models.dart';
+import '../l10n/gen/app_localizations.dart';
 import 'reminder_plan.dart';
 
 /// What the user did with a medicine notification.
@@ -49,42 +51,55 @@ class NotificationService {
 
   static const _doseCategory = 'dose';
 
-  // Each button opens the app so the answer is saved in the encrypted store.
-  static const _doseActions = [
-    AndroidNotificationAction('taken', 'Taken', showsUserInterface: true),
-    AndroidNotificationAction('snooze', 'In 10 min', showsUserInterface: true),
-    AndroidNotificationAction('not_yet', 'Not yet', showsUserInterface: true),
-  ];
+  /// The language of the notifications, from the last [init] or [sync].
+  AppLocalizations _l10n = lookupAppLocalizations(const Locale('en'));
 
-  static const _medicineDetails = NotificationDetails(
+  // Each button opens the app so the answer is saved in the encrypted store.
+  NotificationDetails get _medicineDetails => NotificationDetails(
     android: AndroidNotificationDetails(
       'medicine',
-      'Medicine reminders',
-      channelDescription: 'Reminds you when it is time to take a medicine',
+      _l10n.notifyMedicineChannel,
+      channelDescription: _l10n.notifyMedicineChannelDescription,
       importance: Importance.max,
       priority: Priority.high,
       category: AndroidNotificationCategory.reminder,
       // Hide medicine and doctor names on a secure lock screen.
       visibility: NotificationVisibility.private,
-      actions: _doseActions,
+      actions: [
+        AndroidNotificationAction(
+          'taken',
+          _l10n.notifyActionTaken,
+          showsUserInterface: true,
+        ),
+        AndroidNotificationAction(
+          'snooze',
+          _l10n.notifyActionSnooze,
+          showsUserInterface: true,
+        ),
+        AndroidNotificationAction(
+          'not_yet',
+          _l10n.notifyActionNotYet,
+          showsUserInterface: true,
+        ),
+      ],
     ),
-    iOS: DarwinNotificationDetails(
+    iOS: const DarwinNotificationDetails(
       categoryIdentifier: _doseCategory,
       interruptionLevel: InterruptionLevel.timeSensitive,
     ),
   );
 
-  static const _appointmentDetails = NotificationDetails(
+  NotificationDetails get _appointmentDetails => NotificationDetails(
     android: AndroidNotificationDetails(
       'appointment',
-      'Appointment reminders',
-      channelDescription: 'Reminds you an hour before a doctor appointment',
+      _l10n.notifyAppointmentChannel,
+      channelDescription: _l10n.notifyAppointmentChannelDescription,
       importance: Importance.high,
       priority: Priority.high,
       category: AndroidNotificationCategory.reminder,
       visibility: NotificationVisibility.private,
     ),
-    iOS: DarwinNotificationDetails(),
+    iOS: const DarwinNotificationDetails(),
   );
 
   AndroidFlutterLocalNotificationsPlugin? get _android => _plugin
@@ -92,7 +107,8 @@ class NotificationService {
         AndroidFlutterLocalNotificationsPlugin
       >();
 
-  Future<void> init() async {
+  Future<void> init({AppLocalizations? l10n}) async {
+    if (l10n != null) _l10n = l10n;
     if (!supported) return;
     try {
       tz.initializeTimeZones();
@@ -109,17 +125,17 @@ class NotificationService {
                 actions: [
                   DarwinNotificationAction.plain(
                     'taken',
-                    'Taken',
+                    _l10n.notifyActionTaken,
                     options: options,
                   ),
                   DarwinNotificationAction.plain(
                     'snooze',
-                    'In 10 min',
+                    _l10n.notifyActionSnooze,
                     options: options,
                   ),
                   DarwinNotificationAction.plain(
                     'not_yet',
-                    'Not yet',
+                    _l10n.notifyActionNotYet,
                     options: options,
                   ),
                 ],
@@ -182,7 +198,9 @@ class NotificationService {
   Future<void> sync({
     required List<Medicine> medicines,
     required List<Appointment> appointments,
+    AppLocalizations? l10n,
   }) async {
+    if (l10n != null) _l10n = l10n;
     if (!_ready) return;
     if (_syncing) {
       _syncAgain = true;
@@ -197,6 +215,7 @@ class NotificationService {
             medicines: medicines,
             appointments: appointments,
             now: DateTime.now(),
+            l10n: _l10n,
           ),
         );
       } while (_syncAgain);
@@ -246,8 +265,8 @@ class NotificationService {
     final slot = ([...m.times]..sort()).indexOf(dose.slot);
     await _plugin.zonedSchedule(
       id: ReminderPlan.snoozeId(m.id, slot < 0 ? 0 : slot),
-      title: 'Time for ${m.name}',
-      body: 'Reminding you again, as you asked.',
+      title: _l10n.notifyDoseTitle(m.name),
+      body: _l10n.notifySnoozeBody,
       payload: dose.toString(),
       scheduledDate: tz.TZDateTime.now(tz.local).add(after),
       notificationDetails: _medicineDetails,

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../app_scope.dart';
 import '../../data/models.dart';
+import '../../l10n/l10n.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import 'appointment_edit_screen.dart';
@@ -23,6 +24,7 @@ class AppointmentsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final store = context.store;
     final now = DateTime.now();
     final upcoming = store.upcomingAppointments(now);
@@ -35,12 +37,10 @@ class AppointmentsScreen extends StatelessWidget {
             child: EmptyState(
               icon: Icons.event_available_rounded,
               image: isPast ? null : 'assets/images/appointment.png',
-              title: isPast
-                  ? 'No past appointments'
-                  : 'No upcoming appointments',
+              title: isPast ? l.appointmentsNoPast : l.appointmentsNoUpcoming,
               message: isPast
-                  ? 'Appointments move here once they are over.'
-                  : 'Add your next doctor visit and we will remind you an hour before.',
+                  ? l.appointmentsNoPastMessage
+                  : l.appointmentsNoUpcomingMessage,
             ),
           ),
         );
@@ -67,19 +67,19 @@ class AppointmentsScreen extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Appointments'),
+          title: Text(l.appointmentsTitle),
           bottom: TabBar(
             labelStyle: Theme.of(context).textTheme.labelLarge,
             tabs: [
-              Tab(text: 'Upcoming (${upcoming.length})'),
-              Tab(text: 'Past (${past.length})'),
+              Tab(text: l.appointmentsUpcomingTab(upcoming.length)),
+              Tab(text: l.appointmentsPastTab(past.length)),
             ],
           ),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => _edit(context),
           icon: const Icon(Icons.add_rounded, size: 28),
-          label: const Text('Add appointment'),
+          label: Text(l.appointmentsAdd),
         ),
         body: TabBarView(
           children: [list(upcoming, isPast: false), list(past, isPast: true)],
@@ -146,7 +146,7 @@ class _AppointmentCard extends StatelessWidget {
                       Text(a.specialty, style: theme.textTheme.bodyMedium),
                     const SizedBox(height: 4),
                     Text(
-                      '${formatDay(a.dateTime)} · ${formatTime(context, a.dateTime)}',
+                      '${formatDay(context, a.dateTime)} · ${formatTime(context, a.dateTime)}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -169,7 +169,10 @@ class _AppointmentCard extends StatelessWidget {
                               color: Color(0xFF2E7D32),
                             ),
                             const SizedBox(width: 6),
-                            Text('Attended', style: theme.textTheme.bodyMedium),
+                            Text(
+                              context.l10n.appointmentsAttended,
+                              style: theme.textTheme.bodyMedium,
+                            ),
                           ],
                         ),
                       ),

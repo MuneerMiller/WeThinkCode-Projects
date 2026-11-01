@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
+import '../../l10n/l10n.dart';
+import '../../l10n/language_setting.dart';
 import '../../widgets/common.dart';
 
 class _Page {
@@ -10,31 +12,31 @@ class _Page {
   final String text;
 }
 
-const _pages = [
+List<_Page> _pages(AppLocalizations l) => [
   _Page(
     'assets/images/medicines.png',
-    'Never miss a medicine',
-    'Get a reminder when each dose is due, and let your family know if one is missed.',
+    l.onboardingMedicinesTitle,
+    l.onboardingMedicinesText,
   ),
   _Page(
     'assets/images/appointment.png',
-    'Remember appointments',
-    'Keep your doctor visits in one place and get a reminder an hour before.',
+    l.onboardingAppointmentsTitle,
+    l.onboardingAppointmentsText,
   ),
   _Page(
     'assets/images/tracker.png',
-    'Track your health',
-    'Record blood pressure, blood sugar, weight and sleep, and see how they change.',
+    l.onboardingHealthTitle,
+    l.onboardingHealthText,
   ),
   _Page(
     'assets/images/hospital.png',
-    'Find help nearby',
-    'See the closest hospitals and clinics with directions and phone numbers.',
+    l.onboardingHospitalsTitle,
+    l.onboardingHospitalsText,
   ),
   _Page(
     'assets/images/urgent.png',
-    'Family is one tap away',
-    'Call, text or video call your family, or send them your location in an emergency.',
+    l.onboardingFamilyTitle,
+    l.onboardingFamilyText,
   ),
 ];
 
@@ -56,7 +58,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _next() {
-    if (_page == _pages.length - 1) {
+    if (_page == _pages(context.l10n).length - 1) {
       context.store.markOnboardingSeen();
     } else {
       _controller.nextPage(
@@ -68,30 +70,50 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
-    final last = _page == _pages.length - 1;
+    final pages = _pages(l);
+    final last = _page == pages.length - 1;
+    final language = context.store.languageCode;
     return Scaffold(
       body: SafeArea(
         child: ContentWidth(
           child: Column(
             children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: TextButton(
-                    onPressed: () => context.store.markOnboardingSeen(),
-                    child: const Text('Skip'),
-                  ),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  children: [
+                    // Choose the language on the first page, so someone who
+                    // doesn't read English can find it.
+                    if (_page == 0)
+                      Flexible(
+                        child: TextButton.icon(
+                          onPressed: () => chooseLanguage(context),
+                          icon: const Icon(Icons.translate_rounded),
+                          label: Text(
+                            language == null
+                                ? l.languageSystem
+                                : appLanguages[language]!,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () => context.store.markOnboardingSeen(),
+                      child: Text(l.onboardingSkip),
+                    ),
+                  ],
                 ),
               ),
               Expanded(
                 child: PageView.builder(
                   controller: _controller,
-                  itemCount: _pages.length,
+                  itemCount: pages.length,
                   onPageChanged: (i) => setState(() => _page = i),
                   itemBuilder: (context, i) {
-                    final p = _pages[i];
+                    final p = pages[i];
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 32),
                       child: Column(
@@ -127,7 +149,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  for (var i = 0; i < _pages.length; i++)
+                  for (var i = 0; i < pages.length; i++)
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 250),
                       margin: const EdgeInsets.symmetric(horizontal: 5),
@@ -148,7 +170,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: _next,
-                    child: Text(last ? 'Get started' : 'Next'),
+                    child: Text(last ? l.onboardingGetStarted : l.commonNext),
                   ),
                 ),
               ),

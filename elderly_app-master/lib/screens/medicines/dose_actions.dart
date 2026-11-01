@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../data/app_store.dart';
+import '../../l10n/l10n.dart';
 import '../../services/notification_service.dart';
 import '../../theme.dart';
 import 'dose_check_screen.dart';
@@ -23,6 +24,13 @@ Future<void> handleDoseResponse({
   final slot = response.dose.slot;
   final day = response.dose.dayFor(now);
 
+  // This can run at app launch, before the first screen is built, so fall
+  // back to the chosen (or phone's) language when there is no context yet.
+  final context = navigator.currentContext;
+  final l = context != null && context.mounted
+      ? AppLocalizations.of(context)
+      : lookupAppLocalizations(appLocaleFor(store.languageCode));
+
   void say(String text) => messenger.currentState
     ?..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(text)));
@@ -30,10 +38,10 @@ Future<void> handleDoseResponse({
   switch (response.action) {
     case DoseAction.taken:
       await store.recordDose(m, day, slot, true);
-      say('${m.name} recorded as taken. Well done!');
+      say(l.doseTakenFromNotification(m.name));
     case DoseAction.snooze:
       await services.notifications.snooze(m, response.dose);
-      say('We will remind you about ${m.name} again in 10 minutes.');
+      say(l.doseSnoozed(m.name));
     case DoseAction.open || DoseAction.notYet:
       final dose = m
           .dosesOn(day)

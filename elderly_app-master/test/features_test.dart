@@ -282,7 +282,7 @@ void main() {
       tester,
       prefs: signedUp,
       location: FakeLocation(
-        error: const LocationException('Location is switched off.'),
+        error: const LocationException(LocationProblem.switchedOff),
       ),
     );
     await tester.tapText('I need help');
@@ -336,9 +336,7 @@ void main() {
       tester,
       prefs: signedUp,
       location: FakeLocation(
-        error: const LocationException(
-          'Elderly Care needs permission to see your location.',
-        ),
+        error: const LocationException(LocationProblem.noPermission),
       ),
     );
     await tester.tapText('Hospitals nearby');

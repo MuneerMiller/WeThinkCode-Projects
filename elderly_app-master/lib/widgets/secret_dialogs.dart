@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/l10n.dart';
+
 /// Asks for a new PIN or password, typed twice.
 ///
 /// Returns null if cancelled, or an empty string if [skipLabel] was chosen.
@@ -13,7 +15,7 @@ Future<String?> askNewSecret(
   int minLength = 4,
   int? maxLength,
   String? skipLabel,
-  String confirmLabel = 'Save',
+  String? confirmLabel,
 }) {
   return showDialog<String>(
     context: context,
@@ -25,7 +27,7 @@ Future<String?> askNewSecret(
       minLength: minLength,
       maxLength: maxLength,
       skipLabel: skipLabel,
-      confirmLabel: confirmLabel,
+      confirmLabel: confirmLabel ?? context.l10n.commonSave,
       repeat: true,
     ),
   );
@@ -38,7 +40,7 @@ Future<String?> askSecret(
   required String message,
   required String label,
   bool digitsOnly = false,
-  String confirmLabel = 'OK',
+  String? confirmLabel,
 }) {
   return showDialog<String>(
     context: context,
@@ -48,7 +50,7 @@ Future<String?> askSecret(
       label: label,
       digitsOnly: digitsOnly,
       minLength: 1,
-      confirmLabel: confirmLabel,
+      confirmLabel: confirmLabel ?? context.l10n.secretOk,
       repeat: false,
     ),
   );
@@ -123,7 +125,7 @@ class _SecretDialogState extends State<_SecretDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final noun = widget.digitsOnly ? 'numbers' : 'characters';
+    final l = context.l10n;
     return AlertDialog(
       title: Text(widget.title),
       scrollable: true,
@@ -140,22 +142,25 @@ class _SecretDialogState extends State<_SecretDialog> {
               _first,
               widget.label,
               validator: (v) => (v ?? '').length < widget.minLength
-                  ? 'Use at least ${widget.minLength} $noun'
+                  ? (widget.digitsOnly
+                        ? l.secretMinDigits(widget.minLength)
+                        : l.secretMinCharacters(widget.minLength))
                   : null,
             ),
             if (widget.repeat) ...[
               const SizedBox(height: 12),
               _field(
                 _second,
-                'Type it again',
-                validator: (v) =>
-                    v != _first.text ? 'The two do not match' : null,
+                l.secretTypeAgain,
+                validator: (v) => v != _first.text ? l.secretNoMatch : null,
               ),
             ],
             CheckboxListTile(
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
-              title: Text('Show ${widget.digitsOnly ? 'PIN' : 'password'}'),
+              title: Text(
+                widget.digitsOnly ? l.secretShowPin : l.secretShowPassword,
+              ),
               value: _show,
               onChanged: (v) => setState(() => _show = v ?? false),
             ),
@@ -166,7 +171,7 @@ class _SecretDialogState extends State<_SecretDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l.commonCancel),
         ),
         if (widget.skipLabel != null)
           TextButton(
