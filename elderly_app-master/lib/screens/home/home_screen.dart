@@ -16,6 +16,7 @@ import '../medicines/medicines_screen.dart';
 import '../notes/notes_screen.dart';
 import '../profile/profile_screen.dart';
 import '../video_call/video_call_screen.dart';
+import 'getting_started.dart';
 import '../../l10n/l10n.dart';
 import '../../l10n/labels.dart';
 
@@ -94,7 +95,7 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  l.homeGreeting(greeting(l, now), profile.firstName),
+                  l.homeGreeting(greeting(l, now), profile.callName),
                   style: theme.textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 4),
@@ -108,6 +109,10 @@ class HomeScreen extends StatelessWidget {
                 const _SosButton(),
                 const SizedBox(height: 16),
                 _TodayCard(now: now),
+                if (store.showGettingStarted) ...[
+                  const SizedBox(height: 16),
+                  const GettingStartedCard(),
+                ],
                 SectionHeader(l.homeWhatToDo),
                 LayoutBuilder(
                   builder: (context, c) {
@@ -117,7 +122,12 @@ class HomeScreen extends StatelessWidget {
                     final columns = (c.maxWidth / (170 * textScale))
                         .floor()
                         .clamp(1, 4);
-                    const features = Feature.values;
+                    // What the user asked for help with comes first.
+                    final wanted = profile.interests ?? const [];
+                    final features = [
+                      ...Feature.values.where((f) => wanted.contains(f.name)),
+                      ...Feature.values.where((f) => !wanted.contains(f.name)),
+                    ];
                     // Rows size to their tallest tile, so large system text
                     // makes tiles taller instead of overflowing.
                     return Column(
@@ -255,7 +265,7 @@ class _TodayCard extends StatelessWidget {
 
     final spoken = [
       if (profile != null)
-        l.homeSpokenGreeting(greeting(l, now), profile.firstName),
+        l.homeSpokenGreeting(greeting(l, now), profile.callName),
       l.homeSpokenToday(DateFormat('EEEE d MMMM').format(now)),
       if (doses.isEmpty)
         l.homeSpokenNoMedicines

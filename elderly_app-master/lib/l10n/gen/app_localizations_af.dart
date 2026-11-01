@@ -1883,4 +1883,141 @@ class AppLocalizationsAf extends AppLocalizations {
 
   @override
   String get shareBackupPickerTitle => 'Kies u Elderly Care-rugsteun';
+
+  @override
+  String setupStepOf(int step, int total) {
+    return 'Stap $step van $total';
+  }
+
+  @override
+  String get setupSkip => 'Slaan oor';
+
+  @override
+  String get setupFinish => 'Klaar';
+
+  @override
+  String get setupNickname => 'Wat wil u hê moet ons u noem?';
+
+  @override
+  String get setupNicknameHint => 'bv. Ouma, Oupa of Mev. Smit';
+
+  @override
+  String get setupNicknameHelp => 'Los dit leeg, dan gebruik ons u voornaam.';
+
+  @override
+  String get setupReadingTitle => 'Is dit maklik om te lees?';
+
+  @override
+  String get setupReadingBody =>
+      'Kies \'n skrifgrootte wat vir u gemaklik is. U kan dit enige tyd in My profiel verander.';
+
+  @override
+  String get setupReadingSample => 'Tyd vir u bloeddrukpil.';
+
+  @override
+  String get setupHelpTitle => 'Waarmee wil u hulp hê?';
+
+  @override
+  String get setupHelpBody =>
+      'Kies soveel as wat u wil. Hulle kom eerste op u tuisskerm, en alles anders bly ook daar.';
+
+  @override
+  String get setupDayTitle => 'Vertel ons van u dag';
+
+  @override
+  String get setupDayBody => 'Ons stel medisynetye voor wat by u dag pas.';
+
+  @override
+  String get setupWakeUp => 'Ek staan gewoonlik op om';
+
+  @override
+  String get setupBedtime => 'Ek gaan gewoonlik slaap om';
+
+  @override
+  String setupDaySuggestion(String times) {
+    return 'Voorgestelde medisynetye: $times';
+  }
+
+  @override
+  String get setupHealthTitle => '\'n Paar gesondheidsbesonderhede';
+
+  @override
+  String get setupHealthBody =>
+      'Dit gaan op u Mediese ID, sodat paramedici en dokters u vinnig kan help. U kan dit oorslaan en later byvoeg.';
+
+  @override
+  String get setupBloodGroupUnknown => 'Ek weet nie';
+
+  @override
+  String setupFinishTitle(String name) {
+    return 'U is gereed, $name!';
+  }
+
+  @override
+  String get setupFinishBody =>
+      'Hier is wat ons vir u opgestel het. Lees en aanvaar asseblief ons voorwaardes om klaar te maak.';
+
+  @override
+  String setupSummaryName(String name) {
+    return 'Ons sal u $name noem.';
+  }
+
+  @override
+  String setupSummaryFirst(String features) {
+    return 'U tuisskerm begin met $features.';
+  }
+
+  @override
+  String setupSummaryContact(String name) {
+    return '$name is u noodkontak.';
+  }
+
+  @override
+  String get setupSummaryNoContact =>
+      'Nog geen noodkontak nie. U kan een by My familie byvoeg.';
+
+  @override
+  String get startTitle => 'Kom ons begin';
+
+  @override
+  String get startBody =>
+      '\'n Paar eerste stappe om die app vir u te laat werk.';
+
+  @override
+  String get startAllDone => 'U is gereed';
+
+  @override
+  String get startAllDoneBody => 'Mooi so! U kan dit nou toemaak.';
+
+  @override
+  String get startAddMedicine => 'Voeg u eerste medisyne by';
+
+  @override
+  String get startAddAppointment => 'Voeg u volgende doktersbesoek by';
+
+  @override
+  String get startAddFamily => 'Voeg iemand van u familie by';
+
+  @override
+  String get startAddPin => 'Beskerm die app met \'n PIN';
+
+  @override
+  String get profileMadeForYou => 'Net vir u';
+
+  @override
+  String get profileCallMe => 'Ons noem u';
+
+  @override
+  String get profileMyDay => 'My dag';
+
+  @override
+  String profileMyDayValue(String wake, String bed) {
+    return 'Op om $wake, bed toe om $bed';
+  }
+
+  @override
+  String get profileHomeFirst => 'Eerste op my tuisskerm';
+
+  @override
+  String get profileHomeFirstNone => 'Alles, in die gewone volgorde';
 }

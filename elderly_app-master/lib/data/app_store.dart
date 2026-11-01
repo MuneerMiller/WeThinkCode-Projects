@@ -118,6 +118,10 @@ class AppStore extends ChangeNotifier {
   /// Extra text enlargement on top of the phone's own setting.
   double textScale = 1.0;
 
+  /// Whether the home screen shows the "Let's get started" card, which new
+  /// users see after setup until they close it.
+  bool showGettingStarted = false;
+
   /// The app's language ('en', 'af', 'zu' or 'xh'); null follows the phone.
   String? languageCode;
 
@@ -157,6 +161,7 @@ class AppStore extends ChangeNotifier {
     onboardingSeen = _prefs.getBool('onboardingSeen') ?? false;
     textScale = (_prefs.getDouble('textScale') ?? 1.0).clamp(1.0, 1.3);
     languageCode = _prefs.getString('language');
+    showGettingStarted = _prefs.getBool('gettingStarted') ?? false;
     legalAcceptedVersion = _prefs.getInt('legal.version') ?? 0;
     final acceptedAt = _prefs.getString('legal.acceptedAt');
     legalAcceptedAt = acceptedAt == null ? null : DateTime.tryParse(acceptedAt);
@@ -297,6 +302,12 @@ class AppStore extends ChangeNotifier {
     textScale = value;
     notifyListeners();
     await _prefs.setDouble('textScale', value);
+  }
+
+  Future<void> setShowGettingStarted(bool value) async {
+    showGettingStarted = value;
+    notifyListeners();
+    await _prefs.setBool('gettingStarted', value);
   }
 
   Future<void> setLanguage(String? code) async {

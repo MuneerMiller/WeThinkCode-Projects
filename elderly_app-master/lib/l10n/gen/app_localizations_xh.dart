@@ -1889,4 +1889,144 @@ class AppLocalizationsXh extends AppLocalizations {
 
   @override
   String get shareBackupPickerTitle => 'Khetha i-backup yenu ye-Elderly Care';
+
+  @override
+  String setupStepOf(int step, int total) {
+    return 'Inyathelo $step kwa-$total';
+  }
+
+  @override
+  String get setupSkip => 'Tsiba';
+
+  @override
+  String get setupFinish => 'Gqiba';
+
+  @override
+  String get setupNickname => 'Ningathanda sinibize ngokuthini?';
+
+  @override
+  String get setupNicknameHint => 'umz. Makhulu, Tatomkhulu okanye Mama Mbeki';
+
+  @override
+  String get setupNicknameHelp =>
+      'Ukuba niyishiya ingabhalwanga, siza kusebenzisa igama lenu lokuqala.';
+
+  @override
+  String get setupReadingTitle => 'Ngaba oku kulula ukufunda?';
+
+  @override
+  String get setupReadingBody =>
+      'Khethani ubungakanani bombhalo obunilungeleyo. Ningabutshintsha nangaliphi na ixesha kwiProfayili yam.';
+
+  @override
+  String get setupReadingSample => 'Lixesha lepilisi yenu yoxinzelelo lwegazi.';
+
+  @override
+  String get setupHelpTitle => 'Ningathanda ukuncedwa ngantoni?';
+
+  @override
+  String get setupHelpBody =>
+      'Khethani ezininzi kangangoko nifuna. Ziya kuvela kuqala kwisikrini senu sasekhaya, kwaye yonke enye into iya kuhlala ikhona.';
+
+  @override
+  String get setupDayTitle => 'Sixeleleni ngosuku lwenu';
+
+  @override
+  String get setupDayBody =>
+      'Siza kunicebisa ngamaxesha amayeza ahambelana nosuku lwenu.';
+
+  @override
+  String get setupWakeUp => 'Ndidla ngokuvuka ngo';
+
+  @override
+  String get setupBedtime => 'Ndidla ngokulala ngo';
+
+  @override
+  String setupDaySuggestion(String times) {
+    return 'Amaxesha amayeza acetyiswayo: $times';
+  }
+
+  @override
+  String get setupHealthTitle => 'Iinkcukacha ezimbalwa zempilo';
+
+  @override
+  String get setupHealthBody =>
+      'Ezi ziya kwiSazisi senu sezempilo, ukuze abasebenzi be-ambulensi noogqirha banincede ngokukhawuleza. Ningakutsiba oku, nizongeze kamva.';
+
+  @override
+  String get setupBloodGroupUnknown => 'Andazi';
+
+  @override
+  String setupFinishTitle(String name) {
+    return 'Yonke into ilungile, $name!';
+  }
+
+  @override
+  String get setupFinishBody =>
+      'Nantsi into esiniselele yona. Nceda nifunde kwaye namkele imiqathango yethu ukuze nigqibe.';
+
+  @override
+  String setupSummaryName(String name) {
+    return 'Siza kunibiza ngokuthi $name.';
+  }
+
+  @override
+  String setupSummaryFirst(String features) {
+    return 'Isikrini senu sasekhaya siqala ngezi: $features.';
+  }
+
+  @override
+  String setupSummaryContact(String name) {
+    return 'U-$name ngumntu wenu wongxamiseko.';
+  }
+
+  @override
+  String get setupSummaryNoContact =>
+      'Akukabikho mntu wongxamiseko. Ningamongeza ku-\"Usapho lwam\".';
+
+  @override
+  String get startTitle => 'Masiqale';
+
+  @override
+  String get startBody =>
+      'Amanyathelo ambalwa okuqala ukuze le app inincede kakuhle.';
+
+  @override
+  String get startAllDone => 'Yonke into ilungile';
+
+  @override
+  String get startAllDoneBody => 'Nenze kakuhle! Ningakuvala oku ngoku.';
+
+  @override
+  String get startAddMedicine => 'Yongezani iyeza lenu lokuqala';
+
+  @override
+  String get startAddAppointment =>
+      'Yongezani idinga lenu elilandelayo kugqirha';
+
+  @override
+  String get startAddFamily => 'Yongezani umntu wosapho lwenu';
+
+  @override
+  String get startAddPin => 'Khuselani i-app nge-PIN';
+
+  @override
+  String get profileMadeForYou => 'Okwenzelwe nina';
+
+  @override
+  String get profileCallMe => 'Sinibiza ngokuthi';
+
+  @override
+  String get profileMyDay => 'Usuku lwam';
+
+  @override
+  String profileMyDayValue(String wake, String bed) {
+    return 'Ndivuka ngo-$wake, ndilala ngo-$bed';
+  }
+
+  @override
+  String get profileHomeFirst => 'Okuqala kwisikrini sam sasekhaya';
+
+  @override
+  String get profileHomeFirstNone => 'Yonke into, ngendlela eqhelekileyo';
 }

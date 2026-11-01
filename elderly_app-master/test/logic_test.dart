@@ -403,4 +403,52 @@ void main() {
     }
     expect(out, isNot(contains('Blood pressure'))); // no readings: no section
   });
+
+  group('Personal setup', () {
+    test('suggested medicine times fit the user\'s day', () {
+      final p = UserProfile(name: 'Margaret Smith');
+      expect(p.suggestedDoseTimes, const [
+        ClockTime(8, 0),
+        ClockTime(14, 0),
+        ClockTime(20, 0),
+      ]);
+      p
+        ..wakeTime = const ClockTime(6, 0)
+        ..bedTime = const ClockTime(22, 0);
+      expect(p.suggestedDoseTimes, const [
+        ClockTime(6, 30),
+        ClockTime(13, 0),
+        ClockTime(21, 0),
+      ]);
+      // An unusual day (night shifts) falls back to the usual times.
+      p
+        ..wakeTime = const ClockTime(14, 0)
+        ..bedTime = const ClockTime(6, 0);
+      expect(p.suggestedDoseTimes.first, const ClockTime(8, 0));
+    });
+
+    test('profile choices survive saving, and old profiles still load', () {
+      final p = UserProfile(
+        name: 'Margaret Smith',
+        nickname: 'Gogo',
+        interests: ['medicines', 'family'],
+        wakeTime: const ClockTime(6, 15),
+        bedTime: const ClockTime(21, 45),
+      );
+      final back = UserProfile.fromJson(p.toJson());
+      expect(back.callName, 'Gogo');
+      expect(back.interests, ['medicines', 'family']);
+      expect(back.wakeTime, const ClockTime(6, 15));
+      expect(back.bedTime, const ClockTime(21, 45));
+
+      final old = UserProfile.fromJson({'name': 'Margaret Smith'});
+      expect(old.callName, 'Margaret');
+      expect(old.interests, isNull);
+      expect(old.wakeTime, isNull);
+      expect(
+        UserProfile.fromJson({'name': 'A', 'wakeTime': '25:99'}).wakeTime,
+        isNull,
+      );
+    });
+  });
 }

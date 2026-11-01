@@ -11,7 +11,7 @@
 ![Dart](https://img.shields.io/badge/Dart-3.13-0175C2?logo=dart&logoColor=white)
 ![Languages](https://img.shields.io/badge/languages-English%20%C2%B7%20Afrikaans%20%C2%B7%20isiZulu%20%C2%B7%20isiXhosa-B45309)
 ![Platforms](https://img.shields.io/badge/platforms-Android%20%C2%B7%20iOS%20%C2%B7%20Web-1B6B5F)
-![Tests](https://img.shields.io/badge/tests-89%20unit%20%26%20widget%20%C2%B7%2026%20browser-2E7D32)
+![Tests](https://img.shields.io/badge/tests-92%20unit%20%26%20widget%20%C2%B7%2026%20browser-2E7D32)
 
 <img src="docs/screenshots/feature-grid.png" alt="Six screens of Elderly Care: home with SOS button, medicine check, blood pressure chart, Medical ID, nearby hospitals and the PIN lock screen" width="100%">
 
@@ -25,6 +25,7 @@ Older people often juggle several medicines, doctor visits and readings, and wan
 
 | | |
 |---|---|
+| 👋 **Made for you** | A short, friendly setup, one question per screen: what to call you, a comfortable text size, what you want help with (shown first on the home screen), when you get up and go to bed (so medicine times fit your day), Medical ID basics and an emergency contact. Then a *Let's get started* checklist suggests first steps. Everything can be changed later under **My profile → Made for you**. |
 | 💊 **Medicine reminders** | Up to three doses a day. Notifications have **Taken**, **In 10 min** and **Not yet** buttons, and an unanswered dose gets a follow-up an hour later. A missed dose can be texted to family. Optional pack count with refill warnings, and a 7-day record. |
 | 📅 **Appointments** | Upcoming and past doctor visits, with a reminder an hour before. |
 | ❤️ **Health tracker** | Blood pressure, blood sugar, weight and sleep, with charts and healthy-range tips. **Share** sends the doctor a 30-day summary as a printable **PDF** or a message. |
@@ -125,7 +126,7 @@ tool/build_web.sh
 
 | | |
 |---|---|
-| **Unit & widget tests** | 89 tests: scheduling, reminders, encryption, backups, the app lock, legal acceptance, every language and every feature end to end with fake phone services, including at large text sizes. Run `flutter test`. |
+| **Unit & widget tests** | 92 tests: scheduling, reminders, encryption, backups, the app lock, legal acceptance, every language and every feature end to end with fake phone services, including at large text sizes. Run `flutter test`. |
 | **Browser tests** | [`test_e2e/browser_test.js`](test_e2e/browser_test.js) drives the release web build in Chromium through every feature, checks the PDF's contents and that nothing readable is left in browser storage, and screenshots each step. |
 | **Continuous integration** | Every change runs formatting, `flutter analyze` and the tests, then builds the website, the Android APK and the iOS app. |
 | **Dependencies** | Kept up to date by Dependabot. |

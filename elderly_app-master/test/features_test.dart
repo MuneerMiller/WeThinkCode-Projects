@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'helpers.dart';
 
 void main() {
-  testWidgets('first run: intro, setup, then home', (tester) async {
+  testWidgets('first run: intro, personal setup, then home', (tester) async {
     final app = await pumpApp(tester);
 
     expect(find.text('Never miss a medicine'), findsOneWidget);
@@ -17,28 +17,81 @@ void main() {
     expect(find.text('Family is one tap away'), findsOneWidget);
     await tester.tapText('Get started');
 
+    // 1. About you: only the name is required.
     expect(find.text('Welcome to Elderly Care'), findsOneWidget);
+    expect(find.text('Step 1 of 7'), findsOneWidget);
     await tester.tapText('Continue');
     expect(find.text('Please enter your name'), findsOneWidget);
-
     await tester.enter('Your name', 'Margaret Smith');
+    await tester.enter('What would you like us to call you?', 'Gogo');
+    await tester.tapText('Continue');
+
+    // 2. Text size changes as soon as it is chosen.
+    expect(find.text('Is this easy to read?'), findsOneWidget);
+    await tester.tapText('Large');
+    expect(app.store.textScale, 1.15);
+    await tester.tapText('Continue');
+
+    // 3. What to help with.
+    expect(find.text('What would you like help with?'), findsOneWidget);
+    await tester.tapText('My family');
+    await tester.tapText('Medicines');
+    await tester.tapText('Continue');
+
+    // 4. Their day, which sets suggested medicine times.
+    expect(find.text('Tell us about your day'), findsOneWidget);
+    expect(
+      find.text('Suggested medicine times: 7:30 AM, 1:00 PM, 8:00 PM'),
+      findsOneWidget,
+    );
+    await tester.tapText('Continue');
+
+    // 5. Health details can be skipped; going back keeps answers.
+    expect(find.text('A few health details'), findsOneWidget);
+    await tester.tapText('Back');
+    expect(find.text('Tell us about your day'), findsOneWidget);
+    await tester.tapText('Continue');
+    await tester.enter('Allergies', 'Penicillin');
+    await tester.tapText('Continue');
+
+    // 6. Emergency contact: a name needs a number.
+    expect(find.text('Emergency contact'), findsOneWidget);
     await tester.enter('Their name', 'Anna');
     await tester.tapText('Continue');
     expect(find.text('Please enter their phone number'), findsOneWidget);
     await tester.enter('Their phone number', '082 555 0101');
     await tester.tapText('Continue');
+
+    // 7. A summary, then the terms.
+    expect(find.text("You're all set, Gogo!"), findsOneWidget);
+    expect(find.text('We will call you Gogo.'), findsOneWidget);
+    expect(
+      find.text('Your home screen starts with Medicines, My family.'),
+      findsOneWidget,
+    );
+    expect(find.text('Anna is your emergency contact.'), findsOneWidget);
+    await tester.tapText('Finish');
     expect(find.text('Please tick the box to continue.'), findsOneWidget);
     expect(app.store.profile, isNull);
     await tester.tapText(
       'I agree to the Terms of Use, and I have read the Medical disclaimer '
       'and the Privacy policy',
     );
-    await tester.tapText('Continue');
+    await tester.tapText('Finish');
     expect(app.store.legalAcceptedVersion, LegalInfo.version);
 
-    expect(find.textContaining(', Margaret'), findsOneWidget);
-    expect(find.text('I need help'), findsOneWidget);
+    final profile = app.store.profile!;
+    expect(profile.name, 'Margaret Smith');
+    expect(profile.callName, 'Gogo');
+    expect(profile.allergies, 'Penicillin');
+    expect(profile.interests, ['medicines', 'family']);
+    expect(profile.wakeTime, const ClockTime(7, 0));
     expect(app.store.relatives.single.name, 'Anna');
+
+    // Home greets them by the name they chose, shows their choices first
+    // and suggests first steps for them.
+    expect(find.textContaining(', Gogo'), findsOneWidget);
+    expect(find.text('I need help'), findsOneWidget);
     for (final label in [
       'Medicines',
       'Appointments',
@@ -51,6 +104,46 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget, reason: label);
     }
+    double top(String label) => tester.getTopLeft(find.text(label)).dy;
+    expect(top('My family'), lessThan(top('Appointments')));
+    expect(find.text("Let's get started"), findsOneWidget);
+    expect(find.text('Add your first medicine'), findsOneWidget);
+    expect(find.text("Add your next doctor's visit"), findsNothing);
+
+    // A new medicine starts at a time that fits their day.
+    await tester.tapText('Add your first medicine');
+    expect(find.text('7:30 AM'), findsOneWidget);
+    await tester.back();
+
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(find.text("Let's get started"), findsNothing);
+    expect(app.store.showGettingStarted, isFalse);
+  });
+
+  testWidgets('My profile changes what was chosen during setup', (
+    tester,
+  ) async {
+    final app = await pumpApp(tester, prefs: signedUp);
+    await tester.tap(find.byTooltip('My profile'));
+    await tester.pumpAndSettle();
+    expect(find.text('Made for you'), findsOneWidget);
+    expect(find.text('Everything, in the usual order'), findsOneWidget);
+
+    await tester.tapText('First on my home screen');
+    await tester.tapText('Notes');
+    await tester.tapText('Save');
+    expect(app.store.profile!.interests, ['notes']);
+    expect(find.text('Notes'), findsOneWidget);
+
+    // Editing the profile keeps these choices.
+    await tester.tapText('Edit');
+    await tester.enter('What would you like us to call you?', 'Gran');
+    await tester.tapText('Save profile');
+    expect(app.store.profile!.callName, 'Gran');
+    expect(app.store.profile!.interests, ['notes']);
+    await tester.back();
+    expect(find.textContaining(', Gran'), findsOneWidget);
   });
 
   testWidgets('medicines: add, see on schedule, confirm a dose, edit, delete', (
@@ -710,17 +803,20 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester, prefs: {'onboardingSeen': true});
+    await tester.enter('Your name', 'Margaret Smith');
+    for (var i = 0; i < 6; i++) {
+      await tester.tapText('Continue');
+    }
     await tester.tapText('Read the privacy policy');
     expect(find.text('Privacy policy'), findsWidgets);
     expect(find.text('The short version'), findsOneWidget);
     await tester.back();
 
-    await tester.enter('Your name', 'Margaret Smith');
     await tester.tapText(
       'I agree to the Terms of Use, and I have read the Medical disclaimer '
       'and the Privacy policy',
     );
-    await tester.tapText('Continue');
+    await tester.tapText('Finish');
     await tester.tap(find.byTooltip('My profile'));
     await tester.pumpAndSettle();
     await tester.tapText('Privacy & security');

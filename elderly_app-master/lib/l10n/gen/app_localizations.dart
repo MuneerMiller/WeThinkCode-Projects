@@ -3239,6 +3239,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose your Elderly Care backup'**
   String get shareBackupPickerTitle;
+
+  /// No description provided for @setupStepOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total}'**
+  String setupStepOf(int step, int total);
+
+  /// Skips an optional setup step.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get setupSkip;
+
+  /// Last button of the setup.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get setupFinish;
+
+  /// No description provided for @setupNickname.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like us to call you?'**
+  String get setupNickname;
+
+  /// Examples of names older people like to be called; adapt to familiar forms in the language (e.g. Gogo/Mkhulu in isiZulu, Makhulu/Tamkhulu in isiXhosa, Ouma/Oupa in Afrikaans).
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Gogo, Oupa or Mrs Smith'**
+  String get setupNicknameHint;
+
+  /// No description provided for @setupNicknameHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave it empty and we will use your first name.'**
+  String get setupNicknameHelp;
+
+  /// No description provided for @setupReadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Is this easy to read?'**
+  String get setupReadingTitle;
+
+  /// "My profile" must match profileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a text size that is comfortable for you. You can change it any time in My profile.'**
+  String get setupReadingBody;
+
+  /// A sample reminder shown to preview the text size.
+  ///
+  /// In en, this message translates to:
+  /// **'Time for your blood pressure tablet.'**
+  String get setupReadingSample;
+
+  /// No description provided for @setupHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like help with?'**
+  String get setupHelpTitle;
+
+  /// No description provided for @setupHelpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose as many as you like. They will come first on your home screen, and everything else stays there too.'**
+  String get setupHelpBody;
+
+  /// No description provided for @setupDayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us about your day'**
+  String get setupDayTitle;
+
+  /// No description provided for @setupDayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We will suggest medicine times that fit around your day.'**
+  String get setupDayBody;
+
+  /// No description provided for @setupWakeUp.
+  ///
+  /// In en, this message translates to:
+  /// **'I usually get up at'**
+  String get setupWakeUp;
+
+  /// No description provided for @setupBedtime.
+  ///
+  /// In en, this message translates to:
+  /// **'I usually go to bed at'**
+  String get setupBedtime;
+
+  /// {times} is a list of times, e.g. "07:30, 13:00, 20:00".
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested medicine times: {times}'**
+  String setupDaySuggestion(String times);
+
+  /// No description provided for @setupHealthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A few health details'**
+  String get setupHealthTitle;
+
+  /// No description provided for @setupHealthBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These go on your Medical ID, so paramedics and doctors can help you quickly. You can skip this and add them later.'**
+  String get setupHealthBody;
+
+  /// No description provided for @setupBloodGroupUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t know'**
+  String get setupBloodGroupUnknown;
+
+  /// No description provided for @setupFinishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set, {name}!'**
+  String setupFinishTitle(String name);
+
+  /// No description provided for @setupFinishBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Here is what we set up for you. Please read and accept our terms to finish.'**
+  String get setupFinishBody;
+
+  /// No description provided for @setupSummaryName.
+  ///
+  /// In en, this message translates to:
+  /// **'We will call you {name}.'**
+  String setupSummaryName(String name);
+
+  /// {features} is a comma-separated list of feature names.
+  ///
+  /// In en, this message translates to:
+  /// **'Your home screen starts with {features}.'**
+  String setupSummaryFirst(String features);
+
+  /// No description provided for @setupSummaryContact.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is your emergency contact.'**
+  String setupSummaryContact(String name);
+
+  /// "My family" must match featureFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'No emergency contact yet. You can add one in My family.'**
+  String get setupSummaryNoContact;
+
+  /// No description provided for @startTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s get started'**
+  String get startTitle;
+
+  /// No description provided for @startBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A few first steps to make the app work for you.'**
+  String get startBody;
+
+  /// No description provided for @startAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set'**
+  String get startAllDone;
+
+  /// No description provided for @startAllDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Well done! You can close this now.'**
+  String get startAllDoneBody;
+
+  /// No description provided for @startAddMedicine.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first medicine'**
+  String get startAddMedicine;
+
+  /// No description provided for @startAddAppointment.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your next doctor\'s visit'**
+  String get startAddAppointment;
+
+  /// No description provided for @startAddFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Add someone from your family'**
+  String get startAddFamily;
+
+  /// No description provided for @startAddPin.
+  ///
+  /// In en, this message translates to:
+  /// **'Protect the app with a PIN'**
+  String get startAddPin;
+
+  /// Profile section with personal preferences from setup.
+  ///
+  /// In en, this message translates to:
+  /// **'Made for you'**
+  String get profileMadeForYou;
+
+  /// No description provided for @profileCallMe.
+  ///
+  /// In en, this message translates to:
+  /// **'We call you'**
+  String get profileCallMe;
+
+  /// No description provided for @profileMyDay.
+  ///
+  /// In en, this message translates to:
+  /// **'My day'**
+  String get profileMyDay;
+
+  /// No description provided for @profileMyDayValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Up at {wake}, bed at {bed}'**
+  String profileMyDayValue(String wake, String bed);
+
+  /// No description provided for @profileHomeFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First on my home screen'**
+  String get profileHomeFirst;
+
+  /// No description provided for @profileHomeFirstNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything, in the usual order'**
+  String get profileHomeFirstNone;
 }
 
 class _AppLocalizationsDelegate

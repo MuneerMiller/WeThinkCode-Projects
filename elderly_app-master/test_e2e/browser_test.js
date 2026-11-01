@@ -194,21 +194,39 @@ async function opened() { return page.evaluate(() => window.__opened); }
     await tap('Get started');
   });
 
-  await check('setup validates and creates the profile', async () => {
+  await check('personal setup asks the basics, step by step', async () => {
     await see('Welcome to Elderly Care');
+    await see('Step 1 of 7');
     await tap('Continue');
     await see('Please enter your name');
     await fill('Your name', 'Margaret Smith');
+    await fill('What would you like us to call you?', 'Margaret');
+    await shot('setup-you');
+    await tap('Continue');
+    await see('Is this easy to read?');
+    await tap('Continue');
+    await see('What would you like help with?');
+    await tap('Medicines');
+    await shot('setup-help');
+    await tap('Continue');
+    await see('Tell us about your day');
+    await tap('Continue');
+    await see('A few health details');
+    await tap('Skip');
+    await see('Emergency contact');
     await fill('Their name', 'Anna Smith');
     await fill('Relationship', 'Daughter');
     await fill('Their phone number', '082 555 0101');
     await tap('Continue');
+    await see("You're all set, Margaret!");
+    await tap('Finish');
     await see('Please tick the box to continue.');
     await tapLocator(page.getByRole('checkbox').first());
     await shot('setup');
-    await tap('Continue');
+    await tap('Finish');
     await see('Margaret');
     await see('I need help');
+    await see("Let's get started");
     await shot('home');
   });
 
@@ -224,7 +242,7 @@ async function opened() { return page.evaluate(() => window.__opened); }
     await see("Today's schedule");
     await see('2× a day');
     await shot('medicines');
-    await page.getByRole('button', { name: /Metformin.*8:00/ }).first().click({ force: true });
+    await page.getByRole('button', { name: /Metformin.*7:30/ }).first().click({ force: true });
     await settle();
     await see('Did you take your Metformin?');
     await shot('dose-check');

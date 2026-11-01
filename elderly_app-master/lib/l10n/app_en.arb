@@ -1589,5 +1589,122 @@
   "shareBackupPickerTitle": "Choose your Elderly Care backup",
   "@shareBackupPickerTitle": {
     "description": "Title of the file picker used to restore a backup file."
-  }
+  },
+  "setupStepOf": "Step {step} of {total}",
+  "@setupStepOf": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "setupSkip": "Skip",
+  "@setupSkip": {
+    "description": "Skips an optional setup step."
+  },
+  "setupFinish": "Finish",
+  "@setupFinish": {
+    "description": "Last button of the setup."
+  },
+  "setupNickname": "What would you like us to call you?",
+  "setupNicknameHint": "e.g. Gogo, Oupa or Mrs Smith",
+  "@setupNicknameHint": {
+    "description": "Examples of names older people like to be called; adapt to familiar forms in the language (e.g. Gogo/Mkhulu in isiZulu, Makhulu/Tamkhulu in isiXhosa, Ouma/Oupa in Afrikaans)."
+  },
+  "setupNicknameHelp": "Leave it empty and we will use your first name.",
+  "setupReadingTitle": "Is this easy to read?",
+  "setupReadingBody": "Choose a text size that is comfortable for you. You can change it any time in My profile.",
+  "@setupReadingBody": {
+    "description": "\"My profile\" must match profileTitle."
+  },
+  "setupReadingSample": "Time for your blood pressure tablet.",
+  "@setupReadingSample": {
+    "description": "A sample reminder shown to preview the text size."
+  },
+  "setupHelpTitle": "What would you like help with?",
+  "setupHelpBody": "Choose as many as you like. They will come first on your home screen, and everything else stays there too.",
+  "setupDayTitle": "Tell us about your day",
+  "setupDayBody": "We will suggest medicine times that fit around your day.",
+  "setupWakeUp": "I usually get up at",
+  "setupBedtime": "I usually go to bed at",
+  "setupDaySuggestion": "Suggested medicine times: {times}",
+  "@setupDaySuggestion": {
+    "description": "{times} is a list of times, e.g. \"07:30, 13:00, 20:00\".",
+    "placeholders": {
+      "times": {
+        "type": "String"
+      }
+    }
+  },
+  "setupHealthTitle": "A few health details",
+  "setupHealthBody": "These go on your Medical ID, so paramedics and doctors can help you quickly. You can skip this and add them later.",
+  "setupBloodGroupUnknown": "I don't know",
+  "setupFinishTitle": "You're all set, {name}!",
+  "@setupFinishTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "setupFinishBody": "Here is what we set up for you. Please read and accept our terms to finish.",
+  "setupSummaryName": "We will call you {name}.",
+  "@setupSummaryName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "setupSummaryFirst": "Your home screen starts with {features}.",
+  "@setupSummaryFirst": {
+    "description": "{features} is a comma-separated list of feature names.",
+    "placeholders": {
+      "features": {
+        "type": "String"
+      }
+    }
+  },
+  "setupSummaryContact": "{name} is your emergency contact.",
+  "@setupSummaryContact": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "setupSummaryNoContact": "No emergency contact yet. You can add one in My family.",
+  "@setupSummaryNoContact": {
+    "description": "\"My family\" must match featureFamily."
+  },
+  "startTitle": "Let's get started",
+  "startBody": "A few first steps to make the app work for you.",
+  "startAllDone": "You're all set",
+  "startAllDoneBody": "Well done! You can close this now.",
+  "startAddMedicine": "Add your first medicine",
+  "startAddAppointment": "Add your next doctor's visit",
+  "startAddFamily": "Add someone from your family",
+  "startAddPin": "Protect the app with a PIN",
+  "profileMadeForYou": "Made for you",
+  "@profileMadeForYou": {
+    "description": "Profile section with personal preferences from setup."
+  },
+  "profileCallMe": "We call you",
+  "profileMyDay": "My day",
+  "profileMyDayValue": "Up at {wake}, bed at {bed}",
+  "@profileMyDayValue": {
+    "placeholders": {
+      "wake": {
+        "type": "String"
+      },
+      "bed": {
+        "type": "String"
+      }
+    }
+  },
+  "profileHomeFirst": "First on my home screen",
+  "profileHomeFirstNone": "Everything, in the usual order"
 }

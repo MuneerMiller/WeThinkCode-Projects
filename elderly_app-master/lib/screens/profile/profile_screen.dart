@@ -8,6 +8,9 @@ import '../../widgets/secret_dialogs.dart';
 import '../../legal/legal_screens.dart';
 import '../../l10n/l10n.dart';
 import '../../l10n/language_setting.dart';
+import '../../l10n/labels.dart';
+import '../../theme.dart';
+import '../onboarding/personal_widgets.dart';
 import 'medical_id_screen.dart';
 import 'security_screen.dart';
 
@@ -85,6 +88,8 @@ class ProfileScreen extends StatelessWidget {
                   icon: const Icon(Icons.medical_information_rounded),
                   label: Text(l.profileShowMedicalId),
                 ),
+                SectionHeader(l.profileMadeForYou),
+                const _MadeForYouCard(),
                 SectionHeader(l.profileContact),
                 Card(
                   child: Column(
@@ -144,7 +149,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
                 SectionHeader(l.profileTextSize),
-                const _TextSizePicker(),
+                const TextSizePicker(),
                 const SizedBox(height: 12),
                 const Card(child: LanguageSetting()),
                 SectionHeader(l.profileBackup),
@@ -226,9 +231,11 @@ class ProfileEditScreen extends StatefulWidget {
 
 class _ProfileEditScreenState extends State<ProfileEditScreen> {
   final _form = GlobalKey<FormState>();
+  // One controller per text field; other settings (interests, times) are
+  // kept as they are.
   late final Map<String, TextEditingController> _c = {
     for (final e in widget.profile.toJson().entries)
-      e.key: TextEditingController(text: e.value as String),
+      if (e.value is String) e.key: TextEditingController(text: e.value),
   };
 
   @override
@@ -242,6 +249,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
     final updated = UserProfile.fromJson({
+      ...widget.profile.toJson(),
       for (final e in _c.entries) e.key: e.value.text.trim(),
     });
     await context.store.saveProfile(updated);
@@ -305,6 +313,11 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     'name',
                     l.profileName,
                     validator: (v) => requiredField(v, l.profileNameRequired),
+                  ),
+                  _field(
+                    'nickname',
+                    l.setupNickname,
+                    hint: l.setupNicknameHint,
                   ),
                   _field(
                     'phone',
@@ -374,8 +387,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   }
 }
 
-class _TextSizePicker extends StatelessWidget {
-  const _TextSizePicker();
+class TextSizePicker extends StatelessWidget {
+  const TextSizePicker({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -536,3 +549,136 @@ String backupErrorText(AppLocalizations l, BackupError e) => switch (e) {
   BackupError.noProfile => l.backupErrorNoProfile,
   BackupError.unknownProtection => l.backupErrorUnknownProtection,
 };
+
+/// The choices from setup: what to call the user, their day and what comes
+/// first on the home screen.
+class _MadeForYouCard extends StatelessWidget {
+  const _MadeForYouCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final store = context.store;
+    final p = store.profile!;
+    final today = DateTime.now();
+    final wake = p.wakeTime ?? const ClockTime(7, 0);
+    final bed = p.bedTime ?? const ClockTime(21, 0);
+    final first = [
+      for (final f in Feature.values)
+        if (p.interests?.contains(f.name) ?? false) f.title(l),
+    ];
+
+    Future<void> save(void Function(UserProfile p) change) {
+      final updated = UserProfile.fromJson(p.toJson());
+      change(updated);
+      return store.saveProfile(updated);
+    }
+
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.waving_hand_rounded),
+            title: Text(l.profileCallMe),
+            subtitle: Text(p.callName),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => ProfileEditScreen(profile: p)),
+            ),
+          ),
+          const Divider(indent: 20, endIndent: 20),
+          ListTile(
+            leading: const Icon(Icons.schedule_rounded),
+            title: Text(l.profileMyDay),
+            subtitle: Text(
+              l.profileMyDayValue(
+                formatTime(context, wake.on(today)),
+                formatTime(context, bed.on(today)),
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _editIn<(ClockTime, ClockTime)>(
+              context,
+              title: l.profileMyDay,
+              initial: (wake, bed),
+              builder: (value, set) => DayTimesPicker(
+                wake: value.$1,
+                bed: value.$2,
+                onChanged: (w, b) => set((w, b)),
+              ),
+              onSave: (v) => save((p) {
+                p.wakeTime = v.$1;
+                p.bedTime = v.$2;
+              }),
+            ),
+          ),
+          const Divider(indent: 20, endIndent: 20),
+          ListTile(
+            leading: const Icon(Icons.home_rounded),
+            title: Text(l.profileHomeFirst),
+            subtitle: Text(
+              first.isEmpty ? l.profileHomeFirstNone : first.join(', '),
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _editIn<Set<Feature>>(
+              context,
+              title: l.profileHomeFirst,
+              initial: {
+                for (final f in Feature.values)
+                  if (p.interests?.contains(f.name) ?? false) f,
+              },
+              builder: (value, set) =>
+                  InterestsPicker(selected: value, onChanged: set),
+              onSave: (v) => save(
+                (p) => p.interests = [
+                  for (final f in Feature.values)
+                    if (v.contains(f)) f.name,
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Opens a small screen to change one setting, saved with the bottom button.
+void _editIn<T>(
+  BuildContext context, {
+  required String title,
+  required T initial,
+  required Widget Function(T value, ValueChanged<T> set) builder,
+  required Future<void> Function(T value) onSave,
+}) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) {
+        var value = initial;
+        return StatefulBuilder(
+          builder: (context, setState) => Scaffold(
+            appBar: AppBar(title: Text(title)),
+            bottomNavigationBar: BottomAction(
+              child: FilledButton.icon(
+                onPressed: () async {
+                  await onSave(value);
+                  if (context.mounted) Navigator.pop(context);
+                },
+                icon: const Icon(Icons.check_rounded),
+                label: Text(context.l10n.commonSave),
+              ),
+            ),
+            body: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                ContentWidth(
+                  child: builder(value, (v) => setState(() => value = v)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}

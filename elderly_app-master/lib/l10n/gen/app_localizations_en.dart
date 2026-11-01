@@ -1874,4 +1874,142 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareBackupPickerTitle => 'Choose your Elderly Care backup';
+
+  @override
+  String setupStepOf(int step, int total) {
+    return 'Step $step of $total';
+  }
+
+  @override
+  String get setupSkip => 'Skip';
+
+  @override
+  String get setupFinish => 'Finish';
+
+  @override
+  String get setupNickname => 'What would you like us to call you?';
+
+  @override
+  String get setupNicknameHint => 'e.g. Gogo, Oupa or Mrs Smith';
+
+  @override
+  String get setupNicknameHelp =>
+      'Leave it empty and we will use your first name.';
+
+  @override
+  String get setupReadingTitle => 'Is this easy to read?';
+
+  @override
+  String get setupReadingBody =>
+      'Choose a text size that is comfortable for you. You can change it any time in My profile.';
+
+  @override
+  String get setupReadingSample => 'Time for your blood pressure tablet.';
+
+  @override
+  String get setupHelpTitle => 'What would you like help with?';
+
+  @override
+  String get setupHelpBody =>
+      'Choose as many as you like. They will come first on your home screen, and everything else stays there too.';
+
+  @override
+  String get setupDayTitle => 'Tell us about your day';
+
+  @override
+  String get setupDayBody =>
+      'We will suggest medicine times that fit around your day.';
+
+  @override
+  String get setupWakeUp => 'I usually get up at';
+
+  @override
+  String get setupBedtime => 'I usually go to bed at';
+
+  @override
+  String setupDaySuggestion(String times) {
+    return 'Suggested medicine times: $times';
+  }
+
+  @override
+  String get setupHealthTitle => 'A few health details';
+
+  @override
+  String get setupHealthBody =>
+      'These go on your Medical ID, so paramedics and doctors can help you quickly. You can skip this and add them later.';
+
+  @override
+  String get setupBloodGroupUnknown => 'I don\'t know';
+
+  @override
+  String setupFinishTitle(String name) {
+    return 'You\'re all set, $name!';
+  }
+
+  @override
+  String get setupFinishBody =>
+      'Here is what we set up for you. Please read and accept our terms to finish.';
+
+  @override
+  String setupSummaryName(String name) {
+    return 'We will call you $name.';
+  }
+
+  @override
+  String setupSummaryFirst(String features) {
+    return 'Your home screen starts with $features.';
+  }
+
+  @override
+  String setupSummaryContact(String name) {
+    return '$name is your emergency contact.';
+  }
+
+  @override
+  String get setupSummaryNoContact =>
+      'No emergency contact yet. You can add one in My family.';
+
+  @override
+  String get startTitle => 'Let\'s get started';
+
+  @override
+  String get startBody => 'A few first steps to make the app work for you.';
+
+  @override
+  String get startAllDone => 'You\'re all set';
+
+  @override
+  String get startAllDoneBody => 'Well done! You can close this now.';
+
+  @override
+  String get startAddMedicine => 'Add your first medicine';
+
+  @override
+  String get startAddAppointment => 'Add your next doctor\'s visit';
+
+  @override
+  String get startAddFamily => 'Add someone from your family';
+
+  @override
+  String get startAddPin => 'Protect the app with a PIN';
+
+  @override
+  String get profileMadeForYou => 'Made for you';
+
+  @override
+  String get profileCallMe => 'We call you';
+
+  @override
+  String get profileMyDay => 'My day';
+
+  @override
+  String profileMyDayValue(String wake, String bed) {
+    return 'Up at $wake, bed at $bed';
+  }
+
+  @override
+  String get profileHomeFirst => 'First on my home screen';
+
+  @override
+  String get profileHomeFirstNone => 'Everything, in the usual order';
 }

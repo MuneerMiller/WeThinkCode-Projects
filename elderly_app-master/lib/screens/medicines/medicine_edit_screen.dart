@@ -6,8 +6,6 @@ import '../../l10n/l10n.dart';
 import '../../l10n/labels.dart';
 import '../../widgets/common.dart';
 
-const _defaultTimes = [ClockTime(8, 0), ClockTime(14, 0), ClockTime(20, 0)];
-
 class MedicineEditScreen extends StatefulWidget {
   const MedicineEditScreen({super.key, this.medicine});
   final Medicine? medicine;
@@ -26,9 +24,13 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
   late MedicineType _type = widget.medicine?.type ?? MedicineType.tablet;
   late final List<ClockTime> _times = [...?widget.medicine?.times]..sort();
 
+  /// Times fitted to the user's day, from setup or My profile.
+  late final List<ClockTime> _defaultTimes =
+      (context.store.profile ?? UserProfile(name: '')).suggestedDoseTimes;
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     if (_times.isEmpty) _times.add(_defaultTimes.first);
   }
 
