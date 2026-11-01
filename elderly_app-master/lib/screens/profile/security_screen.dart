@@ -4,7 +4,8 @@ import '../../app_scope.dart';
 import '../../security/app_lock.dart';
 import '../../widgets/common.dart';
 import '../../widgets/secret_dialogs.dart';
-import 'privacy_policy_screen.dart';
+import '../../legal/legal.dart';
+import '../../legal/legal_screens.dart';
 
 class SecurityScreen extends StatelessWidget {
   const SecurityScreen({super.key});
@@ -232,11 +233,7 @@ class SecurityScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const PrivacyPolicyScreen(),
-                    ),
-                  ),
+                  onPressed: () => openLegalDoc(context, LegalDoc.privacy),
                   icon: const Icon(Icons.policy_rounded),
                   label: const Text('Read the full privacy policy'),
                 ),

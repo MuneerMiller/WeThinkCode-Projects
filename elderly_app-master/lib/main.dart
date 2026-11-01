@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import 'app_scope.dart';
 import 'data/app_store.dart';
+import 'legal/legal.dart';
+import 'legal/legal_screens.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/medicines/dose_actions.dart';
 import 'screens/onboarding/onboarding_screen.dart';
@@ -14,6 +16,7 @@ import 'theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerExtraLicenses();
   final store = await AppStore.load();
   final services = AppServices();
   await services.notifications.init();
@@ -140,7 +143,13 @@ class StartGate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = context.store;
-    if (store.profile != null) return const HomeScreen();
+    if (store.profile != null) {
+      // Existing users accept new or updated legal documents once.
+      if (store.legalAcceptedVersion < LegalInfo.version) {
+        return const LegalUpdateScreen();
+      }
+      return const HomeScreen();
+    }
     if (!store.onboardingSeen) return const OnboardingScreen();
     return const SetupScreen();
   }

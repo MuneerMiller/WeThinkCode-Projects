@@ -255,3 +255,49 @@ class ReadAloudButton extends StatelessWidget {
     );
   }
 }
+
+/// A short, quiet reminder that the app is not medical advice, linking to
+/// the full Medical disclaimer.
+class DisclaimerNote extends StatelessWidget {
+  const DisclaimerNote(this.text, {super.key, required this.onReadMore});
+  final String text;
+  final VoidCallback onReadMore;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.info_outline_rounded,
+                size: 20,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  text,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: onReadMore,
+              child: const Text('Read the medical disclaimer'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

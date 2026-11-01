@@ -4,6 +4,8 @@ import '../../app_scope.dart';
 import '../../data/models.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
+import '../../legal/legal_screens.dart';
+import '../../legal/legal.dart';
 import 'dose_check_screen.dart';
 import 'medicine_edit_screen.dart';
 
@@ -106,6 +108,13 @@ class MedicinesScreen extends StatelessWidget {
                             ),
                           ),
                         ),
+                      DisclaimerNote(
+                        'Always take medicines as your doctor or pharmacist '
+                        'told you. Reminders can sometimes be late, so do not '
+                        'rely on them alone.',
+                        onReadMore: () =>
+                            openLegalDoc(context, LegalDoc.medical),
+                      ),
                     ],
                   ),
                 ),

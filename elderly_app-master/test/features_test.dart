@@ -1,4 +1,5 @@
 import 'package:elderly_app/data/models.dart';
+import 'package:elderly_app/legal/legal.dart';
 import 'package:elderly_app/services/location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,6 +27,14 @@ void main() {
     expect(find.text('Please enter their phone number'), findsOneWidget);
     await tester.enter('Their phone number', '082 555 0101');
     await tester.tapText('Continue');
+    expect(find.text('Please tick the box to continue.'), findsOneWidget);
+    expect(app.store.profile, isNull);
+    await tester.tapText(
+      'I agree to the Terms of Use, and I have read the Medical disclaimer '
+      'and the Privacy policy',
+    );
+    await tester.tapText('Continue');
+    expect(app.store.legalAcceptedVersion, LegalInfo.version);
 
     expect(find.textContaining(', Margaret'), findsOneWidget);
     expect(find.text('I need help'), findsOneWidget);
@@ -554,6 +563,10 @@ void main() {
     expect(app.store.profile, isNull);
     await app.store.markOnboardingSeen();
     await app.store.saveProfile(UserProfile(name: 'Temporary'));
+    // Erasing also cleared the accepted terms, so the app asks again.
+    await tester.pumpAndSettle();
+    expect(find.text('Please review our terms'), findsOneWidget);
+    await app.store.acceptLegal(LegalInfo.version);
     await tester.pumpAndSettle();
 
     app.share.fileToPick = 'this is not a backup';
@@ -699,23 +712,23 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester, prefs: {'onboardingSeen': true});
-    await tester.tapText('How we look after your information');
+    await tester.tapText('Read the privacy policy');
     expect(find.text('Privacy policy'), findsWidgets);
     expect(find.text('The short version'), findsOneWidget);
-    expect(
-      find.textContaining('Your information stays on your phone.'),
-      findsOneWidget,
-    );
     await tester.back();
 
     await tester.enter('Your name', 'Margaret Smith');
+    await tester.tapText(
+      'I agree to the Terms of Use, and I have read the Medical disclaimer '
+      'and the Privacy policy',
+    );
     await tester.tapText('Continue');
     await tester.tap(find.byTooltip('My profile'));
     await tester.pumpAndSettle();
     await tester.tapText('Privacy & security');
     await tester.tapText('Read the full privacy policy');
-    await tester.drag(find.byType(ListView).last, const Offset(0, -3000));
+    await tester.drag(find.byType(ListView).last, const Offset(0, -20000));
     await tester.pumpAndSettle();
-    expect(find.text('Changes to this policy'), findsOneWidget);
+    expect(find.text('15. Changes to this policy'), findsOneWidget);
   });
 }

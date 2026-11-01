@@ -89,6 +89,10 @@ class AppStore extends ChangeNotifier {
 
   /// Extra text enlargement on top of the phone's own setting.
   double textScale = 1.0;
+
+  /// Which version of the legal documents was accepted (0: none yet), and when.
+  int legalAcceptedVersion = 0;
+  DateTime? legalAcceptedAt;
   final List<Relative> relatives = [];
   final List<Medicine> medicines = [];
   final List<Appointment> appointments = [];
@@ -121,6 +125,9 @@ class AppStore extends ChangeNotifier {
   Future<void> _read() async {
     onboardingSeen = _prefs.getBool('onboardingSeen') ?? false;
     textScale = (_prefs.getDouble('textScale') ?? 1.0).clamp(1.0, 1.3);
+    legalAcceptedVersion = _prefs.getInt('legal.version') ?? 0;
+    final acceptedAt = _prefs.getString('legal.acceptedAt');
+    legalAcceptedAt = acceptedAt == null ? null : DateTime.tryParse(acceptedAt);
     _nextId = _prefs.getInt('nextId') ?? 1;
 
     final sections = <String, String>{};
@@ -244,6 +251,18 @@ class AppStore extends ChangeNotifier {
     return _write('profile', jsonEncode(value.toJson()));
   }
 
+  /// Records that the user accepted [version] of the legal documents.
+  Future<void> acceptLegal(int version) async {
+    legalAcceptedVersion = version;
+    legalAcceptedAt = DateTime.now();
+    notifyListeners();
+    await _prefs.setInt('legal.version', version);
+    await _prefs.setString(
+      'legal.acceptedAt',
+      legalAcceptedAt!.toIso8601String(),
+    );
+  }
+
   Future<void> setTextScale(double value) async {
     textScale = value;
     notifyListeners();
@@ -357,7 +376,14 @@ class AppStore extends ChangeNotifier {
 
     final scale = data['textScale'];
     final salt = data['callRoomSalt'];
+    // Acceptance of the legal documents belongs to this device's user.
+    final legalVersion = _prefs.getInt('legal.version');
+    final legalAt = _prefs.getString('legal.acceptedAt');
     await _prefs.clear();
+    if (legalVersion != null && legalAt != null) {
+      await _prefs.setInt('legal.version', legalVersion);
+      await _prefs.setString('legal.acceptedAt', legalAt);
+    }
     await _prefs.setBool('onboardingSeen', true);
     if (scale is num) {
       await _prefs.setDouble('textScale', scale.toDouble().clamp(1.0, 1.3));

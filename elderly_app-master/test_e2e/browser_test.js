@@ -202,6 +202,9 @@ async function opened() { return page.evaluate(() => window.__opened); }
     await fill('Their name', 'Anna Smith');
     await fill('Relationship', 'Daughter');
     await fill('Their phone number', '082 555 0101');
+    await tap('Continue');
+    await see('Please tick the box to continue.');
+    await tapLocator(page.getByRole('checkbox').first());
     await shot('setup');
     await tap('Continue');
     await see('Margaret');
@@ -466,6 +469,30 @@ async function opened() { return page.evaluate(() => window.__opened); }
     const csp = await page.evaluate(() =>
       document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content ?? '');
     assert(csp.includes("script-src 'self'"), 'release build has a Content-Security-Policy');
+  });
+
+  await check('legal: every document opens from Legal & about', async () => {
+    await tapLocator(page.getByRole('button', { name: 'My profile' }));
+    await tap('Legal & about');
+    await shot('legal-hub');
+    for (const [title, text] of [
+      ['Terms of Use', 'Consumer Protection Act'],
+      ['Medical disclaimer', 'The App is not a doctor'],
+      ['Privacy policy', 'Information Regulator'],
+      ['Accessibility statement', 'Known limitations'],
+      ['Credits and third-party notices', 'OpenStreetMap contributors'],
+    ]) {
+      await tap(title);
+      await see(text);
+      if (title === 'Terms of Use') await shot('terms');
+      await back();
+    }
+    await tap('Open-source licences');
+    await see('Version 2.1.0');
+    await see('cryptography');
+    await back();
+    await back();
+    await back();
   });
 
   await check('security: privacy page confirms encryption', async () => {

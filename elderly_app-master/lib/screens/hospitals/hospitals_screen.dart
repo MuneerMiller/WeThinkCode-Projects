@@ -129,6 +129,15 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
                             child: _HospitalCard(h),
                           ),
                         Text(
+                          'This list comes from OpenStreetMap and may be '
+                          'incomplete or out of date. Not every place has an '
+                          'emergency unit: phone first if you can.',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
                           'Data © OpenStreetMap contributors',
                           style: theme.textTheme.bodySmall,
                           textAlign: TextAlign.center,

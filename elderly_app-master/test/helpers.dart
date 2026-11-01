@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:elderly_app/data/models.dart';
+import 'package:elderly_app/legal/legal.dart';
 import 'package:elderly_app/main.dart';
 import 'package:elderly_app/security/app_lock.dart';
 import 'package:elderly_app/security/crypto.dart';
@@ -252,6 +253,8 @@ const signedUp = <String, Object>{
       '[{"id":1,"name":"Anna","phone":"082 555 0101","relationship":"Daughter"},'
       '{"id":2,"name":"Ben","phone":"083 555 0202","relationship":"Son"}]',
   'nextId': 3,
+  'legal.version': LegalInfo.version,
+  'legal.acceptedAt': '2026-11-01T09:00:00.000',
 };
 
 extension Driver on WidgetTester {

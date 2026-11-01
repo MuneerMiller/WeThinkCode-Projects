@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../app_scope.dart';
 import '../../data/models.dart';
 import '../../widgets/common.dart';
-import '../profile/privacy_policy_screen.dart';
+import '../../legal/legal.dart';
+import '../../legal/legal_screens.dart';
 
 /// First-run form: who is using the app and who to contact in an emergency.
 class SetupScreen extends StatefulWidget {
@@ -29,9 +30,15 @@ class _SetupScreenState extends State<SetupScreen> {
     super.dispose();
   }
 
+  bool _agreed = false;
+  bool _showAgreeError = false;
+
   Future<void> _finish() async {
-    if (!_form.currentState!.validate()) return;
+    final valid = _form.currentState!.validate();
+    if (!_agreed) setState(() => _showAgreeError = true);
+    if (!valid || !_agreed) return;
     final store = context.store;
+    await store.acceptLegal(LegalInfo.version);
     if (_relName.text.trim().isNotEmpty) {
       await store.saveRelative(
         Relative(
@@ -147,13 +154,11 @@ class _SetupScreenState extends State<SetupScreen> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const PrivacyPolicyScreen(),
-                        ),
-                      ),
-                      child: const Text('How we look after your information'),
+                    const SizedBox(height: 24),
+                    LegalAgreement(
+                      agreed: _agreed,
+                      showError: _showAgreeError && !_agreed,
+                      onChanged: (v) => setState(() => _agreed = v),
                     ),
                   ],
                 ),

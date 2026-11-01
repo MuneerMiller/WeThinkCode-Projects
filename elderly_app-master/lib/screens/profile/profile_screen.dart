@@ -5,6 +5,7 @@ import '../../data/models.dart';
 import '../../widgets/common.dart';
 import '../../data/app_store.dart';
 import '../../widgets/secret_dialogs.dart';
+import '../../legal/legal_screens.dart';
 import 'medical_id_screen.dart';
 import 'security_screen.dart';
 
@@ -155,6 +156,19 @@ class ProfileScreen extends StatelessWidget {
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const SecurityScreen(),
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.description_rounded),
+                        title: const Text('Legal & about'),
+                        subtitle: const Text(
+                          'Terms, medical disclaimer, privacy, licences',
+                        ),
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const LegalHubScreen(),
                           ),
                         ),
                       ),

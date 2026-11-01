@@ -7,6 +7,8 @@ import '../../data/summary_pdf.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../../theme.dart';
 import '../../widgets/common.dart';
+import '../../legal/legal_screens.dart';
+import '../../legal/legal.dart';
 import 'tracker_screen.dart';
 
 class HealthScreen extends StatelessWidget {
@@ -51,6 +53,12 @@ class HealthScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                 ],
+                DisclaimerNote(
+                  'Tips here are general information for adults, not medical '
+                  'advice. Ask your doctor what readings are right for you. '
+                  'If you feel very unwell, call 112.',
+                  onReadMore: () => openLegalDoc(context, LegalDoc.medical),
+                ),
               ],
             ),
           ),
