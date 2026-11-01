@@ -1,3 +1,6 @@
+import 'dart:ui' show Locale;
+
+import 'package:elderly_app/l10n/l10n.dart';
 import 'package:elderly_app/data/models.dart';
 import 'package:elderly_app/services/notification_service.dart';
 import 'package:elderly_app/services/reminder_plan.dart';
@@ -14,12 +17,15 @@ Medicine metformin({DateTime? addedOn}) => Medicine(
   addedOn: addedOn ?? DateTime(2026, 3, 1),
 );
 
+final en = lookupAppLocalizations(const Locale('en'));
+
 void main() {
   group('Reminder plan', () {
     final now = DateTime(2026, 3, 10, 9, 30);
 
     test('each dose time repeats daily from its next occurrence', () {
       final plan = ReminderPlan.build(
+        l10n: en,
         medicines: [metformin()],
         appointments: const [],
         now: now,
@@ -38,6 +44,7 @@ void main() {
     test('unanswered doses get a follow-up an hour later, for a week', () {
       final m = metformin();
       var plan = ReminderPlan.build(
+        l10n: en,
         medicines: [m],
         appointments: const [],
         now: now,
@@ -53,6 +60,7 @@ void main() {
       // Answering tonight's dose removes its follow-up.
       m.record(DateTime(2026, 3, 10), const ClockTime(20, 0), true);
       plan = ReminderPlan.build(
+        l10n: en,
         medicines: [m],
         appointments: const [],
         now: now,
@@ -67,6 +75,7 @@ void main() {
 
     test('no follow-ups for doses before the medicine was added', () {
       final plan = ReminderPlan.build(
+        l10n: en,
         medicines: [metformin(addedOn: DateTime(2026, 3, 10, 21))],
         appointments: const [],
         now: now,
@@ -82,6 +91,7 @@ void main() {
 
     test('appointments are reminded an hour before, unless past or done', () {
       final plan = ReminderPlan.build(
+        l10n: en,
         medicines: const [],
         appointments: [
           Appointment(
@@ -120,6 +130,7 @@ void main() {
           ),
       ];
       final plan = ReminderPlan.build(
+        l10n: en,
         medicines: medicines,
         appointments: [
           for (var i = 1; i <= 50; i++)

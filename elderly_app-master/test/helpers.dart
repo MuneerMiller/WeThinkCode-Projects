@@ -14,6 +14,7 @@ import 'package:elderly_app/services/notification_service.dart';
 import 'package:elderly_app/services/reminder_plan.dart';
 import 'package:elderly_app/services/share_service.dart';
 import 'package:elderly_app/services/speech_service.dart';
+import 'package:elderly_app/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -68,6 +69,7 @@ class FakeNotifications extends NotificationService {
   Future<void> sync({
     required List<Medicine> medicines,
     required List<Appointment> appointments,
+    AppLocalizations? l10n,
   }) async {
     syncs++;
     lastMedicines = [...medicines];
@@ -146,7 +148,7 @@ class FakeShare extends ShareService {
   }
 
   @override
-  Future<String?> pickBackupFile() async => fileToPick;
+  Future<String?> pickBackupFile({String? title}) async => fileToPick;
 }
 
 class FakeLocation extends LocationService {

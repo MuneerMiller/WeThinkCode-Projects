@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'app_scope.dart';
 import 'data/app_store.dart';
 import 'legal/legal.dart';
+import 'l10n/l10n.dart';
 import 'legal/legal_screens.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/medicines/dose_actions.dart';
@@ -19,7 +20,9 @@ Future<void> main() async {
   registerExtraLicenses();
   final store = await AppStore.load();
   final services = AppServices();
-  await services.notifications.init();
+  await services.notifications.init(
+    l10n: lookupAppLocalizations(appLocaleFor(store.languageCode)),
+  );
   runApp(ElderlyApp(store: store, services: services));
 }
 
@@ -55,6 +58,8 @@ class _ElderlyAppState extends State<ElderlyApp> {
     );
     // Keep the phone's reminders in step with the data.
     store.addListener(_scheduleSync);
+    _language = store.languageCode;
+    store.addListener(_languageChanged);
     _syncReminders();
     _doseTaps = notifications.responses.listen(_onDoseTap);
     final launch = notifications.takeLaunchResponse();
@@ -63,14 +68,24 @@ class _ElderlyAppState extends State<ElderlyApp> {
     }
   }
 
+  String? _language;
+
+  /// Rebuilds the app in a newly chosen language (and rewrites reminders).
+  void _languageChanged() {
+    if (widget.store.languageCode == _language) return;
+    setState(() => _language = widget.store.languageCode);
+  }
+
   void _scheduleSync() {
     _syncTimer?.cancel();
     _syncTimer = Timer(const Duration(milliseconds: 500), _syncReminders);
   }
 
+  /// The language the app is shown in.
   void _syncReminders() => widget.services.notifications.sync(
     medicines: widget.store.medicines,
     appointments: widget.store.appointments,
+    l10n: lookupAppLocalizations(appLocaleFor(widget.store.languageCode)),
   );
 
   void _onDoseTap(DoseResponse r) => handleDoseResponse(
@@ -85,6 +100,7 @@ class _ElderlyAppState extends State<ElderlyApp> {
   void dispose() {
     _lifecycle.dispose();
     widget.store.removeListener(_scheduleSync);
+    widget.store.removeListener(_languageChanged);
     _doseTaps?.cancel();
     _syncTimer?.cancel();
     super.dispose();
@@ -98,7 +114,10 @@ class _ElderlyAppState extends State<ElderlyApp> {
       store: store,
       services: services,
       child: MaterialApp(
-        title: 'Elderly Care',
+        onGenerateTitle: (context) => context.l10n.appTitle,
+        locale: _language == null ? null : Locale(_language!),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: appLocalizationsDelegates,
         navigatorKey: _navigator,
         scaffoldMessengerKey: _messenger,
         debugShowCheckedModeBanner: false,
@@ -106,6 +125,9 @@ class _ElderlyAppState extends State<ElderlyApp> {
         darkTheme: AppTheme.dark(),
         // Apply the in-app text size on top of the phone's own setting.
         builder: (context, child) {
+          final locale = Localizations.localeOf(context);
+          applyIntlLocale(locale);
+          services.speech.language = locale.languageCode;
           final mq = MediaQuery.of(context);
           final scale = mq.textScaler.scale(1) * context.store.textScale;
           final locked = context.store.lock.locked;

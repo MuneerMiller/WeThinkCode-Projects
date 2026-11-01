@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
+import '../../l10n/l10n.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 
@@ -16,10 +17,8 @@ class MedicalIdScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Medical ID')),
-    body: const MedicalIdView(
-      footer: 'Keep your details up to date in My profile.',
-    ),
+    appBar: AppBar(title: Text(context.l10n.medicalIdTitle)),
+    body: MedicalIdView(footer: context.l10n.medicalIdFooter),
   );
 }
 
@@ -31,6 +30,7 @@ class MedicalIdView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final store = context.store;
     final contacts = context.services.contacts;
     final theme = Theme.of(context);
@@ -53,7 +53,7 @@ class MedicalIdView extends StatelessWidget {
                 ),
               ),
               Text(
-                value.isEmpty ? 'Not recorded' : value,
+                value.isEmpty ? l.medicalIdNotRecorded : value,
                 style: theme.textTheme.titleLarge?.copyWith(
                   color: value.isEmpty
                       ? theme.colorScheme.onSurfaceVariant
@@ -75,20 +75,33 @@ class MedicalIdView extends StatelessWidget {
             children: [
               ReadAloudButton(
                 text: [
-                  'Medical ID for ${p.name}.',
-                  if (p.age.isNotEmpty) 'Age ${p.age}.',
-                  if (p.bloodGroup.isNotEmpty) 'Blood group ${p.bloodGroup}.',
+                  l.medicalIdSpeakTitle(p.name),
+                  if (p.age.isNotEmpty) l.medicalIdSpeakAge(p.age),
+                  if (p.bloodGroup.isNotEmpty)
+                    l.medicalIdSpeakBloodGroup(p.bloodGroup),
                   p.allergies.isEmpty
-                      ? 'No allergies recorded.'
-                      : 'Allergies: ${p.allergies}.',
+                      ? l.medicalIdSpeakNoAllergies
+                      : l.medicalIdSpeakAllergies(p.allergies),
                   if (p.conditions.isNotEmpty)
-                    'Medical conditions: ${p.conditions}.',
+                    l.medicalIdSpeakConditions(p.conditions),
                   if (medicines.isNotEmpty)
-                    'Medicines: ${medicines.map((m) => m.dosage.isEmpty ? m.name : '${m.name} ${m.dosage}').join(', ')}.',
+                    l.medicalIdSpeakMedicines(
+                      medicines
+                          .map(
+                            (m) => m.dosage.isEmpty
+                                ? m.name
+                                : '${m.name} ${m.dosage}',
+                          )
+                          .join(', '),
+                    ),
                   for (final r in store.relatives)
-                    'Emergency contact: ${r.name}'
-                        '${r.relationship.isEmpty ? '' : ', ${r.relationship}'}, '
-                        '${r.phone.replaceAll(' ', '').split('').join(' ')}.',
+                    r.relationship.isEmpty
+                        ? l.medicalIdSpeakContact(r.name, _digits(r.phone))
+                        : l.medicalIdSpeakContactWithRelationship(
+                            r.name,
+                            r.relationship,
+                            _digits(r.phone),
+                          ),
                 ].join(' '),
               ),
               const SizedBox(height: 12),
@@ -125,16 +138,23 @@ class MedicalIdView extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Expanded(child: fact('Age', p.age)),
+                              Expanded(child: fact(l.medicalIdAge, p.age)),
                               Expanded(
-                                child: fact('Blood group', p.bloodGroup),
+                                child: fact(
+                                  l.medicalIdBloodGroup,
+                                  p.bloodGroup,
+                                ),
                               ),
                             ],
                           ),
-                          fact('Allergies', p.allergies, important: true),
-                          fact('Medical conditions', p.conditions),
                           fact(
-                            'Medicines',
+                            l.medicalIdAllergies,
+                            p.allergies,
+                            important: true,
+                          ),
+                          fact(l.medicalIdConditions, p.conditions),
+                          fact(
+                            l.medicalIdMedicines,
                             medicines
                                 .map(
                                   (m) => m.dosage.isEmpty
@@ -150,7 +170,7 @@ class MedicalIdView extends StatelessWidget {
                 ),
               ),
               if (store.relatives.isNotEmpty) ...[
-                const SectionHeader('Emergency contacts'),
+                SectionHeader(l.medicalIdEmergencyContacts),
                 for (final r in store.relatives)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
@@ -172,7 +192,10 @@ class MedicalIdView extends StatelessWidget {
                           ),
                           onPressed: () => contacts.call(r.phone),
                           icon: const Icon(Icons.call_rounded),
-                          label: Text('Call', semanticsLabel: 'Call ${r.name}'),
+                          label: Text(
+                            l.commonCall,
+                            semanticsLabel: l.medicalIdCallContact(r.name),
+                          ),
                         ),
                       ),
                     ),
@@ -195,3 +218,7 @@ class MedicalIdView extends StatelessWidget {
     );
   }
 }
+
+/// A phone number with spaces between the digits, so it is read aloud one
+/// digit at a time.
+String _digits(String phone) => phone.replaceAll(' ', '').split('').join(' ');

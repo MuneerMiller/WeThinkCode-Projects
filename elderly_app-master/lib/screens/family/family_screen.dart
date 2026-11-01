@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../data/models.dart';
+import '../../l10n/l10n.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 import 'relative_edit_screen.dart';
@@ -23,24 +24,24 @@ class FamilyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final store = context.store;
     final relatives = [...store.relatives]
       ..sort((a, b) => a.name.compareTo(b.name));
     return Scaffold(
-      appBar: AppBar(title: const Text('My family')),
+      appBar: AppBar(title: Text(l.featureFamily)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _edit(context),
         icon: const Icon(Icons.person_add_rounded, size: 28),
-        label: const Text('Add person'),
+        label: Text(l.familyAddPerson),
       ),
       body: relatives.isEmpty
-          ? const Center(
+          ? Center(
               child: SingleChildScrollView(
                 child: EmptyState(
                   icon: Icons.family_restroom_rounded,
-                  title: 'No family added yet',
-                  message:
-                      'Add the people who look after you so you can reach them quickly.',
+                  title: l.familyNoneTitle,
+                  message: l.familyNoneMessage,
                 ),
               ),
             )
@@ -62,7 +63,7 @@ class FamilyScreen extends StatelessWidget {
                           Icons.share_location_rounded,
                           size: 28,
                         ),
-                        label: const Text('Alert everyone with my location'),
+                        label: Text(l.familyAlertEveryone),
                       ),
                       const SizedBox(height: 8),
                       for (final r in relatives) ...[
@@ -85,6 +86,7 @@ class _RelativeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     final contacts = context.services.contacts;
     return Card(
@@ -111,7 +113,7 @@ class _RelativeCard extends StatelessWidget {
                 ].join(' · '),
               ),
               trailing: IconButton(
-                tooltip: 'Edit ${r.name}',
+                tooltip: l.familyEditPerson(r.name),
                 onPressed: onEdit,
                 icon: const Icon(Icons.edit_rounded),
               ),
@@ -124,7 +126,7 @@ class _RelativeCard extends StatelessWidget {
                     child: FilledButton.icon(
                       onPressed: () => contacts.call(r.phone),
                       icon: const Icon(Icons.call_rounded),
-                      label: const Text('Call'),
+                      label: Text(l.commonCall),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -132,7 +134,7 @@ class _RelativeCard extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: () => contacts.sms([r.phone], ''),
                       icon: const Icon(Icons.sms_rounded),
-                      label: const Text('Text'),
+                      label: Text(l.commonText),
                     ),
                   ),
                 ],

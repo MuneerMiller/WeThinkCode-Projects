@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../l10n/l10n.dart';
+
 /// The app's version, shown under "Legal & about". A test keeps it in step
 /// with pubspec.yaml.
 const appVersion = '2.1.0';
@@ -17,6 +19,9 @@ abstract final class LegalInfo {
   /// Raise this to ask everyone to accept the documents again.
   static const version = 1;
   static const effectiveDate = '1 November 2026';
+
+  /// [effectiveDate] as a date, for showing in the app's language.
+  static final effectiveDay = DateTime(2026, 11, 1);
 
   static const values = <String, String>{
     'publisher_name': '[publisher name – to be completed before release]',
@@ -65,6 +70,9 @@ enum LegalDoc {
   );
 
   const LegalDoc(this.title, this.file, this.icon);
+
+  /// The English title, as used in the documents themselves. Show
+  /// [LegalDocL10n.titleIn] in the app.
   final String title;
   final String file;
   final IconData icon;
@@ -73,6 +81,17 @@ enum LegalDoc {
 
   Future<String> load() async =>
       LegalInfo.fill(await rootBundle.loadString(asset, cache: false));
+}
+
+extension LegalDocL10n on LegalDoc {
+  /// The document's title in the app's language.
+  String titleIn(AppLocalizations l) => switch (this) {
+    LegalDoc.terms => l.legalDocTerms,
+    LegalDoc.medical => l.legalDocMedical,
+    LegalDoc.privacy => l.legalDocPrivacy,
+    LegalDoc.accessibility => l.legalDocAccessibility,
+    LegalDoc.credits => l.legalDocCredits,
+  };
 }
 
 /// Adds the licences that Flutter can't find by itself to the

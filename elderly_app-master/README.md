@@ -9,8 +9,9 @@
 [![CI](https://github.com/MuneerMiller/WeThinkCode-Projects/actions/workflows/elderly-app.yml/badge.svg)](https://github.com/MuneerMiller/WeThinkCode-Projects/actions/workflows/elderly-app.yml)
 ![Flutter](https://img.shields.io/badge/Flutter-3.47-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-3.13-0175C2?logo=dart&logoColor=white)
+![Languages](https://img.shields.io/badge/languages-English%20%C2%B7%20Afrikaans%20%C2%B7%20isiZulu%20%C2%B7%20isiXhosa-B45309)
 ![Platforms](https://img.shields.io/badge/platforms-Android%20%C2%B7%20iOS%20%C2%B7%20Web-1B6B5F)
-![Tests](https://img.shields.io/badge/tests-79%20unit%20%26%20widget%20%C2%B7%2026%20browser-2E7D32)
+![Tests](https://img.shields.io/badge/tests-92%20unit%20%26%20widget%20%C2%B7%2026%20browser-2E7D32)
 
 <img src="docs/screenshots/feature-grid.png" alt="Six screens of Elderly Care: home with SOS button, medicine check, blood pressure chart, Medical ID, nearby hospitals and the PIN lock screen" width="100%">
 
@@ -24,6 +25,7 @@ Older people often juggle several medicines, doctor visits and readings, and wan
 
 | | |
 |---|---|
+| 👋 **Made for you** | A short, friendly setup, one question per screen: what to call you, a comfortable text size, what you want help with (shown first on the home screen), when you get up and go to bed (so medicine times fit your day), Medical ID basics and an emergency contact. Then a *Let's get started* checklist suggests first steps. Everything can be changed later under **My profile → Made for you**. |
 | 💊 **Medicine reminders** | Up to three doses a day. Notifications have **Taken**, **In 10 min** and **Not yet** buttons, and an unanswered dose gets a follow-up an hour later. A missed dose can be texted to family. Optional pack count with refill warnings, and a 7-day record. |
 | 📅 **Appointments** | Upcoming and past doctor visits, with a reminder an hour before. |
 | ❤️ **Health tracker** | Blood pressure, blood sugar, weight and sleep, with charts and healthy-range tips. **Share** sends the doctor a 30-day summary as a printable **PDF** or a message. |
@@ -34,12 +36,14 @@ Older people often juggle several medicines, doctor visits and readings, and wan
 | 📹 **Video call** | Starts a free, private Jitsi Meet call and texts the family the link. |
 | 📄 **Documents & notes** | Photos of prescriptions and test results, searchable by name, plus notes with important ones on top. |
 | 🔊 **Read aloud** | Reads today's summary, the medicine check and the Medical ID out loud. |
+| 🌍 **Four languages** | English, Afrikaans, isiZulu and isiXhosa, chosen on the welcome screen or in **My profile**. Reminders, messages to family and read-aloud follow the chosen language. |
 | 🔒 **Privacy & security** | Encrypted storage, PIN and fingerprint/face lock, password-protected backups. |
 
 ### Designed for older users
 
 - **Easy to read:** the [Lexend](https://www.lexend.com/) typeface at large sizes, plus an in-app Normal / Large / Extra large setting on top of the phone's own text size.
 - **Easy to tap:** big buttons, and every form's main button pinned to the bottom of the screen.
+- **In your own language:** English, Afrikaans, isiZulu or isiXhosa.
 - **Easy to understand:** plain language, one colour per area of the app, and confirmation before anything is deleted.
 - **Works everywhere:** with screen readers and the keyboard, in dark mode, and on tablets and desktop browsers.
 
@@ -122,7 +126,7 @@ tool/build_web.sh
 
 | | |
 |---|---|
-| **Unit & widget tests** | 79 tests: scheduling, reminders, encryption, backups, the app lock, legal acceptance and every feature end to end with fake phone services, including at large text sizes. Run `flutter test`. |
+| **Unit & widget tests** | 92 tests: scheduling, reminders, encryption, backups, the app lock, legal acceptance, every language and every feature end to end with fake phone services, including at large text sizes. Run `flutter test`. |
 | **Browser tests** | [`test_e2e/browser_test.js`](test_e2e/browser_test.js) drives the release web build in Chromium through every feature, checks the PDF's contents and that nothing readable is left in browser storage, and screenshots each step. |
 | **Continuous integration** | Every change runs formatting, `flutter analyze` and the tests, then builds the website, the Android APK and the iOS app. |
 | **Dependencies** | Kept up to date by Dependabot. |
@@ -181,6 +185,23 @@ New users accept them during setup. Existing users are asked again whenever `Leg
 
 </details>
 
+## Languages
+
+The app is available in **English**, **Afrikaans**, **isiZulu** and **isiXhosa**. It follows the phone's language until a different one is chosen on the welcome screen or under **My profile → Language**. Phone reminders, text messages to family and read-aloud (where the phone has a matching voice) use the same language.
+
+The legal documents and the summaries for your doctor stay in English: the English legal text is the binding version, and doctors usually expect English reports.
+
+<details>
+<summary><b>Translations and how to change them</b></summary>
+
+- All the app's text is in [`lib/l10n/app_en.arb`](lib/l10n/app_en.arb), with notes for translators, and the translations are in `app_af.arb`, `app_zu.arb` and `app_xh.arb`. `flutter pub get` or `flutter gen-l10n` turns them into `lib/l10n/gen`.
+- To change wording, edit the `.arb` files. A test checks that every language has every message with the same placeholders.
+- The translations are new and were not written by native speakers. **Afrikaans** should read naturally; **isiZulu** and **isiXhosa** should be reviewed by native speakers, ideally older ones, before release. The app tells isiZulu and isiXhosa users the translation is new and asks for feedback.
+- Flutter has no isiXhosa text for its own buttons (such as the date picker) or dates, so isiXhosa uses South African English for those.
+- To add a language, copy `app_en.arb` to `app_<code>.arb`, translate it, and add the language to `appLanguages` in [`lib/l10n/l10n.dart`](lib/l10n/l10n.dart).
+
+</details>
+
 ## Under the hood
 
 <details>
@@ -193,6 +214,7 @@ lib/
   theme.dart                colours, type scale, per-feature accents
   data/                     models, encrypted on-device store, text and PDF summaries
   security/                 encryption, app lock, lock screen
+  l10n/                     translations (.arb), language setting, translated labels
   legal/                    legal documents, Legal & about, agreement
   services/                 notifications and reminder plan, calls/SMS, location and
                             hospital search, sharing, read aloud

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../data/models.dart';
+import '../../l10n/l10n.dart';
+import '../../l10n/labels.dart';
 import '../../widgets/common.dart';
-
-const _defaultTimes = [ClockTime(8, 0), ClockTime(14, 0), ClockTime(20, 0)];
 
 class MedicineEditScreen extends StatefulWidget {
   const MedicineEditScreen({super.key, this.medicine});
@@ -24,9 +24,13 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
   late MedicineType _type = widget.medicine?.type ?? MedicineType.tablet;
   late final List<ClockTime> _times = [...?widget.medicine?.times]..sort();
 
+  /// Times fitted to the user's day, from setup or My profile.
+  late final List<ClockTime> _defaultTimes =
+      (context.store.profile ?? UserProfile(name: '')).suggestedDoseTimes;
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     if (_times.isEmpty) _times.add(_defaultTimes.first);
   }
 
@@ -57,7 +61,7 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
     final picked = await showTimePicker(
       context: context,
       initialTime: _times[i].timeOfDay,
-      helpText: 'Dose ${i + 1} time',
+      helpText: context.l10n.medicineEditDoseTime(i + 1),
     );
     if (picked != null) {
       setState(() {
@@ -69,6 +73,7 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
 
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
+    final l = context.l10n;
     final store = context.store;
     final m =
         widget.medicine ??
@@ -84,20 +89,21 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
       showMessage(
         context,
         widget.medicine == null
-            ? 'Reminder set for ${m.name}'
-            : 'Saved ${m.name}',
+            ? l.medicineEditReminderSet(m.name)
+            : l.medicineEditSaved(m.name),
       );
       Navigator.pop(context);
     }
   }
 
   Future<void> _delete() async {
+    final l = context.l10n;
     final m = widget.medicine!;
     final ok = await confirm(
       context,
-      title: 'Delete ${m.name}?',
-      message: 'You will no longer get reminders for this medicine.',
-      confirmLabel: 'Delete',
+      title: l.medicineEditDeleteTitle(m.name),
+      message: l.medicineEditDeleteMessage,
+      confirmLabel: l.commonDelete,
       destructive: true,
     );
     if (!ok || !mounted) return;
@@ -108,6 +114,7 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     final editing = widget.medicine != null;
     return Scaffold(
@@ -115,15 +122,17 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
         child: FilledButton.icon(
           onPressed: _save,
           icon: const Icon(Icons.check_rounded),
-          label: Text(editing ? 'Save changes' : 'Save reminder'),
+          label: Text(
+            editing ? l.medicineEditSaveChanges : l.medicineEditSaveNew,
+          ),
         ),
       ),
       appBar: AppBar(
-        title: Text(editing ? 'Edit medicine' : 'Add medicine'),
+        title: Text(editing ? l.medicineEditTitle : l.medicinesAdd),
         actions: [
           if (editing)
             IconButton(
-              tooltip: 'Delete medicine',
+              tooltip: l.medicineEditDeleteTooltip,
               onPressed: _delete,
               icon: const Icon(Icons.delete_outline_rounded),
             ),
@@ -142,39 +151,40 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
                 children: [
                   TextFormField(
                     controller: _name,
-                    decoration: const InputDecoration(
-                      labelText: 'Medicine name',
-                      hintText: 'e.g. Metformin',
+                    decoration: InputDecoration(
+                      labelText: l.medicineEditNameLabel,
+                      hintText: l.medicineEditNameHint,
                     ),
                     textCapitalization: TextCapitalization.words,
-                    validator: (v) => requiredField(v, 'the medicine name'),
+                    validator: (v) =>
+                        requiredField(v, l.medicineEditNameRequired),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _dosage,
-                    decoration: const InputDecoration(
-                      labelText: 'How much (optional)',
-                      hintText: 'e.g. 1 tablet, 500 mg',
+                    decoration: InputDecoration(
+                      labelText: l.medicineEditDosageLabel,
+                      hintText: l.medicineEditDosageHint,
                     ),
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _supply,
-                    decoration: const InputDecoration(
-                      labelText: 'Doses left in the pack (optional)',
-                      hintText: 'e.g. 30',
-                      helperText: 'We will warn you when it is time to refill.',
+                    decoration: InputDecoration(
+                      labelText: l.medicineEditSupplyLabel,
+                      hintText: l.medicineEditSupplyHint,
+                      helperText: l.medicineEditSupplyHelper,
                     ),
                     keyboardType: TextInputType.number,
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) return null;
                       final n = int.tryParse(v.trim());
                       return n == null || n < 0 || n > 10000
-                          ? 'Please enter a whole number'
+                          ? l.medicineEditSupplyInvalid
                           : null;
                     },
                   ),
-                  const SectionHeader('Type'),
+                  SectionHeader(l.medicineEditType),
                   Wrap(
                     spacing: 10,
                     runSpacing: 10,
@@ -182,7 +192,7 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
                       for (final t in MedicineType.values)
                         ChoiceChip(
                           avatar: Icon(t.icon, size: 22),
-                          label: Text(t.label),
+                          label: Text(t.title(l)),
                           selected: _type == t,
                           showCheckmark: false,
                           padding: const EdgeInsets.symmetric(
@@ -193,17 +203,20 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
                         ),
                     ],
                   ),
-                  const SectionHeader('How many times a day?'),
+                  SectionHeader(l.medicineEditHowOften),
                   SegmentedButton<int>(
-                    segments: const [
-                      ButtonSegment(value: 1, label: Text('Once')),
-                      ButtonSegment(value: 2, label: Text('Twice')),
-                      ButtonSegment(value: 3, label: Text('3 times')),
+                    segments: [
+                      ButtonSegment(value: 1, label: Text(l.medicineEditOnce)),
+                      ButtonSegment(value: 2, label: Text(l.medicineEditTwice)),
+                      ButtonSegment(
+                        value: 3,
+                        label: Text(l.medicineEditThreeTimes),
+                      ),
                     ],
                     selected: {_times.length},
                     onSelectionChanged: (s) => _setCount(s.first),
                   ),
-                  const SectionHeader('At what times?'),
+                  SectionHeader(l.medicineEditAtWhatTimes),
                   for (var i = 0; i < _times.length; i++)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 10),
@@ -214,8 +227,8 @@ class _MedicineEditScreenState extends State<MedicineEditScreen> {
                             _times[i].timeOfDay.format(context),
                             style: theme.textTheme.titleLarge,
                           ),
-                          subtitle: Text('Dose ${i + 1}'),
-                          trailing: const Text('Change'),
+                          subtitle: Text(l.medicineEditDoseNumber(i + 1)),
+                          trailing: Text(l.medicineEditChange),
                           onTap: () => _pickTime(i),
                         ),
                       ),

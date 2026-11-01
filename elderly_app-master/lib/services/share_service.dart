@@ -58,10 +58,11 @@ class ShareService {
     }
   }
 
-  /// Lets the user choose a backup file; null if they cancel.
-  Future<String?> pickBackupFile() async {
+  /// Lets the user choose a backup file; null if they cancel. [title] is
+  /// shown on the file picker where the platform has one.
+  Future<String?> pickBackupFile({String? title}) async {
     final file = await FilePicker.pickFile(
-      dialogTitle: 'Choose your Elderly Care backup',
+      dialogTitle: title,
       type: FileType.custom,
       allowedExtensions: const ['json'],
     );

@@ -4,6 +4,8 @@ import 'dart:math' as math;
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
+import '../l10n/gen/app_localizations.dart';
+
 class GeoPoint {
   const GeoPoint(this.lat, this.lon);
   final double lat;
@@ -24,11 +26,22 @@ class GeoPoint {
   }
 }
 
+/// Why the device's location could not be found.
+enum LocationProblem { switchedOff, noPermission, notFound }
+
 class LocationException implements Exception {
-  const LocationException(this.message);
-  final String message;
+  const LocationException(this.problem);
+  final LocationProblem problem;
+
+  /// A sentence explaining [problem] to the user.
+  String message(AppLocalizations l) => switch (problem) {
+    LocationProblem.switchedOff => l.locationOff,
+    LocationProblem.noPermission => l.locationNoPermission,
+    LocationProblem.notFound => l.locationNotFound,
+  };
+
   @override
-  String toString() => message;
+  String toString() => 'LocationException(${problem.name})';
 }
 
 class LocationService {
@@ -37,9 +50,7 @@ class LocationService {
   /// The device's position, asking for permission when needed.
   Future<GeoPoint> current() async {
     if (!await Geolocator.isLocationServiceEnabled()) {
-      throw const LocationException(
-        'Location is switched off. Please turn it on in your phone settings.',
-      );
+      throw const LocationException(LocationProblem.switchedOff);
     }
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -47,9 +58,7 @@ class LocationService {
     }
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
-      throw const LocationException(
-        'Elderly Care needs permission to see your location.',
-      );
+      throw const LocationException(LocationProblem.noPermission);
     }
     try {
       final pos = await Geolocator.getCurrentPosition(
@@ -62,7 +71,7 @@ class LocationService {
     } catch (_) {
       final last = await Geolocator.getLastKnownPosition();
       if (last != null) return GeoPoint(last.latitude, last.longitude);
-      throw const LocationException('We could not find your location.');
+      throw const LocationException(LocationProblem.notFound);
     }
   }
 }

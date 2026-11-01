@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../app_scope.dart';
+import '../l10n/l10n.dart';
 import '../screens/profile/medical_id_screen.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
@@ -74,22 +75,22 @@ class _LockScreenState extends State<LockScreen> {
   Future<void> _submit() async {
     if (_checking || _pin.length < 4) {
       if (_pin.isNotEmpty && _pin.length < 4) {
-        setState(() => _error = 'Your PIN has at least 4 numbers.');
+        setState(() => _error = context.l10n.lockPinTooShort);
       }
       return;
     }
     setState(() => _checking = true);
     final result = await _lock.unlock(_pin);
     if (!mounted) return;
+    final l = context.l10n;
     setState(() {
       _checking = false;
       _pin = '';
       final left = AppLock.freeAttempts - _lock.failedAttempts;
       _error = switch (result) {
         PinResult.ok => null,
-        PinResult.wrong =>
-          'That PIN is not right. $left ${left == 1 ? 'try' : 'tries'} left before a short wait.',
-        PinResult.tooManyAttempts => 'Too many wrong tries.',
+        PinResult.wrong => l.lockPinWrong(left),
+        PinResult.tooManyAttempts => l.lockTooManyTries,
       };
     });
   }
@@ -139,7 +140,7 @@ class _LockScreenState extends State<LockScreen> {
         if (onBack != null)
           Semantics(
             button: true,
-            label: 'Back',
+            label: context.l10n.commonBack,
             excludeSemantics: true,
             child: IconButton(
               onPressed: onBack,
@@ -157,11 +158,13 @@ class _LockScreenState extends State<LockScreen> {
   );
 
   Widget _pinPanel(ThemeData theme) {
+    final l = context.l10n;
     final retryAt = _lock.retryAt;
     final wait = retryAt?.difference(_lock.now());
     final message = wait != null
-        ? 'Too many wrong tries. Try again in '
-              '${wait.inMinutes}:${(wait.inSeconds % 60).toString().padLeft(2, '0')}.'
+        ? l.lockWait(
+            '${wait.inMinutes}:${(wait.inSeconds % 60).toString().padLeft(2, '0')}',
+          )
         : _error;
 
     return LayoutBuilder(
@@ -180,10 +183,10 @@ class _LockScreenState extends State<LockScreen> {
                     excludeFromSemantics: true,
                   ),
                   const SizedBox(height: 12),
-                  Text('Enter your PIN', style: theme.textTheme.headlineSmall),
+                  Text(l.lockEnterPin, style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 16),
                   Semantics(
-                    label: '${_pin.length} numbers entered',
+                    label: l.lockPinDigitsEntered(_pin.length),
                     excludeSemantics: true,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -237,7 +240,7 @@ class _LockScreenState extends State<LockScreen> {
                     OutlinedButton.icon(
                       onPressed: _tryBiometrics,
                       icon: const Icon(Icons.fingerprint_rounded, size: 28),
-                      label: const Text('Use fingerprint or face'),
+                      label: Text(l.lockUseBiometrics),
                     ),
                   ],
                   const SizedBox(height: 20),
@@ -252,7 +255,7 @@ class _LockScreenState extends State<LockScreen> {
                           onPressed: () =>
                               setState(() => _panel = _Panel.emergency),
                           icon: const Icon(Icons.emergency_rounded),
-                          label: const Text('Emergency'),
+                          label: Text(l.lockEmergency),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -262,7 +265,7 @@ class _LockScreenState extends State<LockScreen> {
                             _panel = _Panel.forgot;
                             _confirmErase = false;
                           }),
-                          child: const Text('Forgot PIN?'),
+                          child: Text(l.lockForgotPin),
                         ),
                       ),
                     ],
@@ -277,12 +280,16 @@ class _LockScreenState extends State<LockScreen> {
   }
 
   Widget _emergencyPanel(ThemeData theme) {
+    final l = context.l10n;
     final store = context.store;
     final emergency = store.profile?.emergencyNumber ?? '112';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _header('Emergency', onBack: () => setState(() => _panel = _Panel.pin)),
+        _header(
+          l.lockEmergency,
+          onBack: () => setState(() => _panel = _Panel.pin),
+        ),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
           child: ContentWidth(
@@ -296,7 +303,7 @@ class _LockScreenState extends State<LockScreen> {
                 ),
                 onPressed: () => context.services.contacts.call(emergency),
                 icon: const Icon(Icons.local_phone_rounded),
-                label: Text('Call $emergency'),
+                label: Text(l.lockCallNumber(emergency)),
               ),
             ),
           ),
@@ -307,7 +314,7 @@ class _LockScreenState extends State<LockScreen> {
               : Padding(
                   padding: const EdgeInsets.all(24),
                   child: Text(
-                    'The Medical ID is hidden while the app is locked.',
+                    l.lockMedicalIdHidden,
                     style: theme.textTheme.bodyLarge,
                     textAlign: TextAlign.center,
                   ),
@@ -318,11 +325,12 @@ class _LockScreenState extends State<LockScreen> {
   }
 
   Widget _forgotPanel(ThemeData theme) {
+    final l = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _header(
-          'Forgot your PIN?',
+          l.lockForgotTitle,
           onBack: () => setState(() => _panel = _Panel.pin),
         ),
         Expanded(
@@ -333,13 +341,7 @@ class _LockScreenState extends State<LockScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      'For your privacy the PIN cannot be recovered. '
-                      'You can erase everything in the app and start again. '
-                      'If you made a backup, you can restore it afterwards '
-                      'from My profile.',
-                      style: theme.textTheme.bodyLarge,
-                    ),
+                    Text(l.lockForgotBody, style: theme.textTheme.bodyLarge),
                     const SizedBox(height: 24),
                     FilledButton(
                       style: FilledButton.styleFrom(
@@ -357,14 +359,14 @@ class _LockScreenState extends State<LockScreen> {
                       },
                       child: Text(
                         _confirmErase
-                            ? 'Yes, erase everything'
-                            : 'Erase everything and start again',
+                            ? l.lockEraseConfirm
+                            : l.lockEraseEverything,
                       ),
                     ),
                     if (_confirmErase) ...[
                       const SizedBox(height: 12),
                       Text(
-                        'This cannot be undone. Tap again to confirm.',
+                        l.lockEraseWarning,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.error,
                         ),
@@ -397,6 +399,7 @@ class _Keypad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     Widget key(
       Widget child,
@@ -443,7 +446,7 @@ class _Keypad extends StatelessWidget {
               key(
                 const Icon(Icons.backspace_outlined, size: 28),
                 onBackspace,
-                'Delete',
+                l.lockKeyDelete,
               ),
               digit('0'),
               key(
@@ -453,7 +456,7 @@ class _Keypad extends StatelessWidget {
                   color: theme.colorScheme.onPrimary,
                 ),
                 onSubmit,
-                'Unlock',
+                l.lockKeyUnlock,
                 color: theme.colorScheme.primary,
               ),
             ],

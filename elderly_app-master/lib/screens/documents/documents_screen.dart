@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../app_scope.dart';
 import '../../data/models.dart';
+import '../../l10n/l10n.dart';
 import '../../widgets/common.dart';
 
 /// Photos of prescriptions, reports and other paperwork, searchable by name.
@@ -20,6 +21,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   String _query = '';
 
   Future<void> _add() async {
+    final l = context.l10n;
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       showDragHandle: true,
@@ -31,12 +33,12 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_camera_rounded, size: 30),
-                title: const Text('Take a photo'),
+                title: Text(l.documentTakePhoto),
                 onTap: () => Navigator.pop(context, ImageSource.camera),
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library_rounded, size: 30),
-                title: const Text('Choose from gallery'),
+                title: Text(l.documentChooseFromGallery),
                 onTap: () => Navigator.pop(context, ImageSource.gallery),
               ),
             ],
@@ -55,7 +57,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
       );
     } catch (e) {
       if (mounted) {
-        showMessage(context, 'Could not open the camera or gallery.');
+        showMessage(context, l.documentPickFailed);
       }
       return;
     }
@@ -72,6 +74,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final store = context.store;
     final theme = Theme.of(context);
     final docs =
@@ -81,20 +84,19 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
           ..sort((a, b) => b.addedAt.compareTo(a.addedAt));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Documents')),
+      appBar: AppBar(title: Text(l.featureDocuments)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _add,
         icon: const Icon(Icons.add_a_photo_rounded, size: 28),
-        label: const Text('Add document'),
+        label: Text(l.documentAdd),
       ),
       body: store.documents.isEmpty
-          ? const Center(
+          ? Center(
               child: SingleChildScrollView(
                 child: EmptyState(
                   icon: Icons.folder_copy_rounded,
-                  title: 'No documents yet',
-                  message:
-                      'Take photos of prescriptions, test results and medical aid cards to keep them handy.',
+                  title: l.documentNoneTitle,
+                  message: l.documentNoneMessage,
                 ),
               ),
             )
@@ -107,9 +109,9 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       TextField(
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.search_rounded),
-                          hintText: 'Search documents',
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.search_rounded),
+                          hintText: l.documentSearch,
                         ),
                         onChanged: (v) => setState(() => _query = v),
                       ),
@@ -123,7 +125,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(24),
                             child: Text(
-                              'Nothing matches "$_query".',
+                              l.documentNoMatch(_query),
                               style: theme.textTheme.bodyLarge,
                               textAlign: TextAlign.center,
                             ),
@@ -191,7 +193,7 @@ class _DocumentTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    formatDay(doc.addedAt),
+                    formatDay(context, doc.addedAt),
                     style: theme.textTheme.bodySmall,
                   ),
                 ],
@@ -239,22 +241,23 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
       ),
     );
     if (mounted) {
-      showMessage(context, 'Document saved');
+      showMessage(context, context.l10n.documentSaved);
       Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Scaffold(
       bottomNavigationBar: BottomAction(
         child: FilledButton.icon(
           onPressed: _save,
           icon: const Icon(Icons.check_rounded),
-          label: const Text('Save document'),
+          label: Text(l.documentSave),
         ),
       ),
-      appBar: AppBar(title: const Text('Save document')),
+      appBar: AppBar(title: Text(l.documentSave)),
       body: Form(
         key: _form,
         // Clear an error as soon as the user fixes it.
@@ -278,13 +281,12 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
                   TextFormField(
                     controller: _name,
                     autofocus: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Name',
-                      hintText: 'e.g. Blood test March',
+                    decoration: InputDecoration(
+                      labelText: l.documentName,
+                      hintText: l.documentNameHint,
                     ),
                     textCapitalization: TextCapitalization.sentences,
-                    validator: (v) =>
-                        requiredField(v, 'a name so you can find it later'),
+                    validator: (v) => requiredField(v, l.documentNameRequired),
                   ),
                 ],
               ),
@@ -302,6 +304,7 @@ class DocumentViewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -313,14 +316,14 @@ class DocumentViewScreen extends StatelessWidget {
         ).textTheme.titleLarge?.copyWith(color: Colors.white),
         actions: [
           IconButton(
-            tooltip: 'Delete document',
+            tooltip: l.documentDelete,
             icon: const Icon(Icons.delete_outline_rounded),
             onPressed: () async {
               final ok = await confirm(
                 context,
-                title: 'Delete ${doc.name}?',
-                message: 'This photo will be removed from the app.',
-                confirmLabel: 'Delete',
+                title: l.documentDeleteTitle(doc.name),
+                message: l.documentDeleteMessage,
+                confirmLabel: l.commonDelete,
                 destructive: true,
               );
               if (!ok || !context.mounted) return;

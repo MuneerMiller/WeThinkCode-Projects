@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../app_scope.dart';
+import '../l10n/l10n.dart';
 import '../widgets/common.dart';
 import 'legal.dart';
 
@@ -18,8 +19,12 @@ class LegalDocScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
+    final theme = Theme.of(context);
+    // The documents are only written in English.
+    final english = Localizations.localeOf(context).languageCode == 'en';
     return Scaffold(
-      appBar: AppBar(title: Text(doc.title)),
+      appBar: AppBar(title: Text(doc.titleIn(l))),
       body: FutureBuilder<String>(
         future: doc.load(),
         builder: (context, snap) {
@@ -32,7 +37,35 @@ class LegalDocScreen extends StatelessWidget {
               ContentWidth(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: renderSimpleMarkdown(context, snap.data!),
+                  children: [
+                    if (!english)
+                      Card(
+                        color: theme.colorScheme.secondaryContainer,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.translate_rounded,
+                                color: theme.colorScheme.onSecondaryContainer,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  l.legalEnglishOnly,
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    color:
+                                        theme.colorScheme.onSecondaryContainer,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ...renderSimpleMarkdown(context, snap.data!),
+                  ],
                 ),
               ),
             ],
@@ -49,10 +82,11 @@ class LegalHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     final accepted = context.store.legalAcceptedAt;
     return Scaffold(
-      appBar: AppBar(title: const Text('Legal & about')),
+      appBar: AppBar(title: Text(l.legalHubTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
@@ -67,7 +101,7 @@ class LegalHubScreen extends StatelessWidget {
                         if (i > 0) const Divider(indent: 20, endIndent: 20),
                         ListTile(
                           leading: Icon(doc.icon),
-                          title: Text(doc.title),
+                          title: Text(doc.titleIn(l)),
                           trailing: const Icon(Icons.chevron_right_rounded),
                           onTap: () => openLegalDoc(context, doc),
                         ),
@@ -75,12 +109,12 @@ class LegalHubScreen extends StatelessWidget {
                       const Divider(indent: 20, endIndent: 20),
                       ListTile(
                         leading: const Icon(Icons.code_rounded),
-                        title: const Text('Open-source licences'),
+                        title: Text(l.legalOpenSourceLicences),
                         trailing: const Icon(Icons.chevron_right_rounded),
                         onTap: () => showLicensePage(
                           context: context,
-                          applicationName: 'Elderly Care',
-                          applicationVersion: 'Version $appVersion',
+                          applicationName: l.appTitle,
+                          applicationVersion: l.legalVersion(appVersion),
                           applicationIcon: Padding(
                             padding: const EdgeInsets.all(8),
                             child: Image.asset(
@@ -96,14 +130,16 @@ class LegalHubScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Elderly Care, version $appVersion',
+                  l.legalAppVersion(appVersion),
                   style: theme.textTheme.titleMedium,
                   textAlign: TextAlign.center,
                 ),
                 if (accepted != null)
                   Text(
-                    'You accepted version ${context.store.legalAcceptedVersion} '
-                    'of these documents on ${DateFormat('d MMMM y').format(accepted)}.',
+                    l.legalAcceptedOn(
+                      context.store.legalAcceptedVersion,
+                      DateFormat('d MMMM y').format(accepted),
+                    ),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -133,14 +169,15 @@ class LegalAgreement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
-    Widget link(LegalDoc doc) => TextButton(
+    Widget link(LegalDoc doc, String label) => TextButton(
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         alignment: Alignment.centerLeft,
       ),
       onPressed: () => openLegalDoc(context, doc),
-      child: Text('Read the ${doc.title.toLowerCase()}'),
+      child: Text(label),
     );
     return Card(
       color: showError ? theme.colorScheme.errorContainer : null,
@@ -154,27 +191,21 @@ class LegalAgreement extends StatelessWidget {
               contentPadding: const EdgeInsets.symmetric(horizontal: 8),
               value: agreed,
               onChanged: (v) => onChanged(v ?? false),
-              title: const Text(
-                'I agree to the Terms of Use, and I have read the Medical '
-                'disclaimer and the Privacy policy',
-              ),
+              title: Text(l.legalAgree),
               subtitle: showError
                   ? Text(
-                      'Please tick the box to continue.',
+                      l.legalTickBox,
                       style: TextStyle(color: theme.colorScheme.error),
                     )
-                  : const Text(
-                      'Elderly Care is not a medical service. In an '
-                      'emergency, call 112.',
-                    ),
+                  : Text(l.legalNotMedicalService),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 12),
               child: Wrap(
                 children: [
-                  link(LegalDoc.terms),
-                  link(LegalDoc.medical),
-                  link(LegalDoc.privacy),
+                  link(LegalDoc.terms, l.legalReadTerms),
+                  link(LegalDoc.medical, l.commonReadMedicalDisclaimer),
+                  link(LegalDoc.privacy, l.legalReadPrivacy),
                 ],
               ),
             ),
@@ -199,6 +230,7 @@ class _LegalUpdateScreenState extends State<LegalUpdateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     final first = context.store.legalAcceptedVersion == 0;
     return Scaffold(
@@ -211,7 +243,7 @@ class _LegalUpdateScreenState extends State<LegalUpdateScreen> {
             }
             context.store.acceptLegal(LegalInfo.version);
           },
-          child: const Text('Continue'),
+          child: Text(l.commonContinue),
         ),
       ),
       body: SafeArea(
@@ -229,19 +261,16 @@ class _LegalUpdateScreenState extends State<LegalUpdateScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    first
-                        ? 'Please review our terms'
-                        : 'Our terms have been updated',
+                    first ? l.legalReviewTitle : l.legalUpdatedTitle,
                     style: theme.textTheme.headlineMedium,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Before you continue, please read and accept the Terms '
-                    'of Use, the Medical disclaimer and the Privacy policy '
-                    '(version ${LegalInfo.version}, effective '
-                    '${LegalInfo.effectiveDate}). Your information stays on '
-                    'this device.',
+                    l.legalUpdateBody(
+                      LegalInfo.version,
+                      DateFormat('d MMMM y').format(LegalInfo.effectiveDay),
+                    ),
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

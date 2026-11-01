@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../../app_scope.dart';
 import '../../data/models.dart';
+import '../../l10n/l10n.dart';
+import '../../l10n/labels.dart';
 import '../../widgets/common.dart';
 
 class TrackerScreen extends StatelessWidget {
@@ -12,12 +14,13 @@ class TrackerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final store = context.store;
     final theme = Theme.of(context);
     final entries = store.entriesFor(type);
 
     return Scaffold(
-      appBar: AppBar(title: Text(type.label)),
+      appBar: AppBar(title: Text(type.title(l))),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: type.color,
         foregroundColor: Colors.white,
@@ -25,7 +28,7 @@ class TrackerScreen extends StatelessWidget {
           context,
         ).push(MaterialPageRoute(builder: (_) => AddReadingScreen(type: type))),
         icon: const Icon(Icons.add_rounded, size: 28),
-        label: const Text('Add reading'),
+        label: Text(l.trackingAddReading),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
@@ -43,8 +46,8 @@ class TrackerScreen extends StatelessWidget {
                             child: Center(
                               child: Text(
                                 entries.isEmpty
-                                    ? 'Add your first reading to start tracking.'
-                                    : 'Add one more reading to see a chart.',
+                                    ? l.trackingFirstReading
+                                    : l.trackingOneMore,
                                 style: theme.textTheme.bodyLarge,
                                 textAlign: TextAlign.center,
                               ),
@@ -62,11 +65,14 @@ class TrackerScreen extends StatelessWidget {
                     Icon(Icons.lightbulb_outline_rounded, color: type.color),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(type.tip, style: theme.textTheme.bodyMedium),
+                      child: Text(
+                        type.hint(l),
+                        style: theme.textTheme.bodyMedium,
+                      ),
                     ),
                   ],
                 ),
-                if (entries.isNotEmpty) const SectionHeader('Readings'),
+                if (entries.isNotEmpty) SectionHeader(l.trackingReadings),
                 for (final e in entries.reversed)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
@@ -87,30 +93,36 @@ class TrackerScreen extends StatelessWidget {
                       ),
                       confirmDismiss: (_) => confirm(
                         context,
-                        title: 'Delete reading?',
-                        message: '${e.display} on ${formatDay(e.at)}',
-                        confirmLabel: 'Delete',
+                        title: l.trackingDeleteReadingTitle,
+                        message: l.trackingDeleteReadingMessage(
+                          e.displayIn(l),
+                          formatDay(context, e.at),
+                        ),
+                        confirmLabel: l.commonDelete,
                         destructive: true,
                       ),
                       onDismissed: (_) => store.deleteTrackerEntry(e.id),
                       child: Card(
                         child: ListTile(
-                          title: Text(e.display),
+                          title: Text(e.displayIn(l)),
                           subtitle: Text(
                             [
-                              '${formatDay(e.at)}, ${formatTime(context, e.at)}',
+                              '${formatDay(context, e.at)}, ${formatTime(context, e.at)}',
                               if (e.notes.isNotEmpty) e.notes,
                             ].join('\n'),
                           ),
                           trailing: IconButton(
-                            tooltip: 'Delete reading',
+                            tooltip: l.trackingDeleteReading,
                             icon: const Icon(Icons.delete_outline_rounded),
                             onPressed: () async {
                               final ok = await confirm(
                                 context,
-                                title: 'Delete reading?',
-                                message: '${e.display} on ${formatDay(e.at)}',
-                                confirmLabel: 'Delete',
+                                title: l.trackingDeleteReadingTitle,
+                                message: l.trackingDeleteReadingMessage(
+                                  e.displayIn(l),
+                                  formatDay(context, e.at),
+                                ),
+                                confirmLabel: l.commonDelete,
                                 destructive: true,
                               );
                               if (ok) store.deleteTrackerEntry(e.id);
@@ -136,6 +148,7 @@ class _Chart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     final shown = entries.length > 14
         ? entries.sublist(entries.length - 14)
@@ -171,9 +184,11 @@ class _Chart extends StatelessWidget {
     );
 
     return Semantics(
-      label:
-          '${type.label} chart of the last ${shown.length} readings. '
-          'Latest ${shown.last.display}.',
+      label: l.trackingChartLabel(
+        shown.length,
+        type.title(l),
+        shown.last.displayIn(l),
+      ),
       child: LineChart(
         LineChartData(
           lineBarsData: bars,
@@ -190,7 +205,7 @@ class _Chart extends StatelessWidget {
                 for (final s in spots)
                   LineTooltipItem(
                     s.barIndex == 0
-                        ? '${shown[s.x.toInt()].display}\n${DateFormat('d MMM').format(shown[s.x.toInt()].at)}'
+                        ? '${shown[s.x.toInt()].displayIn(l)}\n${DateFormat('d MMM').format(shown[s.x.toInt()].at)}'
                         : '',
                     TextStyle(
                       color: theme.colorScheme.onInverseSurface,
@@ -268,21 +283,24 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
     super.dispose();
   }
 
-  String? _validate(TrackerField f, String? v) {
+  String? _validate(AppLocalizations l, TrackerField f, String? v) {
     final optional = f.key == 'minutes';
     if (v == null || v.trim().isEmpty) {
-      return optional ? null : 'Please enter ${f.label.toLowerCase()}';
+      return optional
+          ? null
+          : l.trackingFieldRequired(f.title(l).toLowerCase());
     }
     final n = num.tryParse(v.trim().replaceAll(',', '.'));
-    if (n == null) return 'Please enter a number';
+    if (n == null) return l.trackingEnterNumber;
     if (n < f.min || n > f.max) {
-      return 'Should be between ${f.min} and ${f.max}';
+      return l.trackingOutOfRange('${f.min}', '${f.max}');
     }
     return null;
   }
 
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
+    final l = context.l10n;
     final store = context.store;
     final values = <String, num>{
       for (final f in widget.type.fields)
@@ -302,13 +320,14 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
       ),
     );
     if (mounted) {
-      showMessage(context, '${widget.type.label} reading saved');
+      showMessage(context, l.trackingReadingSaved(widget.type.title(l)));
       Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final type = widget.type;
     return Scaffold(
       bottomNavigationBar: BottomAction(
@@ -319,10 +338,12 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
           ),
           onPressed: _save,
           icon: const Icon(Icons.check_rounded),
-          label: const Text('Save reading'),
+          label: Text(l.trackingSaveReading),
         ),
       ),
-      appBar: AppBar(title: Text('New ${type.label.toLowerCase()} reading')),
+      appBar: AppBar(
+        title: Text(l.trackingNewReadingTitle(type.title(l).toLowerCase())),
+      ),
       body: Form(
         key: _form,
         // Clear an error as soon as the user fixes it.
@@ -338,14 +359,14 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
                     TextFormField(
                       controller: _controllers[f.key],
                       decoration: InputDecoration(
-                        labelText: f.label,
+                        labelText: f.title(l),
                         suffixText: f.unit,
                       ),
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
                       textInputAction: TextInputAction.next,
-                      validator: (v) => _validate(f, v),
+                      validator: (v) => _validate(l, f, v),
                     ),
                     const SizedBox(height: 16),
                   ],
@@ -353,9 +374,9 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
                     child: ListTile(
                       leading: const Icon(Icons.schedule_rounded, size: 30),
                       title: Text(
-                        '${formatDay(_at)}, ${formatTime(context, _at)}',
+                        '${formatDay(context, _at)}, ${formatTime(context, _at)}',
                       ),
-                      trailing: const Text('Change'),
+                      trailing: Text(l.trackingChangeTime),
                       onTap: () async {
                         final picked = await pickDateTime(context, _at);
                         if (picked != null) setState(() => _at = picked);
@@ -365,9 +386,9 @@ class _AddReadingScreenState extends State<AddReadingScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _notes,
-                    decoration: const InputDecoration(
-                      labelText: 'Notes (optional)',
-                      hintText: 'e.g. after breakfast',
+                    decoration: InputDecoration(
+                      labelText: l.trackingNotes,
+                      hintText: l.trackingNotesHint,
                     ),
                     textCapitalization: TextCapitalization.sentences,
                   ),

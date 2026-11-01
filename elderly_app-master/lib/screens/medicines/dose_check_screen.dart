@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../data/models.dart';
+import '../../l10n/l10n.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
 
@@ -25,6 +26,7 @@ class DoseCheckScreen extends StatelessWidget {
   final Dose dose;
 
   Future<void> _answer(BuildContext context, bool taken) async {
+    final l = context.l10n;
     final store = context.store;
     final contacts = context.services.contacts;
     final m = dose.medicine;
@@ -40,27 +42,27 @@ class DoseCheckScreen extends StatelessWidget {
     if (!taken && store.relatives.isNotEmpty) {
       final tell = await confirm(
         context,
-        title: 'Let your family know?',
-        message:
-            'We can send a text to ${store.relatives.map((r) => r.name).join(', ')} '
-            'saying you missed your ${m.name}.',
-        confirmLabel: 'Send text',
+        title: l.doseTellFamilyTitle,
+        message: l.doseTellFamilyMessage(
+          store.relatives.map((r) => r.name).join(', '),
+          m.name,
+        ),
+        confirmLabel: l.doseTellFamilySend,
       );
       if (tell) {
-        final name = store.profile?.firstName ?? 'I';
+        final name = store.profile?.firstName;
         await contacts.sms(
           [for (final r in store.relatives) r.phone],
-          '$name did not take ${m.name} '
-          '($timeLabel) today. Please check in.',
+          name == null
+              ? l.doseMissedSmsNoName(m.name, timeLabel)
+              : l.doseMissedSms(name, m.name, timeLabel),
         );
       }
     }
     if (context.mounted) {
       showMessage(
         context,
-        taken
-            ? 'Well done! ${m.name} recorded.'
-            : 'Noted. ${m.name} not taken.',
+        taken ? l.doseRecordedTaken(m.name) : l.doseRecordedNotTaken(m.name),
       );
       Navigator.pop(context);
     }
@@ -68,10 +70,15 @@ class DoseCheckScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     final theme = Theme.of(context);
     final m = dose.medicine;
+    final when = l.doseCheckWhen(
+      formatDay(context, dose.time),
+      formatTime(context, dose.time),
+    );
     return Scaffold(
-      appBar: AppBar(title: const Text('Medicine check')),
+      appBar: AppBar(title: Text(l.doseCheckTitle)),
       body: SafeArea(
         child: ContentWidth(
           child: Padding(
@@ -90,16 +97,13 @@ class DoseCheckScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Did you take your ${m.name}?',
+                  l.doseCheckQuestion(m.name),
                   style: theme.textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  [
-                    if (m.dosage.isNotEmpty) m.dosage,
-                    '${formatDay(dose.time)} at ${formatTime(context, dose.time)}',
-                  ].join(' · '),
+                  [if (m.dosage.isNotEmpty) m.dosage, when].join(' · '),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -108,9 +112,9 @@ class DoseCheckScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 ReadAloudButton(
                   text:
-                      'Did you take your ${m.name}? '
+                      '${l.doseCheckQuestion(m.name)} '
                       '${m.dosage.isEmpty ? '' : '${m.dosage}. '}'
-                      '${formatDay(dose.time)} at ${formatTime(context, dose.time)}.',
+                      '$when.',
                 ),
                 const Spacer(),
                 SizedBox(
@@ -123,7 +127,7 @@ class DoseCheckScreen extends StatelessWidget {
                     ),
                     onPressed: () => _answer(context, true),
                     icon: const Icon(Icons.check_rounded, size: 32),
-                    label: const Text('Yes, I took it'),
+                    label: Text(l.doseCheckYes),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -133,7 +137,7 @@ class DoseCheckScreen extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => _answer(context, false),
                     icon: const Icon(Icons.close_rounded, size: 32),
-                    label: const Text('No, not yet'),
+                    label: Text(l.doseCheckNo),
                   ),
                 ),
                 const SizedBox(height: 16),
