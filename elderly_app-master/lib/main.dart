@@ -1,92 +1,156 @@
-import 'package:elderly_app/models/appoinment.dart';
-import 'package:elderly_app/models/reminder.dart';
-import 'package:elderly_app/others/auth.dart';
-import 'package:elderly_app/resources/service_locator.dart';
-import 'package:elderly_app/screens/appoinment_reminder/appoinment_decision_screen.dart';
-import 'package:elderly_app/screens/appoinment_reminder/appoinment_detail_screen.dart';
-import 'package:elderly_app/screens/appoinment_reminder/appoinment_reminder_screen.dart';
-import 'package:elderly_app/screens/document/add_documents_screen.dart';
-import 'package:elderly_app/screens/document/view_documents_screen.dart';
-import 'package:elderly_app/screens/home/home_screen.dart';
-import 'package:elderly_app/screens/hospital/nearby_hospital_screen.dart';
-import 'package:elderly_app/screens/loading/loading_screen.dart';
-import 'package:elderly_app/screens/loading/onBoarding_screen.dart';
-import 'package:elderly_app/screens/login/initial_setup_screen.dart';
-import 'package:elderly_app/screens/login/login_screen.dart';
-import 'package:elderly_app/screens/medicine_reminder/medicine_reminder.dart';
-import 'package:elderly_app/screens/medicine_reminder/reminder_detail.dart';
-import 'package:elderly_app/screens/notes/note_home_screen.dart';
-import 'package:elderly_app/screens/pages/heart_rate_screen.dart';
-import 'package:elderly_app/screens/pages/image_label.dart';
-import 'package:elderly_app/screens/profile/profile_edit_screen.dart';
-import 'package:elderly_app/screens/profile/profile_screen.dart';
-import 'package:elderly_app/screens/relatives/contact_relatives_screen.dart';
-import 'package:elderly_app/screens/relatives/edit_relatives.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:elderly_app/others/notification_service.dart';
+import 'dart:async';
 
-NotificationAppLaunchDetails notificationAppLaunchDetails;
-NotificationService notificationService;
+import 'package:flutter/material.dart';
+
+import 'app_scope.dart';
+import 'data/app_store.dart';
+import 'legal/legal.dart';
+import 'legal/legal_screens.dart';
+import 'screens/home/home_screen.dart';
+import 'screens/medicines/dose_actions.dart';
+import 'screens/onboarding/onboarding_screen.dart';
+import 'screens/onboarding/setup_screen.dart';
+import 'security/lock_screen.dart';
+import 'services/notification_service.dart';
+import 'theme.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  notificationService = NotificationService();
-  notificationService.initialize();
-  notificationAppLaunchDetails =
-      await notificationService.notificationDetails();
-
-  setupLocator();
-  FlutterDownloader.initialize(debug: false);
-  runApp(ElderlyApp());
+  registerExtraLicenses();
+  final store = await AppStore.load();
+  final services = AppServices();
+  await services.notifications.init();
+  runApp(ElderlyApp(store: store, services: services));
 }
 
-class ElderlyApp extends StatelessWidget {
-  Reminder reminder;
+class ElderlyApp extends StatefulWidget {
+  const ElderlyApp({super.key, required this.store, required this.services});
+
+  final AppStore store;
+  final AppServices services;
+
+  @override
+  State<ElderlyApp> createState() => _ElderlyAppState();
+}
+
+class _ElderlyAppState extends State<ElderlyApp> {
+  late final AppLifecycleListener _lifecycle;
+  final _navigator = GlobalKey<NavigatorState>();
+  final _messenger = GlobalKey<ScaffoldMessengerState>();
+  StreamSubscription<DoseResponse>? _doseTaps;
+  Timer? _syncTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    final store = widget.store;
+    final notifications = widget.services.notifications;
+    _lifecycle = AppLifecycleListener(
+      // Lock again when the app comes back after a while in the background.
+      onHide: store.lock.appPaused,
+      onShow: () {
+        store.lock.appResumed();
+        _syncReminders();
+      },
+    );
+    // Keep the phone's reminders in step with the data.
+    store.addListener(_scheduleSync);
+    _syncReminders();
+    _doseTaps = notifications.responses.listen(_onDoseTap);
+    final launch = notifications.takeLaunchResponse();
+    if (launch != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _onDoseTap(launch));
+    }
+  }
+
+  void _scheduleSync() {
+    _syncTimer?.cancel();
+    _syncTimer = Timer(const Duration(milliseconds: 500), _syncReminders);
+  }
+
+  void _syncReminders() => widget.services.notifications.sync(
+    medicines: widget.store.medicines,
+    appointments: widget.store.appointments,
+  );
+
+  void _onDoseTap(DoseResponse r) => handleDoseResponse(
+    response: r,
+    store: widget.store,
+    services: widget.services,
+    navigator: _navigator,
+    messenger: _messenger,
+  );
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    widget.store.removeListener(_scheduleSync);
+    _doseTaps?.cancel();
+    _syncTimer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    precacheImage(AssetImage('lib/resources/images/loadingimage.jpg'), context);
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Elderly Care',
-      initialRoute: LoadingScreen.id,
-      routes: {
-        HomeScreen.id: (context) => HomeScreen(),
-        HeartRateScreen.id: (context) => HeartRateScreen(),
-        ProfileScreen.id: (context) => ProfileScreen(),
-        MedicineReminder.id: (context) => MedicineReminder(),
-        LoadingScreen.id: (context) => LoadingScreen(
-              auth: Auth(),
+    final store = widget.store;
+    final services = widget.services;
+    return AppScope(
+      store: store,
+      services: services,
+      child: MaterialApp(
+        title: 'Elderly Care',
+        navigatorKey: _navigator,
+        scaffoldMessengerKey: _messenger,
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(),
+        darkTheme: AppTheme.dark(),
+        // Apply the in-app text size on top of the phone's own setting.
+        builder: (context, child) {
+          final mq = MediaQuery.of(context);
+          final scale = mq.textScaler.scale(1) * context.store.textScale;
+          final locked = context.store.lock.locked;
+          return MediaQuery(
+            data: mq.copyWith(textScaler: TextScaler.linear(scale)),
+            // While locked the app stays alive underneath, but hidden from
+            // view, screen readers, touch and keyboard focus.
+            child: Stack(
+              children: [
+                Offstage(
+                  offstage: locked,
+                  child: ExcludeSemantics(
+                    excluding: locked,
+                    child: ExcludeFocus(
+                      excluding: locked,
+                      child: TickerMode(enabled: !locked, child: child!),
+                    ),
+                  ),
+                ),
+                if (locked) const Positioned.fill(child: LockScreen()),
+              ],
             ),
-        ContactScreen.id: (context) => ContactScreen(),
-        LoginScreen.id: (context) => LoginScreen(
-              auth: Auth(),
-            ),
-        ProfileEdit.id: (context) => ProfileEdit(),
-        NoteList.id: (context) => NoteList(),
-        ReminderDetail.id: (context) => ReminderDetail(reminder, ''),
-        NearbyHospitalScreen.id: (context) => NearbyHospitalScreen(),
-        InitialSetupScreen.id: (context) => InitialSetupScreen(),
-        EditRelativesScreen.id: (context) => EditRelativesScreen(''),
-        AppoinmentReminder.id: (context) => AppoinmentReminder(),
-        AppoinmentDetail.id: (context) => AppoinmentDetail(
-              Appoinment('', '', '', '', 999999, false),
-              '',
-            ),
-        ViewDocuments.id: (context) => ViewDocuments(),
-        AddDocuments.id: (context) => AddDocuments(),
-        ImageLabel.id: (context) => ImageLabel(),
-        AppoinmentDecision.id: (context) =>
-            AppoinmentDecision(Appoinment('', '', '', '', 999999, false)),
-        OnBoardingScreen.id: (context) => OnBoardingScreen(),
-      },
-      theme: ThemeData(
-          fontFamily: GoogleFonts.lato().fontFamily,
-          scaffoldBackgroundColor: Colors.white,
-          primaryColor: Colors.white,
-          textTheme:
-              TextTheme().apply(fontFamily: GoogleFonts.lato().fontFamily)),
+          );
+        },
+        home: const StartGate(),
+      ),
     );
+  }
+}
+
+/// Shows the intro and setup until a profile exists, then the home screen.
+class StartGate extends StatelessWidget {
+  const StartGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final store = context.store;
+    if (store.profile != null) {
+      // Existing users accept new or updated legal documents once.
+      if (store.legalAcceptedVersion < LegalInfo.version) {
+        return const LegalUpdateScreen();
+      }
+      return const HomeScreen();
+    }
+    if (!store.onboardingSeen) return const OnboardingScreen();
+    return const SetupScreen();
   }
 }

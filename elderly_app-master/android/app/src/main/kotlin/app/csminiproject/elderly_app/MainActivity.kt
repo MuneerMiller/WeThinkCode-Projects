@@ -1,12 +1,6 @@
 package app.csminiproject.elderly_app
 
-import androidx.annotation.NonNull;
-import io.flutter.embedding.android.FlutterActivity
-import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.plugins.GeneratedPluginRegistrant
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity: FlutterActivity() {
-    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
-        GeneratedPluginRegistrant.registerWith(flutterEngine);
-    }
-}
+// FragmentActivity is required for the fingerprint/face prompt (local_auth).
+class MainActivity : FlutterFragmentActivity()
