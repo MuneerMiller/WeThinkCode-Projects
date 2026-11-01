@@ -122,6 +122,7 @@ async function topOf(text) {
 
 async function fill(label, value) {
   const box = page.getByRole('textbox', { name: label }).first();
+  await reveal(box);
   await tapLocator(box);
   await settle(150);
   // Flutter routes typing through a hidden <input> that gets focus.
@@ -227,7 +228,12 @@ async function opened() { return page.evaluate(() => window.__opened); }
     await see('Margaret');
     await see('I need help');
     await see("Let's get started");
+    await see('Add your first medicine');
     await shot('home');
+    // Close the first-steps card; it stays closed.
+    await tapLocator(page.getByRole('button', { name: 'Close' }).first());
+    await settle();
+    if (await byText("Let's get started").count()) throw new Error('first-steps card did not close');
   });
 
   await check('medicine reminder: add, schedule, confirm a dose', async () => {
