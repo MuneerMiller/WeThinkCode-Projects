@@ -1,0 +1,5 @@
+"CFBundleDisplayName" = "Elderly Care";
+"NSLocationWhenInUseUsageDescription" = "U ligging word gebruik om hospitale naby te vind en, wanneer u vra, om dit in 'n noodgeval aan u familie te stuur.";
+"NSFaceIDUsageDescription" = "Gebruik Face ID om Elderly Care oop te sluit in plaas daarvan om u PIN in te tik.";
+"NSCameraUsageDescription" = "Neem foto's van voorskrifte en mediese dokumente om dit in die app te bewaar.";
+"NSPhotoLibraryUsageDescription" = "Kies foto's van voorskrifte en mediese dokumente om dit in die app te bewaar.";

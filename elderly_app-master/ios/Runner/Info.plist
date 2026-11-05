@@ -15,7 +15,14 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>elderly_app</string>
+	<string>Elderly Care</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>af</string>
+		<string>zu</string>
+		<string>xh</string>
+	</array>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -74,6 +81,10 @@
 	<string>Take photos of prescriptions and medical documents to keep them in the app.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Choose photos of prescriptions and medical documents to keep them in the app.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<!-- Only standard encryption of the user's own data on the device, which
+	     is exempt from export documentation. -->
+	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>tel</string>

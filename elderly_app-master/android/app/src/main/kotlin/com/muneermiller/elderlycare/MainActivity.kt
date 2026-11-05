@@ -1,4 +1,4 @@
-package app.csminiproject.elderly_app
+package com.muneermiller.elderlycare
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

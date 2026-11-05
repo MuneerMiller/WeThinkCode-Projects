@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches the app's light background (AppTheme surface). -->
+    <color name="ic_launcher_background">#FBF8F3</color>
+    <color name="launch_background">#FBF8F3</color>
+</resources>

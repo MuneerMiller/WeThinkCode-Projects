@@ -12,7 +12,7 @@ The South African Consumer Protection Act asks us to draw your attention to term
 - **Reminders and alerts can fail.** Phones can delay, silence or block notifications, and calls and text messages depend on your phone and network. You must not rely on the App alone to take medicines on time or to get help (section 5).
 - **You are responsible for what you enter** and for keeping your phone, PIN and backups safe. Because your information is kept only on your phone, we cannot recover it if it is lost (sections 6 and 8).
 - **Limits on our liability** (section 13) and **your promise to cover certain losses** you cause by breaking the law or these Terms (section 14).
-- **The App is provided free of charge and "as is"** (section 12).
+- **The App is sold for a once-off price and provided "as is"** (sections 9 and 12).
 
 Nothing in these Terms takes away any rights you have under the Consumer Protection Act 68 of 2008, the Protection of Personal Information Act 4 of 2013, or any other law that cannot be excluded by agreement.
 
@@ -83,8 +83,15 @@ Your information is stored on your device and is not sent to us. The Privacy Pol
 
 ## 9. Licence to use the App
 
-- We give you a personal, non-exclusive, non-transferable, revocable and free licence to install and use the App on devices you own or control, for your own personal, non-commercial use, in line with these Terms.
+- When you buy or download the App from an app store, we give you a personal, non-exclusive, non-transferable and revocable licence to install and use the App on devices you own or control that the store's rules allow, for your own personal, non-commercial use, in line with these Terms.
 - Parts of the App are open-source software licensed to you under their own licences, listed under "Open-source licences". Where an open-source licence gives you broader rights for a component, that licence applies to that component.
+
+### Price, payment and refunds
+
+- The App is sold for a once-off price shown in the app store before you buy it. There is no subscription and no in-app purchase, and we do not charge you anything else.
+- The app store takes the payment, and its own terms decide how you pay, which taxes apply and how refunds work. To ask for a refund, use the store's refund process (for Apple, reportaproblem.apple.com; for Google Play, the "Order history" in Google Play). We cannot see or change store payments ourselves.
+- Nothing in these Terms limits any right you have under the Consumer Protection Act or the Electronic Communications and Transactions Act, including any right to cancel or to a refund, repair or replacement for defective goods or services.
+- Updates to the App are included in the price for as long as we offer them. We do not promise to offer updates forever, or for every device or operating-system version.
 
 ## 10. Acceptable use
 
@@ -102,14 +109,30 @@ You agree not to:
 - Some features use services that we do not control, such as OpenStreetMap's Overpass service (hospital search), Jitsi Meet (video calls), your phone's Phone, Messages, Maps, sharing and text-to-speech functions, and the app store you downloaded the App from. Their own terms and privacy policies apply when you use them, and we are not responsible for them.
 - If you downloaded the App from the Apple App Store or Google Play, the terms of that store also apply. Apple and Google are not parties to these Terms and are not responsible for the App or for support.
 
+### Additional terms for the Apple App Store
+
+If you got the App from the Apple App Store, these points also apply, and take priority over anything else in these Terms that conflicts with them:
+
+- These Terms are between you and us only, not with Apple. We, not Apple, are solely responsible for the App and its content.
+- Your licence is limited to using the App on Apple-branded products that you own or control, as allowed by the Usage Rules in Apple's Media Services Terms and Conditions, except that the App may be accessed by other accounts in your Family Sharing group or volume purchasing.
+- We, not Apple, are solely responsible for any maintenance and support of the App. Apple has no obligation at all to provide maintenance or support.
+- If the App fails to meet any warranty that applies by law, you may tell Apple, and Apple will refund the price you paid for the App. To the maximum extent the law allows, Apple has no other warranty obligation for the App, and any other claims, losses, liabilities, damages, costs or expenses caused by a failure to meet a warranty are our responsibility, within the limits of these Terms.
+- We, not Apple, are responsible for dealing with any claims by you or anyone else about the App or your use of it, including product liability claims, claims that the App fails to meet a legal or regulatory requirement, and claims under consumer protection, privacy or similar laws.
+- If anyone claims that the App or your use of it infringes their intellectual property rights, we, not Apple, are solely responsible for investigating, defending, settling and resolving that claim.
+- You confirm that you are not located in a country that is subject to a United States Government embargo or that the United States Government has designated as a "terrorist supporting" country, and that you are not on any United States Government list of prohibited or restricted parties.
+- Our name, address and contact details for questions, complaints or claims are in section 20.
+- You must follow any third-party terms that apply when you use the App, such as the terms of your mobile network for calls and messages.
+- Apple and its subsidiaries are third-party beneficiaries of these Terms. Once you accept them, Apple has the right (and is taken to have accepted the right) to enforce these Terms against you as a third-party beneficiary.
+
 ## 12. The App is provided "as is"
 
-The App is provided free of charge, on an "as is" and "as available" basis. To the extent the law allows, we do not promise that the App will be uninterrupted, error-free, always available, compatible with every device, or that reminders and alerts will always work. We may change, suspend or stop the App or any feature at any time.
+The App is provided on an "as is" and "as available" basis. To the extent the law allows, we do not promise that the App will be uninterrupted, error-free, always available, compatible with every device, or that reminders and alerts will always work. We may change, suspend or stop the App or any feature at any time.
 
 ## 13. Limitation of liability
 
 - To the extent the law allows, we are not liable for any loss, damage, injury, illness or death that results from: relying on the App instead of professional medical advice or emergency services; a reminder, alert, call, message or video call that was delayed, not shown or not delivered; inaccurate information that you or someone else entered; inaccurate location or hospital information; loss of data; or the acts or omissions of third-party services, networks or device makers.
 - To the extent the law allows, we are not liable for indirect or consequential loss, loss of profit or loss of data.
+- To the extent the law allows, our total liability to you for all claims about the App is limited to the price you paid for it.
 - Nothing in these Terms limits or excludes liability that cannot be limited or excluded by law, including liability for loss caused by our gross negligence or intentional wrongdoing, or any right you have under the Consumer Protection Act that cannot be waived.
 
 ## 14. Indemnity
@@ -149,6 +172,6 @@ We may update these Terms, for example when the App or the law changes. The vers
 - Physical address for receiving legal notices (domicilium citandi et executandi): {{publisher_address}}
 - Telephone: {{contact_phone}}
 - Email: {{contact_email}}
-- Cost of the App: free. There are no in-app purchases, subscriptions or advertising.
+- Cost of the App: the once-off price shown in the app store before you buy, including any taxes the store charges. There are no in-app purchases, subscriptions or advertising. Payment is handled by the app store, which also handles refunds (see section 9).
 - Code of conduct: we do not subscribe to any industry code of conduct.
 - Information Officer (POPIA): {{information_officer}}

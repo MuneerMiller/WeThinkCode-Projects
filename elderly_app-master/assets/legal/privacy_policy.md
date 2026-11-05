@@ -27,13 +27,13 @@ The App is published by {{publisher_name}} ({{publisher_legal_status}}), {{publi
 
 The App only holds what you type in, choose or add yourself:
 
-- **About you:** name, phone number, email address, age, gender, height, weight, blood group, usual blood pressure and blood sugar, allergies, medical conditions, and the emergency number you choose.
+- **About you:** name, the name you like to be called, phone number, email address, age, gender, height, weight, blood group, usual blood pressure and blood sugar, allergies, medical conditions, and the emergency number you choose.
 - **Medicines:** names, type, dose, reminder times, doses left, and whether you took each dose and when.
 - **Appointments:** doctor, type of doctor, place, date and time, notes, and whether you attended.
 - **Health readings:** blood pressure and pulse, blood sugar, weight and sleep, with dates and notes.
 - **Notes and documents:** your notes, and photos of documents you choose to save (for example prescriptions or test results). Photos are reduced in size and stored inside the App, not in your phone's photo gallery.
 - **Family and contacts:** names, relationship, phone numbers and email addresses of people you add.
-- **Settings:** text size, whether you have seen the introduction, app-lock settings, the number of wrong PIN attempts, which version of these documents you accepted and when, and a random name for your private video-call room.
+- **Settings:** text size, language, the times you usually get up and go to bed (used to suggest medicine times), the features you chose to see first, whether you have seen the introduction and the first-steps list, app-lock settings, the number of wrong PIN attempts, which version of these documents you accepted and when, and a random name for your private video-call room.
 - **Your PIN:** the App never stores your PIN itself, only a scrambled one-way value ("salted hash") that lets it check your PIN.
 
 Some of this is **special personal information** under POPIA (section 26) and "special category" data under the GDPR (Article 9), because it concerns your health. It is handled with the extra protection described in section 6 below.
@@ -44,6 +44,7 @@ Some of this is **special personal information** under POPIA (section 26) and "s
 
 - No account, username or password with us.
 - No analytics, usage statistics, advertising identifiers or tracking of any kind.
+- No payment details. If you buy the App, the Apple App Store or Google Play handles the payment under its own terms and privacy policy. We only receive sales and download reports from the store, which do not identify you, and we never see your name, email address or card details.
 - No crash reports sent to us. (Your phone's maker or app store may collect crash and usage information if you allowed this in your phone's settings; their own privacy policies apply.)
 - No contacts list, call history, messages, photo gallery or files from your phone, except a photo or backup file that you choose yourself.
 - No location in the background. Your location is only read at the moment you use the hospital search or "Alert my family".

@@ -1,0 +1,6 @@
+/* Permission prompts shown by iOS, in the app's languages. */
+"CFBundleDisplayName" = "Elderly Care";
+"NSLocationWhenInUseUsageDescription" = "Your location is used to find nearby hospitals and, when you ask, to send to your family in an emergency.";
+"NSFaceIDUsageDescription" = "Use Face ID to unlock Elderly Care instead of typing your PIN.";
+"NSCameraUsageDescription" = "Take photos of prescriptions and medical documents to keep them in the app.";
+"NSPhotoLibraryUsageDescription" = "Choose photos of prescriptions and medical documents to keep them in the app.";
