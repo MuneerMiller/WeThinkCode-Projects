@@ -90,14 +90,14 @@ jobs:
         if: always()
         run: rm -f "$RUNNER_TEMP/upload.jks" android/key.properties
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: elderly-care-play-bundle
           path: elderly_app-master/build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
       - name: Keep the obfuscation symbols (to read future crash reports)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: elderly-care-debug-symbols
           path: elderly_app-master/build/symbols
