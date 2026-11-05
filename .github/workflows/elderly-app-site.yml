@@ -1,0 +1,54 @@
+name: Elderly Care website
+
+# Publishes the privacy policy, terms and support pages that the App Store
+# and Google Play require, at https://muneermiller.github.io/WeThinkCode-Projects/
+# One-time setup: repository Settings → Pages → Source: GitHub Actions.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'elderly_app-master/assets/legal/**'
+      - 'elderly_app-master/lib/legal/legal.dart'
+      - 'elderly_app-master/site/**'
+      - 'elderly_app-master/tool/build_site.py'
+      - '.github/workflows/elderly-app-site.yml'
+  pull_request:
+    paths:
+      - 'elderly_app-master/assets/legal/**'
+      - 'elderly_app-master/site/**'
+      - 'elderly_app-master/tool/build_site.py'
+      - '.github/workflows/elderly-app-site.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: elderly-app-site
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the site
+        run: python3 elderly_app-master/tool/build_site.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: elderly_app-master/build/site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
