@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'app_scope.dart';
 import 'data/app_store.dart';
@@ -17,6 +18,8 @@ import 'theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Draw behind the status and navigation bars, as modern Android expects.
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   registerExtraLicenses();
   final store = await AppStore.load();
   final services = AppServices();
@@ -131,24 +134,27 @@ class _ElderlyAppState extends State<ElderlyApp> {
           final mq = MediaQuery.of(context);
           final scale = mq.textScaler.scale(1) * context.store.textScale;
           final locked = context.store.lock.locked;
-          return MediaQuery(
-            data: mq.copyWith(textScaler: TextScaler.linear(scale)),
-            // While locked the app stays alive underneath, but hidden from
-            // view, screen readers, touch and keyboard focus.
-            child: Stack(
-              children: [
-                Offstage(
-                  offstage: locked,
-                  child: ExcludeSemantics(
-                    excluding: locked,
-                    child: ExcludeFocus(
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            value: AppTheme.overlayFor(Theme.of(context).brightness),
+            child: MediaQuery(
+              data: mq.copyWith(textScaler: TextScaler.linear(scale)),
+              // While locked the app stays alive underneath, but hidden from
+              // view, screen readers, touch and keyboard focus.
+              child: Stack(
+                children: [
+                  Offstage(
+                    offstage: locked,
+                    child: ExcludeSemantics(
                       excluding: locked,
-                      child: TickerMode(enabled: !locked, child: child!),
+                      child: ExcludeFocus(
+                        excluding: locked,
+                        child: TickerMode(enabled: !locked, child: child!),
+                      ),
                     ),
                   ),
-                ),
-                if (locked) const Positioned.fill(child: LockScreen()),
-              ],
+                  if (locked) const Positioned.fill(child: LockScreen()),
+                ],
+              ),
             ),
           );
         },

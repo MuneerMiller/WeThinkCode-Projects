@@ -176,7 +176,7 @@ class _AppointmentEditScreenState extends State<AppointmentEditScreen> {
                   ),
                   if (editing) ...[
                     const SizedBox(height: 12),
-                    SwitchListTile(
+                    SwitchListTile.adaptive(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                       title: Text(l.appointmentEditAttended),
                       value: _done,

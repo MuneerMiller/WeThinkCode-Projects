@@ -174,6 +174,9 @@ class _DocumentTile extends StatelessWidget {
                 doc.bytes,
                 fit: BoxFit.cover,
                 gaplessPlayback: true,
+                // Decode at tile size, not full photo size, to keep the
+                // grid smooth.
+                cacheWidth: 480,
                 semanticLabel: doc.name,
                 errorBuilder: (_, _, _) =>
                     const Icon(Icons.broken_image_rounded, size: 48),

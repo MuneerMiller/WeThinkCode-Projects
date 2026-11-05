@@ -35,7 +35,6 @@ class _SetupScreenState extends State<SetupScreen> {
   final _relName = TextEditingController();
   final _relPhone = TextEditingController();
   final _relRelationship = TextEditingController();
-  final _scroll = ScrollController();
 
   var _step = _Step.you;
   final _interests = <Feature>{};
@@ -60,16 +59,20 @@ class _SetupScreenState extends State<SetupScreen> {
     ]) {
       c.dispose();
     }
-    _scroll.dispose();
     super.dispose();
   }
 
   bool get _optional => _step == _Step.health || _step == _Step.contact;
 
+  /// Whether the last move was forward, so steps slide the right way.
+  bool _forward = true;
+
   void _go(_Step step) {
     FocusScope.of(context).unfocus();
-    setState(() => _step = step);
-    if (_scroll.hasClients) _scroll.jumpTo(0);
+    setState(() {
+      _forward = step.index > _step.index;
+      _step = step;
+    });
   }
 
   void _back() => _go(_Step.values[_step.index - 1]);
@@ -224,45 +227,66 @@ class _SetupScreenState extends State<SetupScreen> {
                 ),
               ),
               Expanded(
-                child: ListView(
-                  key: ValueKey(_step),
-                  controller: _scroll,
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-                  children: [
-                    ContentWidth(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (_step == _Step.you) ...[
-                            Image.asset(
-                              'assets/images/logo.png',
-                              height: 80,
-                              excludeFromSemantics: true,
+                // Each step slides gently in from the side it comes from.
+                child: AnimatedSwitcher(
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 280),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, animation) {
+                    final incoming = child.key == ValueKey(_step);
+                    final dx = (incoming ? 1 : -1) * (_forward ? 0.08 : -0.08);
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween(
+                          begin: Offset(dx, 0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: ListView(
+                    key: ValueKey(_step),
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                    children: [
+                      ContentWidth(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (_step == _Step.you) ...[
+                              Image.asset(
+                                'assets/images/logo.png',
+                                height: 80,
+                                excludeFromSemantics: true,
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                            Semantics(
+                              header: true,
+                              child: Text(
+                                title,
+                                style: theme.textTheme.headlineMedium,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                            const SizedBox(height: 16),
-                          ],
-                          Semantics(
-                            header: true,
-                            child: Text(
-                              title,
-                              style: theme.textTheme.headlineMedium,
+                            const SizedBox(height: 8),
+                            Text(
+                              body,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
                               textAlign: TextAlign.center,
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            body,
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          ..._content(context),
-                        ],
+                            const SizedBox(height: 24),
+                            ..._content(context),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../app_scope.dart';
 import '../../data/models.dart';
@@ -31,6 +32,7 @@ class DoseCheckScreen extends StatelessWidget {
     final contacts = context.services.contacts;
     final m = dose.medicine;
     final timeLabel = formatTime(context, dose.time);
+    taken ? HapticFeedback.mediumImpact() : HapticFeedback.lightImpact();
     await store.recordDose(
       m,
       dose.time,

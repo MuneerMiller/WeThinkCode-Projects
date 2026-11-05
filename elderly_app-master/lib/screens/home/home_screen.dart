@@ -109,10 +109,29 @@ class HomeScreen extends StatelessWidget {
                 const _SosButton(),
                 const SizedBox(height: 16),
                 _TodayCard(now: now),
-                if (store.showGettingStarted) ...[
-                  const SizedBox(height: 16),
-                  const GettingStartedCard(),
-                ],
+                // Folds away smoothly when closed.
+                AnimatedSwitcher(
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) => SizeTransition(
+                    sizeFactor: CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeInOutCubic,
+                    ),
+                    child: FadeTransition(opacity: animation, child: child),
+                  ),
+                  child: store.showGettingStarted
+                      ? const Padding(
+                          key: ValueKey('start'),
+                          padding: EdgeInsets.only(top: 16),
+                          child: GettingStartedCard(),
+                        )
+                      : const SizedBox(
+                          key: ValueKey('none'),
+                          width: double.infinity,
+                        ),
+                ),
                 SectionHeader(l.homeWhatToDo),
                 LayoutBuilder(
                   builder: (context, c) {
