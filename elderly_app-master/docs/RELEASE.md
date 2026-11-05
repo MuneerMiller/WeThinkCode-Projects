@@ -28,7 +28,7 @@ The site is built from the app's own legal documents by `tool/build_site.py` and
 
 - [ ] Once: repository **Settings → Pages → Source: GitHub Actions**.
 - [ ] Run the "Elderly Care website" workflow (Actions tab), or push a change to the legal files.
-- [ ] Check https://muneermiller.github.io/WeThinkCode-Projects/privacy.html and …/support.html.
+- [ ] Check https://muneermiller.github.io/WeThinkCode-Projects/privacy.html, …/support.html and the live demo at …/demo.html.
 - [ ] Later, replace the two "Download" buttons in `site/index.html` with the real store links.
 
 `python3 tool/build_site.py --check` fails while any publisher detail still says "to be completed". Use it as a final check.
@@ -81,7 +81,7 @@ No Mac? Codemagic or a rented Mac in the cloud can build and upload with your Ap
 
 ## 7. Things to keep in mind
 
-- **Don't publish the web version for free** while selling the app.
+- **Don't publish the normal web version for free** while selling the app. The public **demo** (`tool/build_demo.sh`, at …/demo.html) is fine: it starts from sample data and forgets everything on every reload, so it can't replace the app. Link to it from your website, CV and store listing ("Marketing URL").
 - **Moving to a new phone:** the encryption key stays on the old phone, so users must use **Back up my data** and **Restore from a backup**. The support page explains this.
 - **Refunds** are handled by Apple and Google, not by you.
 - **The app ID** (`com.muneermiller.elderlycare`) can't change after the first upload. Change it in `android/app/build.gradle.kts` and the iOS project now if you want another, for example one with your company's domain.

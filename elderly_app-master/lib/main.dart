@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import 'app_scope.dart';
 import 'data/app_store.dart';
+import 'demo/demo.dart';
 import 'legal/legal.dart';
 import 'l10n/l10n.dart';
 import 'legal/legal_screens.dart';
@@ -21,7 +22,9 @@ Future<void> main() async {
   // Draw behind the status and navigation bars, as modern Android expects.
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   registerExtraLicenses();
+  if (isDemo) await prepareDemo();
   final store = await AppStore.load();
+  if (isDemo) await store.lock.clear();
   final services = AppServices();
   await services.notifications.init(
     l10n: lookupAppLocalizations(appLocaleFor(store.languageCode)),
@@ -134,27 +137,52 @@ class _ElderlyAppState extends State<ElderlyApp> {
           final mq = MediaQuery.of(context);
           final scale = mq.textScaler.scale(1) * context.store.textScale;
           final locked = context.store.lock.locked;
+          // While locked the app stays alive underneath, but hidden from
+          // view, screen readers, touch and keyboard focus.
+          final app = Stack(
+            children: [
+              Offstage(
+                offstage: locked,
+                child: ExcludeSemantics(
+                  excluding: locked,
+                  child: ExcludeFocus(
+                    excluding: locked,
+                    child: TickerMode(enabled: !locked, child: child!),
+                  ),
+                ),
+              ),
+              if (locked) const Positioned.fill(child: LockScreen()),
+            ],
+          );
           return AnnotatedRegion<SystemUiOverlayStyle>(
             value: AppTheme.overlayFor(Theme.of(context).brightness),
             child: MediaQuery(
               data: mq.copyWith(textScaler: TextScaler.linear(scale)),
-              // While locked the app stays alive underneath, but hidden from
-              // view, screen readers, touch and keyboard focus.
-              child: Stack(
-                children: [
-                  Offstage(
-                    offstage: locked,
-                    child: ExcludeSemantics(
-                      excluding: locked,
-                      child: ExcludeFocus(
-                        excluding: locked,
-                        child: TickerMode(enabled: !locked, child: child!),
+              child: isDemo
+                  // The demo strip sits above the app, which starts below it.
+                  ? Builder(
+                      builder: (context) => Column(
+                        children: [
+                          Semantics(
+                            container: true,
+                            child: DemoBanner(navigator: _navigator),
+                          ),
+                          Expanded(
+                            // Its own container, so the app's pages don't
+                            // hide the strip from screen readers.
+                            child: Semantics(
+                              container: true,
+                              child: MediaQuery.removePadding(
+                                context: context,
+                                removeTop: true,
+                                child: app,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-                  if (locked) const Positioned.fill(child: LockScreen()),
-                ],
-              ),
+                    )
+                  : app,
             ),
           );
         },

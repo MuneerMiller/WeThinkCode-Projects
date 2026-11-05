@@ -38,6 +38,9 @@ jobs:
       - name: Unit and widget tests
         run: flutter test
 
+      - name: Web demo tests
+        run: flutter test --dart-define=DEMO=true test/demo_test.dart
+
       - name: Build web app (with Content-Security-Policy)
         run: tool/build_web.sh
 

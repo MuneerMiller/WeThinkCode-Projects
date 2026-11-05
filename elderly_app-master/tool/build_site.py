@@ -82,7 +82,7 @@ def markdown(md):
 
 
 def page(title, body, active=""):
-    nav = [("index.html", "Home"), ("support.html", "Support"),
+    nav = [("index.html", "Home"), ("demo.html", "Try the demo"), ("support.html", "Support"),
            ("privacy.html", "Privacy"), ("terms.html", "Terms")]
     links = "".join(
         f'<a href="{href}"{" aria-current=\"page\"" if href == active else ""}>{name}</a>'
@@ -130,15 +130,22 @@ def main():
             encoding="utf-8",
         )
 
-    for name in ["index", "support"]:
+    for name in ["index", "demo", "support"]:
         body = fill((ROOT / f"site/{name}.html").read_text(encoding="utf-8"), values)
         body = body.replace("{{app_version}}", app_version)
         if "to be completed" in body:
             unfinished.append(name)
-        title = "Medicines, appointments and help, made simple" if name == "index" else "Support"
+        title = {"index": "Medicines, appointments and help, made simple",
+                 "demo": "Try the demo", "support": "Support"}[name]
         (OUT / f"{name}.html").write_text(page(title, body, f"{name}.html"), encoding="utf-8")
 
-    print(f"Built {OUT.relative_to(ROOT)} ({len(DOCS) + 2} pages).")
+    # The web demo, if it was built (tool/build_demo.sh).
+    demo = ROOT / "build" / "demo"
+    if demo.exists():
+        shutil.copytree(demo, OUT / "app")
+    else:
+        print("Note: build/demo not found, so the demo page has no app. Run tool/build_demo.sh first.")
+    print(f"Built {OUT.relative_to(ROOT)} ({len(DOCS) + 3} pages).")
     if unfinished:
         msg = ("Publisher details still say 'to be completed' on: "
                + ", ".join(unfinished) + ". Fill in LegalInfo.values in lib/legal/legal.dart.")

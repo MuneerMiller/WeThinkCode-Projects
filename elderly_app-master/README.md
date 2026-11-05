@@ -74,6 +74,10 @@ Older people often juggle several medicines, doctor visits and readings, and wan
 
 Full-resolution screenshots of every screen are in [`docs/screenshots/screens`](docs/screenshots/screens). All names and health details shown are made up.
 
+## Try the demo
+
+A live demo runs in the browser at **https://muneermiller.github.io/WeThinkCode-Projects/demo.html**. It opens with sample data for "Margaret", and **Try it as a new user** shows the welcome screens and the step-by-step setup. The demo forgets everything when the page reloads, so it shows the app off without replacing it. Build it with `tool/build_demo.sh`; the website workflow publishes it.
+
 ## Getting started
 
 ### The easy way: one script
