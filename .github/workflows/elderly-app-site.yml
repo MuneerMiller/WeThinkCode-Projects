@@ -1,31 +1,23 @@
 name: Elderly Care website
 
 # Publishes the privacy policy, terms and support pages that the App Store
-# and Google Play require, at https://muneermiller.github.io/WeThinkCode-Projects/
+# and Google Play require, and a live web demo of the app (…/demo.html),
+# at https://muneermiller.github.io/WeThinkCode-Projects/
 # One-time setup: repository Settings → Pages → Source: GitHub Actions.
 
 on:
   push:
     branches: [main]
-    paths:
-      - 'elderly_app-master/assets/legal/**'
-      - 'elderly_app-master/lib/legal/legal.dart'
-      - 'elderly_app-master/site/**'
-      - 'elderly_app-master/tool/build_site.py'
-      - '.github/workflows/elderly-app-site.yml'
+    paths: ['elderly_app-master/**', '.github/workflows/elderly-app-site.yml']
   pull_request:
-    paths:
-      - 'elderly_app-master/assets/legal/**'
-      - 'elderly_app-master/site/**'
-      - 'elderly_app-master/tool/build_site.py'
-      - '.github/workflows/elderly-app-site.yml'
+    paths: ['elderly_app-master/**', '.github/workflows/elderly-app-site.yml']
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: elderly-app-site
+  group: elderly-app-site-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -33,6 +25,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.9
+          cache: true
+      - name: Build the web demo
+        working-directory: elderly_app-master
+        run: |
+          flutter pub get
+          tool/build_demo.sh
       - name: Build the site
         run: python3 elderly_app-master/tool/build_site.py
       - uses: actions/upload-pages-artifact@v3

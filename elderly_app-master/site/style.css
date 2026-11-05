@@ -42,3 +42,10 @@ details { background: var(--surface); border: 1px solid var(--line); border-radi
 summary { cursor: pointer; font-weight: 600; }
 footer { max-width: 960px; margin: 0 auto; padding: 24px 16px 40px; color: var(--muted);
   border-top: 1px solid var(--line); font-size: .9rem; }
+.demo { display: grid; gap: 32px; align-items: start; grid-template-columns: 1fr; }
+.phone { justify-self: center; width: 390px; max-width: 100%; height: 820px; padding: 14px;
+  background: #1a1c1b; border-radius: 52px; box-shadow: 0 24px 60px rgba(0,0,0,.25); }
+.phone iframe { width: 100%; height: 100%; border: 0; border-radius: 40px; background: var(--bg); }
+@media (min-width: 900px) { .demo { grid-template-columns: 1fr 390px; } }
+/* On a phone, the frame would only get in the way: link straight to the app. */
+@media (max-width: 600px) { .phone { display: none; } }
