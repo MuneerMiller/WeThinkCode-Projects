@@ -9,6 +9,10 @@
 // faked (Cape Town) and the hospital search API is answered with fixture data.
 
 const http = require('http');
+// The version the app shows, read from the code so the test never goes stale.
+const APP_VERSION = require('fs')
+  .readFileSync(require('path').join(__dirname, '../lib/legal/legal.dart'), 'utf8')
+  .match(/const appVersion = '([^']+)'/)[1];
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
@@ -112,17 +116,16 @@ async function tapLocator(target) {
   await target.scrollIntoViewIfNeeded().catch(() => {});
   await settle(400);
   let box = await target.boundingBox();
-  // If its centre is off screen (or under the bottom bar), scroll the page
-  // so it sits in the middle, as a person would before tapping.
+  // A small target that runs off the bottom of the screen (the home screen's
+  // height depends on the time of day) is scrolled up into view first.
   const vh = page.viewportSize().height;
-  const centre = box.y + box.height / 2;
-  if (centre < 60 || centre > vh - 120) {
+  if (box.height < vh / 2 && box.y + box.height > vh - 8) {
     await page.evaluate((dy) => {
       const views = [...document.querySelectorAll('flt-semantics')]
         .filter((e) => getComputedStyle(e).overflowY === 'scroll');
       const v = views.at(-1);
       if (v) v.scrollTop += dy;
-    }, centre - vh / 2);
+    }, box.y + box.height - vh + 160);
     await settle(500);
     box = await target.boundingBox();
   }
@@ -526,7 +529,7 @@ async function opened() { return page.evaluate(() => window.__opened); }
       await back();
     }
     await tap('Open-source licences');
-    await see('Version 2.1.0');
+    await see(`Version ${APP_VERSION}`);
     await see('cryptography');
     await back();
     await back();
