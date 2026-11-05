@@ -9,6 +9,10 @@
 // faked (Cape Town) and the hospital search API is answered with fixture data.
 
 const http = require('http');
+// The version the app shows, read from the code so the test never goes stale.
+const APP_VERSION = require('fs')
+  .readFileSync(require('path').join(__dirname, '../lib/legal/legal.dart'), 'utf8')
+  .match(/const appVersion = '([^']+)'/)[1];
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
@@ -111,7 +115,18 @@ async function tap(text) {
 async function tapLocator(target) {
   await target.scrollIntoViewIfNeeded().catch(() => {});
   await settle(400);
-  const box = await target.boundingBox();
+  let box = await target.boundingBox();
+  // A small target that runs off the bottom of the screen (the home screen's
+  // height depends on the time of day) is scrolled up into view first.
+  const vh = page.viewportSize().height;
+  if (box.height < vh / 2 && box.y + box.height > vh - 8) {
+    // A real wheel scroll moves by the exact amount (scrolling Flutter's
+    // semantics layer would jump a whole page).
+    await page.mouse.move(page.viewportSize().width / 2, vh / 2);
+    await page.mouse.wheel(0, box.y + box.height - vh + 160);
+    await settle(600);
+    box = await target.boundingBox();
+  }
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await settle();
 }
@@ -512,7 +527,7 @@ async function opened() { return page.evaluate(() => window.__opened); }
       await back();
     }
     await tap('Open-source licences');
-    await see('Version 2.1.0');
+    await see(`Version ${APP_VERSION}`);
     await see('cryptography');
     await back();
     await back();

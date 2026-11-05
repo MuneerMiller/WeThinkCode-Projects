@@ -13,7 +13,7 @@ val keyProperties = Properties().apply {
 }
 
 android {
-    namespace = "app.csminiproject.elderly_app"
+    namespace = "com.muneermiller.elderlycare"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "app.csminiproject.elderly_app"
+        applicationId = "com.muneermiller.elderlycare"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Calm, high-contrast theme with large type and generous touch targets,
 /// tuned for older eyes and hands.
@@ -7,6 +9,10 @@ class AppTheme {
   static const sos = Color(0xFFC62828);
 
   static ThemeData light() => _build(Brightness.light);
+
+  /// Bar colours for screens without an app bar (welcome, setup, lock).
+  static SystemUiOverlayStyle overlayFor(Brightness b) =>
+      _build(b).appBarTheme.systemOverlayStyle!;
   static ThemeData dark() => _build(Brightness.dark);
 
   static ThemeData _build(Brightness brightness) {
@@ -58,8 +64,42 @@ class AppTheme {
     const buttonSize = Size(64, 58);
     const buttonPadding = EdgeInsets.symmetric(horizontal: 24, vertical: 14);
 
+    final light = brightness == Brightness.light;
+    // Status and navigation bars blend into the app on both platforms.
+    final overlay = SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: light ? Brightness.dark : Brightness.light,
+      statusBarBrightness: brightness, // iOS
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: light
+          ? Brightness.dark
+          : Brightness.light,
+      systemNavigationBarContrastEnforced: false,
+    );
+
     return base.copyWith(
       textTheme: text,
+      // Native page transitions: the swipe-back slide on iOS, and Android's
+      // predictive back animation.
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        showDragHandle: true,
+        backgroundColor: scheme.surfaceContainerLow,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: scheme.primary,
+        linearTrackColor: scheme.primaryContainer,
+      ),
       scaffoldBackgroundColor: scheme.surface,
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surface,
@@ -68,6 +108,7 @@ class AppTheme {
         scrolledUnderElevation: 1,
         centerTitle: false,
         titleTextStyle: text.titleLarge?.copyWith(color: scheme.onSurface),
+        systemOverlayStyle: overlay,
         iconTheme: const IconThemeData(size: 28),
         actionsIconTheme: const IconThemeData(size: 28),
       ),

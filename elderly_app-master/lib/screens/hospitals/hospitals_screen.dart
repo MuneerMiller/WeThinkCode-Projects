@@ -82,7 +82,7 @@ class _HospitalsScreenState extends State<HospitalsScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 48),
                         child: Column(
                           children: [
-                            const CircularProgressIndicator(),
+                            const CircularProgressIndicator.adaptive(),
                             const SizedBox(height: 20),
                             Text(
                               l.hospitalSearching,

@@ -86,7 +86,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                 Card(
                   child: Column(
                     children: [
-                      SwitchListTile(
+                      SwitchListTile.adaptive(
                         secondary: const Icon(Icons.sms_rounded),
                         title: Text(l.videoTextFamily),
                         subtitle: Text(
@@ -100,14 +100,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                             : null,
                       ),
                       const Divider(indent: 20, endIndent: 20),
-                      SwitchListTile(
+                      SwitchListTile.adaptive(
                         secondary: const Icon(Icons.headset_mic_rounded),
                         title: Text(l.videoVoiceOnly),
                         value: _audioOnly,
                         onChanged: (v) => setState(() => _audioOnly = v),
                       ),
                       const Divider(indent: 20, endIndent: 20),
-                      SwitchListTile(
+                      SwitchListTile.adaptive(
                         secondary: const Icon(Icons.mic_off_rounded),
                         title: Text(l.videoStartMuted),
                         value: _startMuted,

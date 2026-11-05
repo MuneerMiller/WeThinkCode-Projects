@@ -1,0 +1,5 @@
+"CFBundleDisplayName" = "Elderly Care";
+"NSLocationWhenInUseUsageDescription" = "Indawo enikuyo isetshenziselwa ukuthola izibhedlela eziseduze futhi, uma nicela, ukuyithumela emndenini wenu uma kuphuthumile.";
+"NSFaceIDUsageDescription" = "Sebenzisani i-Face ID ukuvula i-Elderly Care esikhundleni sokuthayipha i-PIN yenu.";
+"NSCameraUsageDescription" = "Thathani izithombe zama-script nemibhalo yezempilo ukuze niyigcine ku-app.";
+"NSPhotoLibraryUsageDescription" = "Khethani izithombe zama-script nemibhalo yezempilo ukuze niyigcine ku-app.";

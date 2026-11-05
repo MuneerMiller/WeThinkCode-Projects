@@ -7,7 +7,7 @@ import '../l10n/l10n.dart';
 
 /// The app's version, shown under "Legal & about". A test keeps it in step
 /// with pubspec.yaml.
-const appVersion = '2.1.0';
+const appVersion = '2.2.0';
 
 /// Details filled into the legal documents.
 ///

@@ -148,7 +148,7 @@ class SecurityScreen extends StatelessWidget {
                         FutureBuilder<bool>(
                           future: lock.biometrics.available(),
                           builder: (context, snap) => snap.data == true
-                              ? SwitchListTile(
+                              ? SwitchListTile.adaptive(
                                   secondary: const Icon(
                                     Icons.fingerprint_rounded,
                                   ),
@@ -158,7 +158,7 @@ class SecurityScreen extends StatelessWidget {
                                 )
                               : const SizedBox.shrink(),
                         ),
-                        SwitchListTile(
+                        SwitchListTile.adaptive(
                           secondary: const Icon(
                             Icons.medical_information_rounded,
                           ),

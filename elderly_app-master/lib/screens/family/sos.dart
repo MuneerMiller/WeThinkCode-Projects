@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../app_scope.dart';
 import '../../l10n/l10n.dart';
@@ -12,6 +13,7 @@ import 'family_screen.dart';
 /// Emergency options: call emergency services, alert family, or call one
 /// relative directly.
 Future<void> showSosSheet(BuildContext context) {
+  HapticFeedback.heavyImpact();
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,

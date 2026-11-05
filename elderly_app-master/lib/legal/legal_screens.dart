@@ -29,7 +29,7 @@ class LegalDocScreen extends StatelessWidget {
         future: doc.load(),
         builder: (context, snap) {
           if (!snap.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator.adaptive());
           }
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),

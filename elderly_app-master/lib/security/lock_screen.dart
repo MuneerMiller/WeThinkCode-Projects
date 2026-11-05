@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +28,9 @@ class _LockScreenState extends State<LockScreen> {
   String _pin = '';
   String? _error;
   bool _checking = false;
+
+  /// Counts wrong PINs, to shake the dots each time.
+  int _shakes = 0;
   bool _confirmErase = false;
   _Panel _panel = _Panel.pin;
   Timer? _ticker;
@@ -61,6 +65,7 @@ class _LockScreenState extends State<LockScreen> {
 
   void _digit(String d) {
     if (_checking || _pin.length >= 8 || _lock.retryAt != null) return;
+    HapticFeedback.selectionClick();
     setState(() {
       _pin += d;
       _error = null;
@@ -69,6 +74,7 @@ class _LockScreenState extends State<LockScreen> {
 
   void _backspace() {
     if (_pin.isEmpty) return;
+    HapticFeedback.selectionClick();
     setState(() => _pin = _pin.substring(0, _pin.length - 1));
   }
 
@@ -83,8 +89,10 @@ class _LockScreenState extends State<LockScreen> {
     final result = await _lock.unlock(_pin);
     if (!mounted) return;
     final l = context.l10n;
+    if (result != PinResult.ok) HapticFeedback.heavyImpact();
     setState(() {
       _checking = false;
+      if (result != PinResult.ok) _shakes++;
       _pin = '';
       final left = AppLock.freeAttempts - _lock.failedAttempts;
       _error = switch (result) {
@@ -188,30 +196,34 @@ class _LockScreenState extends State<LockScreen> {
                   Semantics(
                     label: l.lockPinDigitsEntered(_pin.length),
                     excludeSemantics: true,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        for (
-                          var i = 0;
-                          i < (_pin.length < 4 ? 4 : _pin.length);
-                          i++
-                        )
-                          Container(
-                            margin: const EdgeInsets.all(6),
-                            width: 18,
-                            height: 18,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: i < _pin.length
-                                  ? theme.colorScheme.primary
-                                  : Colors.transparent,
-                              border: Border.all(
-                                color: theme.colorScheme.outline,
-                                width: 2,
+                    child: _Shake(
+                      key: ValueKey(_shakes),
+                      active: _shakes > 0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          for (
+                            var i = 0;
+                            i < (_pin.length < 4 ? 4 : _pin.length);
+                            i++
+                          )
+                            Container(
+                              margin: const EdgeInsets.all(6),
+                              width: 18,
+                              height: 18,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: i < _pin.length
+                                    ? theme.colorScheme.primary
+                                    : Colors.transparent,
+                                border: Border.all(
+                                  color: theme.colorScheme.outline,
+                                  width: 2,
+                                ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   SizedBox(
@@ -463,6 +475,28 @@ class _Keypad extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Shakes its child sideways once, as a phone does after a wrong passcode.
+/// Skipped when the user has asked for less motion.
+class _Shake extends StatelessWidget {
+  const _Shake({super.key, required this.active, required this.child});
+  final bool active;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!active || MediaQuery.disableAnimationsOf(context)) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 420),
+      builder: (context, t, child) => Transform.translate(
+        offset: Offset(math.sin(t * math.pi * 6) * 14 * (1 - t), 0),
+        child: child,
+      ),
+      child: child,
     );
   }
 }
