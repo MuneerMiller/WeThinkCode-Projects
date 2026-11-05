@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mogamat Muneer Miller. All rights reserved.
+// Part of the Elderly Care app. Source-available for viewing only;
+// copying or reuse without written permission is prohibited. See LICENSE.
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -115,6 +119,7 @@ class LegalHubScreen extends StatelessWidget {
                           context: context,
                           applicationName: l.appTitle,
                           applicationVersion: l.legalVersion(appVersion),
+                          applicationLegalese: appCopyright,
                           applicationIcon: Padding(
                             padding: const EdgeInsets.all(8),
                             child: Image.asset(
@@ -145,6 +150,14 @@ class LegalHubScreen extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
+                const SizedBox(height: 8),
+                Text(
+                  appCopyright,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           ),

@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mogamat Muneer Miller. All rights reserved.
+// Part of the Elderly Care app. Source-available for viewing only;
+// copying or reuse without written permission is prohibited. See LICENSE.
+
 import 'dart:io';
 
 import 'package:elderly_app/legal/legal.dart';
@@ -124,6 +128,7 @@ void main() {
       expect(find.text(doc.title), findsOneWidget, reason: doc.title);
     }
     expect(find.text('Elderly Care, version $appVersion'), findsOneWidget);
+    expect(find.text(appCopyright), findsOneWidget);
     expect(
       find.text(
         'You accepted version ${LegalInfo.version} of these documents on '

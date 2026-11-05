@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mogamat Muneer Miller. All rights reserved.
+// Part of the Elderly Care app. Source-available for viewing only;
+// copying or reuse without written permission is prohibited. See LICENSE.
+
 import 'package:flutter/foundation.dart'
     show LicenseEntryWithLineBreaks, LicenseRegistry;
 import 'package:flutter/material.dart';
@@ -8,6 +12,12 @@ import '../l10n/l10n.dart';
 /// The app's version, shown under "Legal & about". A test keeps it in step
 /// with pubspec.yaml.
 const appVersion = '2.2.0';
+
+/// The author and the copyright line shown on the "Legal & about" and the
+/// open-source licences screens. A copyright notice is kept in this standard
+/// form rather than translated.
+const appAuthor = 'Mogamat Muneer Miller';
+const appCopyright = '© 2026 $appAuthor. All rights reserved.';
 
 /// Details filled into the legal documents.
 ///

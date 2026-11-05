@@ -257,3 +257,7 @@ tool/build_web.sh           release web build with a Content-Security-Policy
 Flutter and Dart, with packages including `flutter_local_notifications`, `cryptography`, `flutter_secure_storage`, `local_auth`, `fl_chart`, `pdf`, `share_plus`, `geolocator`, `url_launcher` and `flutter_tts`. Map data © OpenStreetMap contributors.
 
 </details>
+
+## Licence
+
+© 2026 Mogamat Muneer Miller. All rights reserved. The source of this app is available for viewing only — see [`LICENSE`](LICENSE). It is not open source: copying, reuse or redistribution of the code, assets or design needs written permission. Third-party components (the Flutter SDK, the packages above, the Lexend font and OpenStreetMap data) keep their own licences, shown in the app under **Legal & about → Open-source licences** and in [`assets/legal/credits.md`](assets/legal/credits.md). Release builds obfuscate the compiled Dart code (see `docs/RELEASE.md`).

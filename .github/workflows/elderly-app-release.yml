@@ -71,8 +71,11 @@ jobs:
       - name: Test
         run: flutter test
 
-      - name: Build the App Bundle
-        run: flutter build appbundle --release
+      - name: Build the App Bundle (Dart code obfuscated)
+        # --obfuscate scrambles the compiled Dart so the app is hard to
+        # reverse-engineer. --split-debug-info keeps the symbol files needed
+        # to read a real crash report; they are uploaded below, never shipped.
+        run: flutter build appbundle --release --obfuscate --split-debug-info=build/symbols
 
       - name: Make sure it is not signed with the debug key
         run: |
@@ -92,3 +95,10 @@ jobs:
           name: elderly-care-play-bundle
           path: elderly_app-master/build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
+
+      - name: Keep the obfuscation symbols (to read future crash reports)
+        uses: actions/upload-artifact@v4
+        with:
+          name: elderly-care-debug-symbols
+          path: elderly_app-master/build/symbols
+          retention-days: 90

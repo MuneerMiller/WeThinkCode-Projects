@@ -1,0 +1,37 @@
+Copyright (c) 2026 Mogamat Muneer Miller. All rights reserved.
+
+SOURCE-AVAILABLE LICENCE — VIEW ONLY
+
+The "Elderly Care" application in this directory (its Dart source code,
+assets, text, layout and design) is the original work of Mogamat Muneer
+Miller (the "Author") and is protected by copyright. The source is made
+available so that others may read it and assess the Author's work. It is
+NOT open source.
+
+You MAY:
+  - view and read the source code;
+  - use the application as published on an app store under that store's
+    terms, and the app's own Terms of Use.
+
+You MAY NOT, without the Author's prior written permission:
+  - copy, reproduce, republish or redistribute the whole or any part of the
+    source code or assets;
+  - reuse the code, assets or design in your own projects, whether
+    commercial or not, and whether modified or not;
+  - build, publish or distribute your own version of the application;
+  - remove, hide or alter the copyright, authorship or attribution notices.
+
+Third-party components used by the application — including the Flutter SDK,
+the Dart packages listed in pubspec.yaml, the Lexend font and OpenStreetMap
+data — remain under their own licences, which continue to apply to those
+components only. Those licences are listed in the app under
+"Legal & about → Open-source licences" and in assets/legal/credits.md.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. TO THE
+EXTENT THE LAW ALLOWS, THE AUTHOR IS NOT LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY ARISING FROM THE SOFTWARE OR ITS USE. See the Medical
+disclaimer in assets/legal for important limits on the app's use.
+
+Authorship and the date of first publication can be established from the
+Git history of this repository. To request permission for any use above,
+contact the Author.
