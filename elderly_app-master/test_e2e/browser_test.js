@@ -111,7 +111,21 @@ async function tap(text) {
 async function tapLocator(target) {
   await target.scrollIntoViewIfNeeded().catch(() => {});
   await settle(400);
-  const box = await target.boundingBox();
+  let box = await target.boundingBox();
+  // If its centre is off screen (or under the bottom bar), scroll the page
+  // so it sits in the middle, as a person would before tapping.
+  const vh = page.viewportSize().height;
+  const centre = box.y + box.height / 2;
+  if (centre < 60 || centre > vh - 120) {
+    await page.evaluate((dy) => {
+      const views = [...document.querySelectorAll('flt-semantics')]
+        .filter((e) => getComputedStyle(e).overflowY === 'scroll');
+      const v = views.at(-1);
+      if (v) v.scrollTop += dy;
+    }, centre - vh / 2);
+    await settle(500);
+    box = await target.boundingBox();
+  }
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await settle();
 }
