@@ -120,13 +120,11 @@ async function tapLocator(target) {
   // height depends on the time of day) is scrolled up into view first.
   const vh = page.viewportSize().height;
   if (box.height < vh / 2 && box.y + box.height > vh - 8) {
-    await page.evaluate((dy) => {
-      const views = [...document.querySelectorAll('flt-semantics')]
-        .filter((e) => getComputedStyle(e).overflowY === 'scroll');
-      const v = views.at(-1);
-      if (v) v.scrollTop += dy;
-    }, box.y + box.height - vh + 160);
-    await settle(500);
+    // A real wheel scroll moves by the exact amount (scrolling Flutter's
+    // semantics layer would jump a whole page).
+    await page.mouse.move(page.viewportSize().width / 2, vh / 2);
+    await page.mouse.wheel(0, box.y + box.height - vh + 160);
+    await settle(600);
     box = await target.boundingBox();
   }
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
