@@ -42,6 +42,7 @@ The site is built from the app's own legal documents by `tool/build_site.py` and
   - `ANDROID_KEY_ALIAS`
   - `ANDROID_KEY_PASSWORD`
 - [ ] Actions → **Elderly Care release (Google Play)** → Run workflow, then download the `elderly-care-play-bundle` artifact (`app-release.aab`).
+- [ ] The workflow obfuscates the compiled Dart code and uploads the matching symbols as `elderly-care-debug-symbols`. Keep that artifact for each release: you need it to read a real crash report (`flutter symbolize`).
 - [ ] In Play Console: create the app, fill in the listing and App content from [`store/google-play.md`](store/google-play.md), and upload the `.aab` to **Closed testing**.
 - [ ] Personal accounts only: keep at least 12 testers opted in for 14 days, then apply for production.
 - [ ] Promote the release to Production.

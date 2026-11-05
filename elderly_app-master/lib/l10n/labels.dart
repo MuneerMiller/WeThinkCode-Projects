@@ -1,3 +1,7 @@
+// Copyright (c) 2026 Mogamat Muneer Miller. All rights reserved.
+// Part of the Elderly Care app. Source-available for viewing only;
+// copying or reuse without written permission is prohibited. See LICENSE.
+
 import '../data/models.dart';
 import '../theme.dart';
 import 'gen/app_localizations.dart';
