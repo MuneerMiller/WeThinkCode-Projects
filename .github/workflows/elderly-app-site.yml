@@ -37,7 +37,7 @@ jobs:
           tool/build_demo.sh
       - name: Build the site
         run: python3 elderly_app-master/tool/build_site.py
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: elderly_app-master/build/site
 
