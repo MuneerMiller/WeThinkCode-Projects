@@ -1,26 +1,22 @@
-# problem-102-java-002-001
-Module 102
-Topic 002: Introduction to Java
-Problem 001: FizzBuzz
+# FizzBuzz (Java)
 
-## Getting Started
-This project is a `Java` project using `maven` as build tool.
+My first Java and Maven project: the classic FizzBuzz. `checkNumber` returns *Fizz* for multiples of 3, *Buzz* for multiples of 5, *FizzBuzz* for multiples of both, and the number otherwise. `countTo` builds the list up to a number.
 
-The structure is as follow:
-* `src/main/java` - in here is some skeleton code that you must use as starting point for the problem.
-* `src/test/java` - in here are unit tests code that you must complete and extend (your unittests will also be reviewed)
-* `src/test/java/za/co/wethinkcode/lms/tests` - the files in this directory are special and should _not be edited by you_. These are the LMS tests that will need to succeed against your code as well. The LMS system will use the original (unedited) tests to test your submissions.
+## What it practises
 
-### IntelliJ
-To open it in `IntelliJ` IDE:
-1. _File_ -> _New_ -> _Project from Existing Sources..._
-1. Select the directory where this code has been checked out to by the LMS
-1. Choose _External Model_ as *Maven*
+- Java syntax, classes and methods
+- Building and testing with Maven and JUnit 5
 
-## Build, Test & Run
-You may use IntelliJ to run your code and tests, but alternatively you can use the Maven build tool:
-* First ensure you are in the root directory of the project
-* To compile your code, run: `mvn compile` 
-* To run the tests: `mvn test`
-* To run your application: `mvn compile exec:java`
+## Build, test and run
 
+You need Java 11 and Maven. From this folder:
+
+```bash
+mvn test
+```
+
+To open it in IntelliJ IDEA, choose *File → New → Project from Existing Sources…*, select this folder and pick *Maven*.
+
+---
+
+Part of my [WeThinkCode_ coursework](../../README.md). The brief, the skeleton code and the tests in `src/test/java/za/co/wethinkcode/lms` were provided by WeThinkCode_; the solution and the other tests are mine.

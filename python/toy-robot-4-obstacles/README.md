@@ -1,16 +1,28 @@
-# Problem - Toy Robot
+# Toy Robot 4: Obstacles
 
-* Modify `robot.py` to solve the problem as stated in the topic content.
-* You can run the program using the instructions in *To Run* below.
-* You can test technical correctness by running the unit tests as in the section *To Test* below.
+The robot from Toy Robot 3 in a world with random obstacles that block its path. The world is split into its own modules, so it can run as text in the terminal or be drawn with turtle graphics.
 
-### To Run
+## What it practises
 
-* `python3 robot.py`
-* follow the input prompts to get the desired output
+- Splitting a program into modules and packages
+- Choosing a module at runtime from command-line arguments
+- Collision checks along a path
 
-### To Test
+## Run it
 
-* To run all the unittests: `python3 -m unittest tests/test_main.py`
-* To run a specific step's unittest, e.g step *1*: `python3 -m unittest tests.test_main.MyTestCase.test_step1`
-* _Note_: at the minimum, these (*unedited*) tests must succeed before you may submit the solution for review.
+From this folder:
+
+```bash
+python3 robot.py          # text world
+python3 robot.py turtle   # turtle graphics (needs tkinter)
+```
+
+## Test it
+
+```bash
+python3 -m unittest
+```
+
+---
+
+Part of my [WeThinkCode_ coursework](../../README.md). The problem brief and the tests in `tests/` were provided by WeThinkCode_; the solution is mine.

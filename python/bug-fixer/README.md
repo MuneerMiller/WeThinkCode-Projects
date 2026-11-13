@@ -1,16 +1,31 @@
-# Problem - Bug Fixer
+# Bug Fixer: Troll Hunter
 
-* Modify your `troll_hunter.py` to solve the problem as stated in the topic content.
-* You can run the program using the instructions in *To Run* below.
-* You can test technical correctness by running the unit tests as in the section *To Test* below.
+I was given a buggy "troll hunter" that scans the `.txt` and `.csv` files in a folder, replaces *goblin* with *elf* and *hobgoblin* with *orc*, and raises a custom exception when it finds a troll. The job was to find and fix the bugs until the tests passed.
 
-### To Run
+## What it practises
 
-* `python3 troll_hunter.py`
-* follow the input prompts to get the desired output
+- Reading and debugging someone else's code
+- Custom exceptions
+- Walking a folder of files with `os`
 
-### To Test
+## Run it
 
-* To run all the unittests: `python3 -m unittest tests/test_main.py`
-* To run a specific step's unittest, e.g step *1*: `python3 -m unittest tests.test_main.MyTestCase.test_step1`
-* _Note_: at the minimum, these (*unedited*) tests must succeed before you may submit the solution for review.
+From this folder:
+
+```bash
+python3 -c "import troll_hunter as t; print(t.troll_check('A goblin and a hobgoblin walk into a bar.'))"
+```
+
+```
+A elf and a orc walk into a bar.
+```
+
+## Test it
+
+```bash
+python3 -m unittest
+```
+
+---
+
+Part of my [WeThinkCode_ coursework](../../README.md). The problem brief and the tests in `tests/` were provided by WeThinkCode_; the solution is mine.

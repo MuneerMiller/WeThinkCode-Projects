@@ -42,9 +42,9 @@ Each folder has the problem's own README, my solution and the unit tests it was 
 | [mastermind-functions](python/mastermind-functions) | Mastermind refactored into small, testable functions | Decomposition |
 | [mastermind-returns](python/mastermind-returns) | Mastermind with functions that return values and are tested on their own | Return values, unit tests |
 | [toy-robot](python/toy-robot) | A robot that takes commands and moves around a grid | Command parsing |
-| [toy-robot-3](python/toy-robot-3) | Keeps a command history and can replay earlier moves | State, refactoring |
+| [toy-robot-3](python/toy-robot-3) | Keeps a command history and can replay earlier moves, silently, reversed or a range | State, refactoring |
 | [toy-robot-4-obstacles](python/toy-robot-4-obstacles) | Random obstacles, with a text world and a turtle-graphics world | Modules, packages |
-| [toy-robot-5-maze](python/toy-robot-5-maze) | Swaps random obstacles for a generated maze (unfinished: the `maze.text` module was never written, so its tests don't run) | Algorithms, imports |
+| [toy-robot-5-maze](python/toy-robot-5-maze) | Swaps random obstacles for a maze drawn with turtle graphics (unfinished: the `maze.text` module was never written, so its tests don't run) | Algorithms, imports |
 | [recursion](python/recursion) | Minimum, sum and every possible string of a given length, all without loops | Recursion |
 
 ## ☕ Java coursework

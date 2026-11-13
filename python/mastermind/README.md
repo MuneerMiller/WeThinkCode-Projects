@@ -1,16 +1,27 @@
-# Problems - Mastermind
+# Mastermind
 
-* Modify `mastermind.py` to solve the problem as stated in the topic content.
-* You can run the program using the instructions in *To Run* below.
-* You can test technical correctness by running the unit tests as in the section *To Test* below.
+The code-breaking game. The computer picks a secret 4-digit code using the digits 1 to 8, and you have 12 turns to guess it. After each guess you're told how many digits are right and in the right place, and how many are right but in the wrong place.
 
-### To Run
+## What it practises
 
-* `python3 mastermind.py`
-* follow the input prompts to get the desired output
+- Game logic in a loop
+- Comparing two sequences position by position
+- Random numbers
 
-### To Test
+## Run it
 
-* To run all the unittests: `python3 -m unittest tests/test_main.py`
-* To run a specific step's unittest, e.g step *1*: `python3 -m unittest tests.test_main.MyTestCase.test_step1`
-* _Note_: at the minimum, these (*unedited*) tests must succeed before you may submit the solution for review.
+From this folder:
+
+```bash
+python3 mastermind.py
+```
+
+## Test it
+
+```bash
+python3 -m unittest
+```
+
+---
+
+Part of my [WeThinkCode_ coursework](../../README.md). The problem brief and the tests in `tests/` were provided by WeThinkCode_; the solution is mine.

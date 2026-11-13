@@ -1,17 +1,27 @@
-# Problems - Hangman
+# Hangman: Random Word
 
-* Modify `hangman.py` to solve the problem as stated in {{%content-link%}}.
-* Use the `short_words.txt` file for the list of words to select from.
-* You can run the program using the instructions in *To Run* below.
-* You can test technical correctness by running the unit tests as in the section *To Test* below.
+The first step of Hangman. The program picks a random word from a file, hides one letter, asks you to guess it, and then shows the whole word.
 
-### To Run
+## What it practises
 
-* `python3 hangman.py`
-* follow the input prompts to play the game
+- Reading a file into a list
+- Picking random items with `random`
+- Reading input from the player
 
-### To Test
+## Run it
 
-* To run all the unittests: `python3 -m unittest tests/test_main.py`
-* To run a specific step's unittest, e.g step *1*: `python3 -m unittest tests.test_main.MyTestCase.test_step1`
-* _Note_: at the minimum, these (*unedited*) tests must succeed before you may submit the solution for review.
+From this folder:
+
+```bash
+python3 hangman.py
+```
+
+## Test it
+
+```bash
+python3 -m unittest
+```
+
+---
+
+Part of my [WeThinkCode_ coursework](../../README.md). The problem brief and the tests in `tests/` were provided by WeThinkCode_; the solution is mine.

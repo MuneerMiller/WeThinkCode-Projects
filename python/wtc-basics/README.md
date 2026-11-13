@@ -1,15 +1,26 @@
-# Problems - WTC Basics
+# WTC Basics
 
-* Modify `hello.py` to solve the problem as stated in the topic content.
-* You can run the program using the instructions in *To Run* below.
-* You can test technical correctness by running the unit tests as in the section *To Test* below.
+My first WeThinkCode_ exercise: a function that prints `Hello World!`, checked by a unit test.
 
-### To Run
+## What it practises
 
-* `python3 hello.py`
+- Writing and calling a function
+- Running a program and its tests from the terminal
 
-### To Test
+## Run it
 
-* To run all the unittests: `python3 -m unittest tests/test_main.py`
-* To run a specific step's unittest, e.g step *1*: `python3 -m unittest tests.test_main.MyTestCase.test_step1`
-* _Note_: at the minimum, these (*unedited*) tests must succeed before you may submit the solution for review.
+From this folder:
+
+```bash
+python3 hello.py
+```
+
+## Test it
+
+```bash
+python3 -m unittest
+```
+
+---
+
+Part of my [WeThinkCode_ coursework](../../README.md). The problem brief and the tests in `tests/` were provided by WeThinkCode_; the solution is mine.
