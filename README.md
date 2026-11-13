@@ -8,6 +8,7 @@
 ![Java](https://img.shields.io/badge/Java-ED8B00?logo=openjdk&logoColor=white)
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white)
+[![Coursework tests](https://github.com/MuneerMiller/WeThinkCode-Projects/actions/workflows/coursework.yml/badge.svg)](https://github.com/MuneerMiller/WeThinkCode-Projects/actions/workflows/coursework.yml)
 
 </div>
 
@@ -25,7 +26,7 @@ It started as my solo final project for the programme. I've since rebuilt it fro
 
 ## 🐍 Python coursework
 
-Each folder has the problem's own README, my solution and the unit tests it was marked against.
+Each folder has the problem's own README, my solution and the unit tests it was marked against. GitHub Actions runs those tests on every change.
 
 | Project | What it does | Concepts |
 | --- | --- | --- |
@@ -43,7 +44,7 @@ Each folder has the problem's own README, my solution and the unit tests it was 
 | [toy-robot](python/toy-robot) | A robot that takes commands and moves around a grid | Command parsing |
 | [toy-robot-3](python/toy-robot-3) | Keeps a command history and can replay earlier moves | State, refactoring |
 | [toy-robot-4-obstacles](python/toy-robot-4-obstacles) | Random obstacles, with a text world and a turtle-graphics world | Modules, packages |
-| [toy-robot-5-maze](python/toy-robot-5-maze) | Swaps random obstacles for a generated maze | Algorithms, imports |
+| [toy-robot-5-maze](python/toy-robot-5-maze) | Swaps random obstacles for a generated maze (unfinished: the `maze.text` module was never written, so its tests don't run) | Algorithms, imports |
 | [recursion](python/recursion) | Minimum, sum and every possible string of a given length, all without loops | Recursion |
 
 ## ☕ Java coursework

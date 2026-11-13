@@ -4,10 +4,24 @@ from io import StringIO
 import sys
 import io
 from unittest.mock import patch
+import functools
+
+
+def with_input(text):
+    """Feed `text` to input() for one test run. A fresh StringIO is made each
+    time the test runs, because the grader in tests/test_main.py runs these
+    tests a second time and a shared one would already be used up."""
+    def decorator(test):
+        @functools.wraps(test)
+        def wrapper(self):
+            with patch("sys.stdin", StringIO(text)):
+                return test(self)
+        return wrapper
+    return decorator
 from robot import *
 
 class MyTestCase(unittest.TestCase):
-    @patch("sys.stdin", StringIO('Joe\nforward 10\nforward 5\nreplay\noff\n'))
+    @with_input('Joe\nforward 10\nforward 5\nreplay\noff\n')
     def test_replay(self):
         sys.stdout = io.StringIO()
         robot_start()
@@ -24,7 +38,7 @@ Joe: What must I do next?  > Joe moved forward by 10 steps.
  > Joe now at position (0,30).
 Joe: What must I do next? Joe: Shutting down..\n""")
 
-    @patch("sys.stdin", StringIO('Joe\nforward 10\nforward 5\nreplay\nreplay\noff\n'))
+    @with_input('Joe\nforward 10\nforward 5\nreplay\nreplay\noff\n')
     def test_step2_replay_twice(self):
         sys.stdout = io.StringIO()
         robot_start()
@@ -47,7 +61,7 @@ Joe: What must I do next?  > Joe moved forward by 10 steps.
  > Joe now at position (0,45).
 Joe: What must I do next? Joe: Shutting down..\n""")
 
-    @patch("sys.stdin", StringIO('Joe\nforward 10\nforward 5\nreplay silent\noff\n'))
+    @with_input('Joe\nforward 10\nforward 5\nreplay silent\noff\n')
     def test_step3_replay_silent(self):
         sys.stdout = io.StringIO()
         robot_start()
@@ -60,7 +74,7 @@ Joe: What must I do next?  > Joe replayed 2 commands silently.
  > Joe now at position (0,30).
 Joe: What must I do next? Joe: Shutting down..\n""")
 
-    @patch("sys.stdin", StringIO('Joe\nforward 10\nforward 5\nREPLAY SILENT\noff\n'))
+    @with_input('Joe\nforward 10\nforward 5\nREPLAY SILENT\noff\n')
     def test_step3_replay_silent_upper(self):
         sys.stdout = io.StringIO()
         robot_start()
@@ -74,7 +88,7 @@ Joe: What must I do next?  > Joe replayed 2 commands silently.
 Joe: What must I do next? Joe: Shutting down..\n""")
 
 
-    @patch("sys.stdin", StringIO('Joe\nforward 10\nforward 5\nreplay reversed\noff\n'))
+    @with_input('Joe\nforward 10\nforward 5\nreplay reversed\noff\n')
     def test_step4_replay_reversed(self):
         sys.stdout = io.StringIO()
         robot_start()
@@ -91,7 +105,7 @@ Joe: What must I do next?  > Joe moved forward by 5 steps.
  > Joe now at position (0,30).
 Joe: What must I do next? Joe: Shutting down..\n""")
 
-    @patch("sys.stdin", StringIO('Joe\nforward 10\nforward 5\nreplay REVERSED\noff\n'))
+    @with_input('Joe\nforward 10\nforward 5\nreplay REVERSED\noff\n')
     def test_step4_replay_reversed_upper(self):
         sys.stdout = io.StringIO()
         robot_start()
@@ -108,7 +122,7 @@ Joe: What must I do next?  > Joe moved forward by 5 steps.
  > Joe now at position (0,30).
 Joe: What must I do next? Joe: Shutting down..\n""")
 
-    @patch("sys.stdin", StringIO('Joe\nforward 10\nforward 5\nreplay reversed silent\noff\n'))
+    @with_input('Joe\nforward 10\nforward 5\nreplay reversed silent\noff\n')
     def test_step3_replay_silent_reversed(self):
         sys.stdout = io.StringIO()
         robot_start()
@@ -121,7 +135,7 @@ Joe: What must I do next?  > Joe replayed 2 commands in reverse silently.
  > Joe now at position (0,30).
 Joe: What must I do next? Joe: Shutting down..\n""")
 
-    @patch("sys.stdin", StringIO('Joe\nforward 10\nforward 5\nreplay REVERSED SILENT\noff\n'))
+    @with_input('Joe\nforward 10\nforward 5\nreplay REVERSED SILENT\noff\n')
     def test_step3_replay_silent_reversed_upper(self):
         sys.stdout = io.StringIO()
         robot_start()
@@ -135,7 +149,7 @@ Joe: What must I do next?  > Joe replayed 2 commands in reverse silently.
 Joe: What must I do next? Joe: Shutting down..\n""")
 
 
-    @patch("sys.stdin", StringIO('Joe\nforward 3\nforward 2\nforward 1\nreplay 2\noff\n'))
+    @with_input('Joe\nforward 3\nforward 2\nforward 1\nreplay 2\noff\n')
     def test_step6_replay_range_basic(self):
         sys.stdout = io.StringIO()
         robot_start()
@@ -154,7 +168,7 @@ Joe: What must I do next?  > Joe moved forward by 2 steps.
  > Joe now at position (0,9).
 Joe: What must I do next? Joe: Shutting down..\n""")
 
-    @patch("sys.stdin", StringIO('Joe\nforward 3\nforward 2\nforward 1\nreplay 3-1\noff\n'))
+    @with_input('Joe\nforward 3\nforward 2\nforward 1\nreplay 3-1\noff\n')
     def test_step6_replay_range_full(self):
         sys.stdout = io.StringIO()
         robot_start()

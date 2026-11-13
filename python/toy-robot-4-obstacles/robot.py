@@ -1,5 +1,4 @@
 import sys
-import turtle
 turtle = False
 text = True
 
