@@ -57,7 +57,8 @@ jobs:
         if: matrix.project != 'fizzbuzz'
         run: |
           if [ "${{ matrix.project }}" = mastermind ]; then
-            yes 1111 | head -n 12 | mvn -B -q compile exec:java | tee run.log
+            # 12 guesses of 1111: the game ends by winning or running out of turns
+            printf '1111\n%.0s' {1..12} | mvn -B -q compile exec:java | tee run.log
             grep -q "The code was" run.log
           else
             printf '\nquit\n' | mvn -B -q compile exec:java | tee run.log
