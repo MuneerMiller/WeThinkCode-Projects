@@ -1,16 +1,27 @@
-# Problem - Word Processor
+# Word Processor
 
-* Modify `word_processor.py` to solve the problem as stated in the topic content.
-* You can run the program using the instructions in *To Run* below.
-* You can test technical correctness by running the unit tests as in the section *To Test* below.
+A set of text-processing functions: split text on several delimiters, list words longer than a length, map word lengths, count letters, and find the most used character.
 
-### To Run
+## What it practises
 
-* `python3 word_processor.py`
-* follow the input prompts to get the desired output
+- Lists and dictionaries
+- List and dictionary comprehensions
+- `map` and `filter`
 
-### To Test
+## Run it
 
-* To run all the unittests: `python3 -m unittest tests/test_main.py`
-* To run a specific step's unittest, e.g step *1*: `python3 -m unittest tests.test_main.MyTestCase.test_step1`
-* _Note_: at the minimum, these (*unedited*) tests must succeed before you may submit the solution for review.
+From this folder:
+
+```bash
+python3 -c "import word_processor as w; print(w.words_lengths_map('the cat sat on the mat'))"
+```
+
+## Test it
+
+```bash
+python3 -m unittest
+```
+
+---
+
+Part of my [WeThinkCode_ coursework](../../README.md). The problem brief and the tests in `tests/` were provided by WeThinkCode_; the solution is mine.

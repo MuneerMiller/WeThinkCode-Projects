@@ -1,17 +1,42 @@
-# Problems - Hangman Loops
+# Hangman: Loops
 
-* Modify `hangman.py` to solve the problem as stated in [_TODO_ ref to content's problem description].
-* Use the `short_words.txt` file for the list of words to select from.
-* You can run the program using the instructions in *To Run* below.
-* You can test technical correctness by running the unit tests as in the section *To Test* below.
+The full game of Hangman. Guess letters one at a time with 5 wrong guesses allowed, while the hangman figure is drawn step by step. Type `quit` or `exit` to stop.
 
-### To Run
+## What it practises
 
-* `python3 hangman.py`
-* follow the input prompts to play the game
+- `while` loops that run until you win, lose or quit
+- Tracking state between turns
+- Drawing ASCII art for each stage
 
-### To Test
+## Run it
 
-* To run all the unittests: `python3 -m unittest tests/test_main.py`
-* To run a specific step's unittest, e.g step *1*: `python3 -m unittest tests.test_main.MyTestCase.test_step1`
-* _Note_: at the minimum, these (*unedited*) tests must succeed before you may submit the solution for review.
+From this folder:
+
+```bash
+python3 hangman.py
+```
+
+Example:
+
+```
+Guess the word: f___
+Guess the missing letter: a
+Wrong! Number of guesses left: 4
+
+/----
+|
+|
+|
+|
+_______
+```
+
+## Test it
+
+```bash
+python3 -m unittest
+```
+
+---
+
+Part of my [WeThinkCode_ coursework](../../README.md). The problem brief and the tests in `tests/` were provided by WeThinkCode_; the solution is mine.

@@ -11,7 +11,7 @@
 ![Dart](https://img.shields.io/badge/Dart-3.13-0175C2?logo=dart&logoColor=white)
 ![Languages](https://img.shields.io/badge/languages-English%20%C2%B7%20Afrikaans%20%C2%B7%20isiZulu%20%C2%B7%20isiXhosa-B45309)
 ![Platforms](https://img.shields.io/badge/platforms-Android%20%C2%B7%20iOS%20%C2%B7%20Web-1B6B5F)
-![Tests](https://img.shields.io/badge/tests-94%20unit%20%26%20widget%20%C2%B7%2026%20browser-2E7D32)
+![Tests](https://img.shields.io/badge/tests-95%20unit%20%26%20widget%20%C2%B7%2026%20browser-2E7D32)
 
 <img src="docs/screenshots/feature-grid.png" alt="Six screens of Elderly Care: home with SOS button, medicine check, blood pressure chart, Medical ID, nearby hospitals and the PIN lock screen" width="100%">
 
@@ -130,7 +130,7 @@ tool/build_web.sh
 
 | | |
 |---|---|
-| **Unit & widget tests** | 94 tests: scheduling, reminders, encryption, backups, the app lock, legal acceptance, every language, Android and iOS behaviour, and every feature end to end with fake phone services, including at large text sizes. Run `flutter test`. |
+| **Unit & widget tests** | 95 tests: scheduling, reminders, encryption, backups, the app lock, legal acceptance, every language, Android and iOS behaviour, and every feature end to end with fake phone services, including at large text sizes. Run `flutter test`. |
 | **Browser tests** | [`test_e2e/browser_test.js`](test_e2e/browser_test.js) drives the release web build in Chromium through every feature, checks the PDF's contents and that nothing readable is left in browser storage, and screenshots each step. |
 | **Continuous integration** | Every change runs formatting, `flutter analyze` and the tests, then builds the website, the Android APK and the iOS app. |
 | **Dependencies** | Kept up to date by Dependabot. |

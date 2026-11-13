@@ -47,7 +47,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-                    <mainClass>hello.Hello</mainClass>
+                    <mainClass>za.co.wethinkcode.mastermind.Mastermind</mainClass>
                 </configuration>
             </plugin>
             <plugin>

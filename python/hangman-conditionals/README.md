@@ -1,17 +1,27 @@
-# Problems - Hangman Conditionals
+# Hangman: Conditionals
 
-* Modify `hangman.py` to solve the problem as stated in [_TODO_ ref to content's problem description].
-* Use the `short_words.txt` file for the list of words to select from.
-* You can run the program using the instructions in *To Run* below.
-* You can test technical correctness by running the unit tests as in the section *To Test* below.
+Hangman that checks your guess. It shows the word with one letter missing, tells you whether your guess was right, and reveals the answer.
 
-### To Run
+## What it practises
 
-* `python3 hangman.py`
-* follow the input prompts to play the game
+- `if` / `else` decisions
+- Asking for a words file, with a default when you leave it empty
+- Breaking the game into small functions
 
-### To Test
+## Run it
 
-* To run all the unittests: `python3 -m unittest tests/test_main.py`
-* To run a specific step's unittest, e.g step *1*: `python3 -m unittest tests.test_main.MyTestCase.test_step1`
-* _Note_: at the minimum, these (*unedited*) tests must succeed before you may submit the solution for review.
+From this folder:
+
+```bash
+python3 hangman.py
+```
+
+## Test it
+
+```bash
+python3 -m unittest
+```
+
+---
+
+Part of my [WeThinkCode_ coursework](../../README.md). The problem brief and the tests in `tests/` were provided by WeThinkCode_; the solution is mine.

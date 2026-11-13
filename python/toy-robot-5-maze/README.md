@@ -1,16 +1,26 @@
-# Problem - Toy Robot
+# Toy Robot 5: Maze
 
-* Modify `robot.py` to solve the problem as stated in the topic content.
-* You can run the program using the instructions in *To Run* below.
-* You can test technical correctness by running the unit tests as in the section *To Test* below.
+The next Toy Robot step, swapping random obstacles for a maze. **Unfinished:** `robot.py` imports a `maze.text` module that was never written, so this version doesn't run and its tests are skipped in CI. `maze/da_crazy_maze.py` draws the maze with turtle graphics on its own.
 
-### To Run
+## What it practises
 
-* `python3 robot.py`
-* follow the input prompts to get the desired output
+- Moving code between modules
+- Drawing with `turtle`
 
-### To Test
+## Run it
 
-* To run all the unittests: `python3 -m unittest tests/test_main.py`
-* To run a specific step's unittest, e.g step *1*: `python3 -m unittest tests.test_main.MyTestCase.test_step1`
-* _Note_: at the minimum, these (*unedited*) tests must succeed before you may submit the solution for review.
+From this folder:
+
+```bash
+python3 maze/da_crazy_maze.py   # draws the maze (needs tkinter)
+```
+
+## Test it
+
+```bash
+python3 -m unittest   # currently fails: see above
+```
+
+---
+
+Part of my [WeThinkCode_ coursework](../../README.md). The problem brief and the tests in `tests/` were provided by WeThinkCode_; the solution is mine.

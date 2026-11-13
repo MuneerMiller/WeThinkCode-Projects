@@ -1,16 +1,26 @@
-# Problems - Mastermind
+# Mastermind: Functions
 
-* Modify `mastermind.py` to solve the problem as stated in the topic content.
-* You can run the program using the instructions in *To Run* below.
-* You can test technical correctness by running the unit tests as in the section *To Test* below.
+The same Mastermind game, refactored from one long function into small functions, each with one job: create the code, show the instructions, take a turn, check the answer.
 
-### To Run
+## What it practises
 
-* `python3 mastermind.py`
-* follow the input prompts to get the desired output
+- Decomposing a program into functions
+- Refactoring without changing behaviour
 
-### To Test
+## Run it
 
-* To run all the unittests: `python3 -m unittest tests/test_main.py`
-* To run a specific step's unittest, e.g step *1*: `python3 -m unittest tests.test_main.MyTestCase.test_step1`
-* _Note_: at the minimum, these (*unedited*) tests must succeed before you may submit the solution for review.
+From this folder:
+
+```bash
+python3 mastermind.py
+```
+
+## Test it
+
+```bash
+python3 -m unittest
+```
+
+---
+
+Part of my [WeThinkCode_ coursework](../../README.md). The problem brief and the tests in `tests/` were provided by WeThinkCode_; the solution is mine.
