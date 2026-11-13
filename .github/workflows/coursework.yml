@@ -48,6 +48,8 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          # Java 11 is what the course used and what the pom.xml files target.
+          # The tests use Mockito 3.6, which can't mock java.util.Random on 17.
+          java-version: '11'
           cache: maven
       - run: mvn -B test
