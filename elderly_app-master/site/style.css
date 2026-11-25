@@ -42,10 +42,26 @@ details { background: var(--surface); border: 1px solid var(--line); border-radi
 summary { cursor: pointer; font-weight: 600; }
 footer { max-width: 960px; margin: 0 auto; padding: 24px 16px 40px; color: var(--muted);
   border-top: 1px solid var(--line); font-size: .9rem; }
-.demo { display: grid; gap: 32px; align-items: start; grid-template-columns: 1fr; }
-.phone { justify-self: center; width: 390px; max-width: 100%; height: 820px; padding: 14px;
-  background: #1a1c1b; border-radius: 52px; box-shadow: 0 24px 60px rgba(0,0,0,.25); }
-.phone iframe { width: 100%; height: 100%; border: 0; border-radius: 40px; background: var(--bg); }
-@media (min-width: 900px) { .demo { grid-template-columns: 1fr 390px; } }
-/* On a phone, the frame would only get in the way: link straight to the app. */
-@media (max-width: 600px) { .phone { display: none; } }
+/* Demo page: the app runs in an iframe. On a phone it shows full-width and
+   comes first so it is immediately usable; on a wider screen it sits in a
+   phone frame beside the text. */
+.demo { display: grid; gap: 28px 40px; align-items: start; grid-template-columns: 1fr; }
+.demo-intro .lead { margin-bottom: 0; }
+.demo-tips h2 { font-size: 1.25rem; margin: 0 0 8px; }
+.phone { justify-self: center; width: 100%; max-width: 420px; }
+.phone iframe { width: 100%; height: min(78vh, 760px); min-height: 540px; border: 0;
+  border-radius: 24px; background: var(--bg); box-shadow: 0 10px 40px rgba(0,0,0,.16);
+  display: block; }
+/* Phone first on small screens, so the tips below refer to something on screen. */
+@media (max-width: 899px) { .phone { order: -1; } }
+@media (min-width: 900px) {
+  .demo {
+    grid-template-columns: 1fr 400px;
+    grid-template-areas: "intro phone" "tips phone";
+  }
+  .demo-intro { grid-area: intro; }
+  .demo-tips { grid-area: tips; }
+  .phone { grid-area: phone; align-self: start; max-width: 400px; padding: 14px;
+    background: #1a1c1b; border-radius: 48px; box-shadow: 0 24px 60px rgba(0,0,0,.25); }
+  .phone iframe { height: 800px; min-height: 0; border-radius: 38px; }
+}
