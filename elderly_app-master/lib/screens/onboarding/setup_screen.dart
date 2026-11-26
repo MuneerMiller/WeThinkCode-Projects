@@ -12,7 +12,7 @@ import '../../legal/legal.dart';
 import '../../legal/legal_screens.dart';
 import '../../theme.dart';
 import '../../widgets/common.dart';
-import '../profile/profile_screen.dart' show TextSizePicker;
+import '../profile/profile_widgets.dart' show TextSizePicker;
 import 'personal_widgets.dart';
 
 enum _Step { you, reading, help, day, health, contact, finish }
