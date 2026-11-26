@@ -14,7 +14,9 @@ val keyProperties = Properties().apply {
 
 android {
     namespace = "com.muneermiller.elderlycare"
-    compileSdk = flutter.compileSdkVersion
+    // androidx.core 1.19 (pulled in by the upgraded plugins) requires
+    // compiling against API 37. targetSdk/minSdk still follow Flutter.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
