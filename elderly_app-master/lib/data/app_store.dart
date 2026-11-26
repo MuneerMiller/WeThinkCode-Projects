@@ -14,6 +14,8 @@ import '../security/app_lock.dart';
 import '../security/crypto.dart';
 import 'models.dart';
 
+part 'app_store_backup.dart';
+
 /// Why a backup could not be restored. Shown to the user, translated, by
 /// the screen that restores it.
 enum BackupError {
@@ -232,6 +234,10 @@ class AppStore extends ChangeNotifier {
     return data;
   }
 
+  // Lets the backup extension (app_store_backup.dart) ask the store to
+  // notify its listeners; notifyListeners() is only callable here.
+  void _notify() => notifyListeners();
+
   void _adopt(_Data d) {
     profile = d.profile;
     relatives
@@ -328,130 +334,6 @@ class AppStore extends ChangeNotifier {
 
   static const _backupFormat = 'elderly-care-backup';
   static const maxBackupLength = 60 * 1024 * 1024;
-
-  Map<String, Object?> _backupData() => {
-    'onboardingSeen': onboardingSeen,
-    'textScale': textScale,
-    'nextId': _nextId,
-    'callRoomSalt': callRoomSalt,
-    if (profile != null) 'profile': jsonEncode(profile!.toJson()),
-    for (final (key, list) in <(String, List<dynamic>)>[
-      ('relatives', relatives),
-      ('medicines', medicines),
-      ('appointments', appointments),
-      ('notes', notes),
-      ('documents', documents),
-      ('trackerEntries', trackerEntries),
-    ])
-      key: jsonEncode([for (final item in list) item.toJson()]),
-  };
-
-  /// Everything the app holds, as one JSON document. With a [password] the
-  /// contents are encrypted (PBKDF2 + AES-256-GCM).
-  Future<String> exportBackup({String? password}) async {
-    final plain = jsonEncode({
-      'format': _backupFormat,
-      'version': 2,
-      'exportedAt': DateTime.now().toIso8601String(),
-      'data': _backupData(),
-    });
-    if (password == null || password.isEmpty) return plain;
-    return jsonEncode({
-      'format': _backupFormat,
-      'version': 2,
-      'encrypted': await PasswordCrypto.encrypt(plain, password),
-    });
-  }
-
-  /// Replaces all data with a backup made by [exportBackup].
-  ///
-  /// The whole file is checked before anything is changed, so a wrong or
-  /// damaged file leaves current data untouched. Throws [BackupException]
-  /// for bad files and [BackupPasswordException] for protected ones.
-  Future<void> importBackup(String json, {String? password}) async {
-    const notBackup = BackupException(BackupError.notBackup);
-    if (json.length > maxBackupLength) {
-      throw const BackupException(BackupError.tooLarge);
-    }
-    Object? decoded;
-    try {
-      decoded = jsonDecode(json);
-    } on FormatException {
-      throw notBackup;
-    }
-    if (decoded is! Map || decoded['format'] != _backupFormat) throw notBackup;
-
-    final sealed = decoded['encrypted'];
-    if (sealed is Map) {
-      if (password == null || password.isEmpty) {
-        throw const BackupPasswordException(wrongPassword: false);
-      }
-      final String inner;
-      try {
-        inner = await PasswordCrypto.decrypt(
-          sealed.cast<String, Object?>(),
-          password,
-        );
-      } on SecretBoxAuthenticationError {
-        throw const BackupPasswordException(wrongPassword: true);
-      } on UnknownProtectionException {
-        throw const BackupException(BackupError.unknownProtection);
-      } catch (_) {
-        // Anything else (bad base64 and so on) means a damaged file.
-        throw const BackupException(BackupError.damaged);
-      }
-      return importBackup(inner);
-    }
-
-    final rawData = decoded['data'];
-    if (rawData is! Map) throw notBackup;
-    final data = rawData.cast<String, Object?>();
-    if (data['profile'] is! String) {
-      throw const BackupException(BackupError.noProfile);
-    }
-    final sections = <String, String>{};
-    for (final key in _sealed) {
-      final v = data[key];
-      if (v == null) continue;
-      if (v is! String) {
-        throw const BackupException(BackupError.damaged);
-      }
-      sections[key] = v;
-    }
-    // Throws before anything is touched if any part is unreadable.
-    final parsed = _parse(sections, strict: true);
-    if (parsed.profile == null) {
-      throw const BackupException(BackupError.noProfile);
-    }
-
-    final scale = data['textScale'];
-    final salt = data['callRoomSalt'];
-    // Acceptance of the legal documents belongs to this device's user.
-    final legalVersion = _prefs.getInt('legal.version');
-    final legalAt = _prefs.getString('legal.acceptedAt');
-    await _prefs.clear();
-    if (legalVersion != null && legalAt != null) {
-      await _prefs.setInt('legal.version', legalVersion);
-      await _prefs.setString('legal.acceptedAt', legalAt);
-    }
-    await _prefs.setBool('onboardingSeen', true);
-    if (scale is num) {
-      await _prefs.setDouble('textScale', scale.toDouble().clamp(1.0, 1.3));
-    }
-    if (salt is String && _saltPattern.hasMatch(salt)) {
-      await _prefs.setString('callRoomSalt', salt);
-    }
-    final nextId = data['nextId'];
-    _nextId = max(nextId is int ? nextId : 1, parsed.maxId + 1);
-    await _prefs.setInt('nextId', _nextId);
-    for (final MapEntry(:key, :value) in sections.entries) {
-      await _write(key, value);
-    }
-    onboardingSeen = true;
-    textScale = _prefs.getDouble('textScale') ?? 1.0;
-    _adopt(parsed);
-    notifyListeners();
-  }
 
   /// Deletes all data and the app lock, as if freshly installed.
   Future<void> resetEverything() async {
