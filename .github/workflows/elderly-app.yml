@@ -68,7 +68,7 @@ jobs:
         run: flutter build apk --release
 
       - name: Keep the APK for testing on a phone
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: elderly-care-android
           path: elderly_app-master/build/app/outputs/flutter-apk/app-release.apk
